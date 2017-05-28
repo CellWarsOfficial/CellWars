@@ -1,0 +1,10 @@
+# exclude objects
+*.o
+# exclude binary folders
+bin/
+# exclude back-up files
+*~
+# exclude hidden files(dot files)
+.*
+# except gitignore itself
+!.gitignore
