@@ -2,7 +2,6 @@
 #define BLOCK_H
 
 #include <constants.hpp>
-#include <map>
 
 class Block
 {
@@ -20,6 +19,13 @@ class Block
   int get_y_relative(int relativity);
 };
 
-extern std::map <long, Block*> super_node;
+/* 3 functions used for compressing 2 ints into a long.
+ */
+
+long compress_xy(int x, int y);
+
+int get_x(long origin);
+
+int get_y(long origin);
 
 #endif

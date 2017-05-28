@@ -1,6 +1,8 @@
 #include <database.hpp>
 #include <block.hpp>
 #include <constants.hpp>
+#include <cstdio>
+#include <cstdlib>
 
 // TODO all functions in here.
 
@@ -13,10 +15,13 @@ void init_db(const char *db)
 
 Block* load_from_db(int NWx, int NWy, int SEx, int SEy)
 {
-  exit(-1);
+  printf("database load not implemented\n");
+  printf("skipping");
+  return NULL;
 }
 
 void update_db(Block* block, int NWx, int NWy, int SEx, int SEy)
 {
-  exit(-1);
+  printf("database load not implemented\n");
+  printf("skipping");
 }

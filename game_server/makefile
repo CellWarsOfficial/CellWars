@@ -6,6 +6,7 @@ RM     = rm -rf
 TARGET = $(BINDIR)/gameserver
 CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11
 HEADER = $(wildcard $(SRCDIR)/*.hpp)
+OBJECT = $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o $(BINDIR)/game.o
 
 .phony: all
 all: installdirs $(TARGET)
@@ -16,7 +17,7 @@ installdirs: $(BINDIR)
 $(BINDIR):
 	$(NEWDIR) $@
 
-$(TARGET): $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o
+$(TARGET): $(OBJECT)
 	$(CC) $(CFLAGS) $^ -o $@
 
 $(BINDIR)/init.o: $(SRCDIR)/init.cpp $(HEADER)
@@ -29,6 +30,9 @@ $(BINDIR)/malloc_safety.o: $(SRCDIR)/malloc_safety.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BINDIR)/database.o: $(SRCDIR)/database.cpp $(HEADER)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BINDIR)/game.o: $(SRCDIR)/game.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 .phony: check

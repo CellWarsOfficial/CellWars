@@ -5,5 +5,6 @@
 #include <constants.hpp>
 #include <malloc_safety.hpp>
 #include <database.hpp>
+#include <game.hpp>
 
 #endif

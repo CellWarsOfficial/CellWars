@@ -7,7 +7,6 @@
 using namespace std;
 
 bool use_safety = 1;
-map <long, Block*> super_node;
 
 int equ(char *s1, string s2)
 {
