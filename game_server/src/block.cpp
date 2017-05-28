@@ -24,7 +24,7 @@ Block::Block(int x, int y)
   check_malloc(map);
   for(int i = 0; i < BLOCK_SIZE; i++)
   {
-    map[i] = new CELL_TYPE[BLOCK_SIZE];
+    map[i] = new CELL_TYPE[BLOCK_SIZE]();
     check_malloc(map[i]);
   }
 }

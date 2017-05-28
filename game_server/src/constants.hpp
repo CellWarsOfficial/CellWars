@@ -2,6 +2,7 @@
 #define CONSTANTS_H
 
 #include <cstdint>
+
 #define CELL_TYPE uint8_t
 #define BLOCK_SIZE 1000
 

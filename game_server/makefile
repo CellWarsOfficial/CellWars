@@ -16,7 +16,7 @@ installdirs: $(BINDIR)
 $(BINDIR):
 	$(NEWDIR) $@
 
-$(TARGET): $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o
+$(TARGET): $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o
 	$(CC) $(CFLAGS) $^ -o $@
 
 $(BINDIR)/init.o: $(SRCDIR)/init.cpp $(HEADER)
@@ -26,6 +26,9 @@ $(BINDIR)/block.o: $(SRCDIR)/block.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BINDIR)/malloc_safety.o: $(SRCDIR)/malloc_safety.cpp $(HEADER)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BINDIR)/database.o: $(SRCDIR)/database.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 .phony: check

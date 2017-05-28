@@ -4,5 +4,6 @@
 #include <block.hpp>
 #include <constants.hpp>
 #include <malloc_safety.hpp>
+#include <database.hpp>
 
 #endif

@@ -1,7 +1,8 @@
-#ifndef BLOCK_HPP
-#define BLOCK_HPP
+#ifndef BLOCK_H
+#define BLOCK_H
 
 #include <constants.hpp>
+#include <map>
 
 class Block
 {
@@ -18,5 +19,7 @@ class Block
   int get_x_relative(int relativity);
   int get_y_relative(int relativity);
 };
+
+extern std::map <long, Block*> super_node;
 
 #endif
