@@ -1,14 +1,14 @@
 CC     = g++
 NEWDIR = mkdir
-CFLAGS = -Wall -Werror
 SRCDIR = src
 BINDIR = bin
 RM     = rm -rf
-TARGET = gameserver
-HEADER = 
+TARGET = $(BINDIR)/gameserver
+CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11
+HEADER = $(wildcard $(SRCDIR)/*.hpp)
 
 .phony: all
-all: installdirs $(BINDIR)/$(TARGET)
+all: installdirs $(TARGET)
 
 .phony: installdirs
 installdirs: $(BINDIR)
@@ -16,10 +16,16 @@ installdirs: $(BINDIR)
 $(BINDIR):
 	$(NEWDIR) $@
 
-$(BINDIR)/$(TARGET): $(BINDIR)/init.o
+$(TARGET): $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o
 	$(CC) $(CFLAGS) $^ -o $@
 
 $(BINDIR)/init.o: $(SRCDIR)/init.cpp $(HEADER)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BINDIR)/block.o: $(SRCDIR)/block.cpp $(HEADER)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BINDIR)/malloc_safety.o: $(SRCDIR)/malloc_safety.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 .phony: check
