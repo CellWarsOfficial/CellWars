@@ -17,6 +17,11 @@ class Block
  */
   int get_x_relative(int relativity);
   int get_y_relative(int relativity);
+  void *crank(void);
+  void crank_cell(int x, int y);
+  void revive_cell(int x, int y);
+  int count_cell_neighbours(int x, int y);
+  int valid_coordonate(int x, int y);
 };
 
 #endif

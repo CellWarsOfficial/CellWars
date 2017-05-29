@@ -61,3 +61,80 @@ int Block::get_y_relative(int relativity)
 {
   return originy + relativity * BLOCK_SIZE;
 }
+
+void *Block::crank(void)
+{
+  for(int i = 0; i < BLOCK_SIZE; i++)
+  {
+    for(int j = 0; j < BLOCK_SIZE; j++)
+    {
+      crank_cell(i, j);
+    }
+  }
+  return map;
+}
+
+int Block::valid_coordonate(int x, int y)
+  {
+    return (0 <= x && x < BLOCK_SIZE) && (0 <= y && y < BLOCK_SIZE); 
+  }
+
+int Block::count_cell_neighbours(int x, int y)
+{
+  int n = 0;
+  for(int i = -1; i < 2; i++)
+  {
+    for(int j = -1; j < 2; j++)
+    {
+      if(valid_coordonate(x + i, y + j) && i != 0 && j != 0 && map[x + i][y + j] != 0)
+      {
+        n++;
+      }
+    }
+  }
+  return n;
+}
+
+void Block::revive_cell(int x, int y)
+{
+  int types[3];
+  int h = 0;
+  for(int i = -1; i < 2; i++)
+  {
+    for(int j = -1; j < 2; j++)
+    {
+      if(valid_coordonate(x + i, y + j) && i != 0 && j != 0 && map[x + i][y + j] != 0)
+      {
+        for (int m = 0; m < 3; m++)
+        {
+          if(map[x + i][y + j] == types[m])
+          {
+            map[x][y] = types[m];
+          }
+        }
+        types[h] = map[x + i][y + j];
+      }
+    }
+  }
+}
+
+void Block::crank_cell(int x, int y)
+{
+  int n_neighbours = count_cell_neighbours(x, y);
+  if(n_neighbours < 2 && map[x][y] != 0)
+  {
+    map[x][y] = 0;
+  } 
+  else if(n_neighbours == 3 && map[x][y] == 0)
+  {
+    revive_cell(x, y);
+  }
+  else if (n_neighbours > 3 && map[x][y] != 0)
+  {
+    map[x][y] = 0; 
+  }
+  else
+  {
+    return;
+  }
+}
