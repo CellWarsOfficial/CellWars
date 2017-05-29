@@ -11,6 +11,7 @@ void *db_info;
 void init_db(const char *db)
 {
   printf("Connection to \"%s\" successful\n", db);
+  db_info = (void*)new int; // duck typing
 }
 
 Block* load_from_db(int NWx, int NWy, int SEx, int SEy)

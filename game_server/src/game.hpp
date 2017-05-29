@@ -3,10 +3,12 @@
 #include <map>
 #include <constants.hpp>
 #include <block.hpp>
+#include <mutex>
 
 #define GFLAG_running flags&JUST_31_MASK
 #define GFLAG_stepped_tick flags&JUST_30_MASK
 #define GFLAG_continue flags&JUST_29_MASK
+#define GFLAG_started flags&JUST_28_MASK
 
 /* Object Game is self contained as a process, and is started using start()
  */
@@ -17,18 +19,20 @@ class Game
   Game();
   void *start(void *arg);
   int get_status();
-  void start_running();
+  void resume_running();
   void stop_running();
   void slow_termination();
   private:
+  std::mutex execution_lock;
+  std::mutex flag_protection;
   FLAG_TYPE flags;
   int gen_to_run;
   int plan_time;
   std::map <long, Block*> super_node;
+  void check_run();
   void plan(int wait_time);
   void crank(int generations);
+  void clean_up();
 };
-
-extern Game game;
 
 #endif

@@ -28,11 +28,17 @@ int main(int argc, char **argv)
 {
   db_info = NULL;
   int i;
+  uint32_t flag = 0;
   for(i = 1; i < argc; i++)
   {
     if(equ(argv[i], "-no_safe"))
     {
       use_safety = 0;
+      continue;
+    }
+    if(equ(argv[i], "-debug_step"))
+    {
+      flag = flag | NO_30_MASK; // set stepped_debug flag
       continue;
     }
     if(equ(argv[i], "-db"))
@@ -49,4 +55,6 @@ int main(int argc, char **argv)
     fprintf(stderr, "Initialisation failure, missing database.\n");
     exit(EXIT_FAILURE);
   }
+  init_server_ui();
+  game = new Game();
 }

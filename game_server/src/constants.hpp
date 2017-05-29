@@ -18,10 +18,12 @@
 #define NO_LAST_MASK NO_31_MASK
 #define JUST_LAST_MASK JUST_31_MASK
 #define NO_31_MASK 0xfffffffe
+#define NO_30_MASK 0xfffffffd
 #define NO_29_MASK 0xfffffffb
 #define JUST_31_MASK 1
 #define JUST_30_MASK 2
 #define JUST_29_MASK 4
+#define JUST_28_MASK 8
 #define FULL_MASK 0xffffffff
 
 /* Game limit related constants
