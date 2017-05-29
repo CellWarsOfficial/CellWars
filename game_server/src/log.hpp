@@ -30,7 +30,8 @@ class Logger
   void mute();
   void unmute();
   int add_file(char *f);
-  int record(string s);
+  int record(string message);
+  int record(string process, string message);
   private:
   void parse_buffer();
   mutex logger_lock;

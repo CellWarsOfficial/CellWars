@@ -6,10 +6,11 @@
 
 // TODO all functions in here.
 
-void *init_db(const char *db)
+#define ME "Database"
+
+void *init_db(const char *db, Logger *log)
 {
-  printf("Connection to \"%s\" successful\n", db);
-  printf("skipping");
+  log -> record(ME, (string)"Connection to database \"" + db + "\" successful");
   void* db_info = (void*)new int; // duck typing
   return db_info;
 }

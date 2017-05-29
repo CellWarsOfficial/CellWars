@@ -3,6 +3,9 @@
 #include <chrono>
 #include <ctime>
 
+#define ME "Logger"
+#define UNKNOWN "Unknown"
+
 Logger::Logger(int max_buf)
 {
   buffer_size = max_buf;
@@ -15,7 +18,7 @@ Logger::Logger(int max_buf)
 
 Logger::~Logger()
 {
-  record("Log closed");
+  record(ME, "Log closed.");
   logger_lock.lock();
   flags = flags | JUST_28_MASK; // inform logger he should terminate
   logger_lock.unlock();
@@ -58,6 +61,7 @@ void Logger::unpause()
 
 void Logger::mute()
 {
+  record(ME, "Skipping a few logs - mute.");
   logger_lock.lock();
   flags = flags | JUST_27_MASK; // Log will ignore record requests.
   logger_lock.unlock();
@@ -78,14 +82,24 @@ int Logger::add_file(char *f)
   return file != NULL;
 }
 
-int Logger::record(string s)
+int Logger::record(string message)
+{
+  if(LFLAG_terminate || LFLAG_mute)
+  {
+    return 1;
+  }
+  return record(UNKNOWN, message);
+}
+
+int Logger::record(string process, string message)
 {
   if(LFLAG_terminate || LFLAG_mute)
   {
     return 1;
   }
   logger_lock.lock();
-  buffer[buffer_read] = to_string(time(NULL)) + s + '\n';
+  buffer[buffer_read] = 
+      '[' + to_string(time(NULL)) + ']' + process + ": " + message + '\n';
   buffer_read++;
   if(buffer_read == buffer_size)
   {

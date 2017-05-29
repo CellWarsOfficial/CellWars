@@ -4,8 +4,11 @@
 #include <thread>
 #include <chrono>
 
-Game::Game(void* ptr)
+#define ME "Game"
+
+Game::Game(void* ptr, Logger *log)
 {
+  this -> log = log;
   db_info = ptr;
   execution_lock.lock();
   flags = 0; // Important because it unsets running flag
@@ -14,8 +17,9 @@ Game::Game(void* ptr)
 int Game::get_status()
 {
   flag_protection.lock();
-  return GFLAG_running;
+  int tmp = GFLAG_running;
   flag_protection.unlock();
+  return tmp;
 }
 
 void Game::resume_running()
@@ -27,6 +31,7 @@ void Game::resume_running()
     flag_protection.unlock();
     execution_lock.unlock();
   }
+  log -> record(ME, "Resume");
 }
 
 void Game::stop_running()
@@ -38,6 +43,7 @@ void Game::stop_running()
     flags = flags & NO_LAST_MASK;
     flag_protection.unlock();
   }
+  log -> record(ME, "Stop");
 }
 
 void Game::slow_termination()
@@ -45,6 +51,7 @@ void Game::slow_termination()
   flag_protection.lock();
   flags = flags & NO_29_MASK; // unset continue flag
   flag_protection.unlock();
+  log -> record(ME, "Registered termination request");
 }
 
 /* By returning from check_run, I am guaranteed the right to continue execution.
@@ -67,6 +74,9 @@ void *Game::start(uint32_t f, int gtc, int w)
 /* Initialise the game
  */
   flag_protection.lock();
+  log -> record(ME, 
+      "Creating new game with gtc " + to_string(gtc) + " and w" + to_string(w)
+      );
   Block *blocks;
   flags = (f & NO_LAST_MASK) | JUST_28_MASK; // unset running and set started.
   gen_to_run = gtc;
@@ -75,6 +85,7 @@ void *Game::start(uint32_t f, int gtc, int w)
   {
     super_node[compress_xy(blocks->originx, blocks->originy)] = blocks;
   }
+  log -> record(ME, "Imported data from database for startup/resume.");
   flags = flags | JUST_29_MASK; // set continue flag
   flag_protection.unlock();
 
@@ -95,14 +106,18 @@ void *Game::start(uint32_t f, int gtc, int w)
 void Game::plan(int wait_time)
 {
   // TODO instruct network manager to receive changes from users
+
   if(GFLAG_stepped_tick)
   {
     stop_running(); // wait for outside interaction to resume.
+    log -> record(ME, "Planning time - debug step - waiting for UI");
   }
   else
   {
     std::this_thread::sleep_for(std::chrono::seconds(wait_time));
+    log -> record(ME, "Planning time - waiting " + to_string(wait_time));
   }
+  log -> record(ME, "Planning time - timeout ");
   
   // TODO instruct network manager to ignore changes from users
   // TODO update database
@@ -110,11 +125,23 @@ void Game::plan(int wait_time)
 
 void Game::crank(int generations)
 {
+  log -> record(ME, "Crank - start");
   // TODO call crank
   // TODO update database
+  log -> record(ME, "Crank - finish");
 }
+
+/* clean_up assumes FR and database are in sync, as it is normally called
+ * after a crank has finished.
+ */
 
 void Game::clean_up()
 {
-  // TODO free any allocated memory, safely destroy locks, empty maps etc.
+  std::map<long,Block*>::iterator i;
+  log -> record(ME, "Terminating");
+  for (i = super_node.begin(); i != super_node.end(); i++)
+  {
+    delete i -> second;
+  }
+  super_node.clear();
 }

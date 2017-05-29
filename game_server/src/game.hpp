@@ -2,6 +2,7 @@
 #define GAME_H
 #include <constants.hpp>
 #include <block.hpp>
+#include <log.hpp>
 #include <map>
 #include <mutex>
 #include <cstdlib>
@@ -17,13 +18,14 @@
 class Game
 {
   public:
-  Game(void *ptr);
+  Game(void *ptr, Logger *log);
   void *start(uint32_t f, int gtc, int w);
   int get_status();
   void resume_running();
   void stop_running();
   void slow_termination();
   private:
+  Logger *log;
   std::mutex execution_lock;
   std::mutex flag_protection;
   FLAG_TYPE flags;

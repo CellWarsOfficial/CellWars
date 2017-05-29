@@ -6,6 +6,8 @@
 #include <thread>
 #include <cstdlib>
 
+#define ME "Init"
+
 using namespace std;
 
 bool use_safety = 1;
@@ -56,18 +58,20 @@ int main(int argc, char **argv)
     if(equ(argv[i], "-no_safe"))
     {
       use_safety = 0;
+      log -> record(ME, "Removing safety.");
       continue;
     }
     if(equ(argv[i], "-debug_step"))
     {
       flags = flags | NO_30_MASK; // set stepped_debug flag
+      log -> record(ME, "Using debug steps.");
       continue;
     }
     if(equ(argv[i], "-db"))
     {
       i++;
       check_limit(i, argc);
-      db_info = init_db(argv[i]);
+      db_info = init_db(argv[i], log);
       continue;
     }
     if(equ(argv[i], "-generations", "-gtc"))
@@ -96,7 +100,7 @@ int main(int argc, char **argv)
     }
     if(equ(argv[i], "-quiet", "-q"))
     {
-      log -> mute();
+      log -> quiet();
       continue;
     }
     if(equ(argv[i], "-log"))
@@ -113,8 +117,8 @@ int main(int argc, char **argv)
     fprintf(stderr, "Initialisation failure, missing database.\n");
     exit(EXIT_FAILURE);
   }
-  init_server_ui();
-  game = new Game(db_info);
+  game = new Game(db_info, log);
+  init_server_ui(log);
   thread *game_thread = new thread(&Game::start, game, flags, gtc, wait_time);
 
   /* main terminating kills process.
