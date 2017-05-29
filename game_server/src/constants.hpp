@@ -32,5 +32,7 @@
 #define MINY -1000
 #define MAXX 1000
 #define MAXY 1000
+#define DEFAULT_GTC 1
+#define DEFAULT_WAIT_TIME 30
 
 #endif

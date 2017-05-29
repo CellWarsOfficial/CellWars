@@ -1,12 +1,12 @@
 #include <game.hpp>
 #include <all.hpp>
 #include <cstdio>
-#include <cstdlib>
 #include <thread>
 #include <chrono>
 
-Game::Game()
+Game::Game(void* ptr)
 {
+  db_info = ptr;
   execution_lock.lock();
   flags = 0; // Important because it unsets running flag
 }
@@ -56,23 +56,21 @@ void Game::check_run()
   execution_lock.unlock();
 }
 
-void *Game::start(void *args)
+void *Game::start(uint32_t f, int gtc, int w)
 {
   if(GFLAG_started)
   {
     fprintf(stderr, "Game already running, start() invoked twice, ignoring.\n");
-    return (void*)1;
+    return NULL;
   }
 
 /* Initialise the game
  */
   flag_protection.lock();
-  flags = flags | JUST_28_MASK; // set started flag
   Block *blocks;
-  uint32_t *callstack = (uint32_t*) args;
-  flags = callstack[0] & NO_LAST_MASK;
-  gen_to_run = (int) callstack[1];
-  plan_time = (int) callstack[2];
+  flags = (f & NO_LAST_MASK) | JUST_28_MASK; // unset running and set started.
+  gen_to_run = gtc;
+  plan_time = w;
   for(blocks = load_from_db(MINX, MINY, MAXX, MAXY); blocks; blocks++)
   {
     super_node[compress_xy(blocks->originx, blocks->originy)] = blocks;

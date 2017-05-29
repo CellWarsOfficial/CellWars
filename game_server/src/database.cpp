@@ -6,12 +6,12 @@
 
 // TODO all functions in here.
 
-void *db_info;
-
-void init_db(const char *db)
+void *init_db(const char *db)
 {
   printf("Connection to \"%s\" successful\n", db);
-  db_info = (void*)new int; // duck typing
+  printf("skipping");
+  void* db_info = (void*)new int; // duck typing
+  return db_info;
 }
 
 Block* load_from_db(int NWx, int NWy, int SEx, int SEy)

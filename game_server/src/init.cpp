@@ -3,6 +3,8 @@
 #include <cstring>
 #include <string>
 #include <map>
+#include <thread>
+#include <cstdlib>
 
 using namespace std;
 
@@ -24,11 +26,23 @@ void check_limit(int i, int l)
   }
 }
 
+void* misc(uint32_t f, int gtc, int w)
+{
+  return NULL;
+}
+
 int main(int argc, char **argv)
 {
-  db_info = NULL;
+/* Initialising default information
+ */
+  void *db_info = NULL;
+  uint32_t flags = 0;
+  int gtc = DEFAULT_GTC;
+  int wait_time = DEFAULT_WAIT_TIME;
+
+/* Parsing program arguments
+ */
   int i;
-  uint32_t flag = 0;
   for(i = 1; i < argc; i++)
   {
     if(equ(argv[i], "-no_safe"))
@@ -38,14 +52,38 @@ int main(int argc, char **argv)
     }
     if(equ(argv[i], "-debug_step"))
     {
-      flag = flag | NO_30_MASK; // set stepped_debug flag
+      flags = flags | NO_30_MASK; // set stepped_debug flag
       continue;
     }
     if(equ(argv[i], "-db"))
     {
       i++;
       check_limit(i, argc);
-      init_db(argv[i]);
+      db_info = init_db(argv[i]);
+      continue;
+    }
+    if(equ(argv[i], "-generations"))
+    {
+      i++;
+      check_limit(i, argc);
+      gtc = atoi(argv[i]);
+      if((gtc <= 0) || (gtc > BLOCK_PADDING))
+      {
+        fprintf(stderr, "Generations requirement unreasonable. Defaulting.\n");
+        gtc = DEFAULT_GTC;
+      }
+      continue;
+    }
+    if(equ(argv[i], "-wait"))
+    {
+      i++;
+      check_limit(i, argc);
+      wait_time = atoi(argv[i]);
+      if(wait_time <= 0)
+      {
+        fprintf(stderr, "Wait time unreasonable. Defaulting.\n");
+        wait_time = DEFAULT_WAIT_TIME;
+      }
       continue;
     }
     fprintf(stderr, "Unrecognised argument \"%s\"\nIgnoring.\n", argv[i]);
@@ -56,5 +94,11 @@ int main(int argc, char **argv)
     exit(EXIT_FAILURE);
   }
   init_server_ui();
-  game = new Game();
+  game = new Game(db_info);
+  thread *game_thread = new thread(&Game::start, game, flags, gtc, wait_time);
+
+  /* main terminating kills process.
+   */
+  game_thread -> join();
+  return 0;
 }
