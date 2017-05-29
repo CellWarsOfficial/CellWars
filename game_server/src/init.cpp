@@ -10,11 +10,19 @@ using namespace std;
 
 bool use_safety = 1;
 
+/* Equ returns true if s1 is equal to s2(or s3 if provided).
+ */
+
 int equ(char *s1, string s2)
 {
   int i = 0;
   for(; (s1[i] != 0) && (s2[i] != 0) && (s1[i] == s2[i]); i++);
   return s1[i] == s2[i];
+}
+
+int equ(char *s1, string s2, string s3)
+{
+  return equ(s1, s2) || equ(s1, s3);
 }
 
 void check_limit(int i, int l)
@@ -39,7 +47,7 @@ int main(int argc, char **argv)
   uint32_t flags = 0;
   int gtc = DEFAULT_GTC;
   int wait_time = DEFAULT_WAIT_TIME;
-
+  Logger *log = new Logger(LOG_MAX_BUFFER_DEFAULT);
 /* Parsing program arguments
  */
   int i;
@@ -62,7 +70,7 @@ int main(int argc, char **argv)
       db_info = init_db(argv[i]);
       continue;
     }
-    if(equ(argv[i], "-generations"))
+    if(equ(argv[i], "-generations", "-gtc"))
     {
       i++;
       check_limit(i, argc);
@@ -74,7 +82,7 @@ int main(int argc, char **argv)
       }
       continue;
     }
-    if(equ(argv[i], "-wait"))
+    if(equ(argv[i], "-wait", "-w"))
     {
       i++;
       check_limit(i, argc);
@@ -84,6 +92,18 @@ int main(int argc, char **argv)
         fprintf(stderr, "Wait time unreasonable. Defaulting.\n");
         wait_time = DEFAULT_WAIT_TIME;
       }
+      continue;
+    }
+    if(equ(argv[i], "-quiet", "-q"))
+    {
+      log -> mute();
+      continue;
+    }
+    if(equ(argv[i], "-log"))
+    {
+      i++;
+      check_limit(i, argc);
+      log -> add_file(argv[i]);
       continue;
     }
     fprintf(stderr, "Unrecognised argument \"%s\"\nIgnoring.\n", argv[i]);

@@ -7,5 +7,6 @@
 #include <database.hpp>
 #include <game.hpp>
 #include <server_ui.hpp>
+#include <log.hpp>
 
 #endif

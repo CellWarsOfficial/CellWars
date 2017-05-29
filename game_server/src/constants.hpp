@@ -20,10 +20,13 @@
 #define NO_31_MASK 0xfffffffe
 #define NO_30_MASK 0xfffffffd
 #define NO_29_MASK 0xfffffffb
+#define NO_28_MASK 0xfffffff7
+#define NO_27_MASK 0xffffffef
 #define JUST_31_MASK 1
 #define JUST_30_MASK 2
 #define JUST_29_MASK 4
 #define JUST_28_MASK 8
+#define JUST_27_MASK 16
 #define FULL_MASK 0xffffffff
 
 /* Game limit related constants
@@ -34,5 +37,7 @@
 #define MAXY 1000
 #define DEFAULT_GTC 1
 #define DEFAULT_WAIT_TIME 30
+#define LOG_MAX_BUFFER_DEFAULT 500
+#define LOG_BUFFER_DELAY 3
 
 #endif
