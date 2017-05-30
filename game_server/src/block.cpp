@@ -86,7 +86,7 @@ int Block::count_cell_neighbours(int x, int y)
   {
     for(int j = -1; j < 2; j++)
     {
-      if(valid_coordonate(x + i, y + j) && i != 0 && j != 0 && map[x + i][y + j] != 0)
+      if(valid_coordonate(x + i, y + j) && i != 0 && j != 0 && map[x + i][y + j] != DEAD_CELL)
       {
         n++;
       }
@@ -97,13 +97,13 @@ int Block::count_cell_neighbours(int x, int y)
 
 void Block::revive_cell(int x, int y)
 {
-  int types[3];
+  CELL_TYPE types[3];
   int h = 0;
   for(int i = -1; i < 2; i++)
   {
     for(int j = -1; j < 2; j++)
     {
-      if(valid_coordonate(x + i, y + j) && i != 0 && j != 0 && map[x + i][y + j] != 0)
+      if(valid_coordonate(x + i, y + j) && i != 0 && j != 0 && map[x + i][y + j] != DEAD_CELL)
       {
         for (int m = 0; m < 3; m++)
         {
@@ -121,20 +121,35 @@ void Block::revive_cell(int x, int y)
 void Block::crank_cell(int x, int y)
 {
   int n_neighbours = count_cell_neighbours(x, y);
-  if(n_neighbours < 2 && map[x][y] != 0)
+  if(n_neighbours < 2 && map[x][y] != DEAD_CELL)
   {
-    map[x][y] = 0;
+    map[x][y] = DEAD_CELL;
   } 
-  else if(n_neighbours == 3 && map[x][y] == 0)
+  else if(n_neighbours == 3 && map[x][y] == DEAD_CELL)
   {
     revive_cell(x, y);
   }
-  else if (n_neighbours > 3 && map[x][y] != 0)
+  else if (n_neighbours > 3 && map[x][y] != DEAD_CELL)
   {
-    map[x][y] = 0; 
+    map[x][y] = DEAD_CELL; 
   }
   else
   {
     return;
   }
+}
+
+int Block::equals(Block &other)
+{
+  for (int i = 0; i < BLOCK_SIZE; i++)
+  {
+    for (int j = 0; j < BLOCK_SIZE; j++)
+    {
+      if(map[i][j] != other.map[i][j])
+      {
+        return 0;
+      }
+    }
+  }
+  return 1;
 }
