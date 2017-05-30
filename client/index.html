@@ -56,7 +56,7 @@
 </div>
 
 <div class="aligncenter">
-  <button class="refreshbutton" onclick="refreshCells()">Refresh</button> 
+  <button class="refreshbutton" onclick="connectSQL()">Refresh</button> 
 </div>
 <script>
 function refreshCells() {
@@ -83,21 +83,23 @@ function connectSQL() {
  *        it in refreshCells
  * Current Error: SQL Server does not exist or access denied.
 */
-  var objConnection = new ActiveXObject("ADODB.Connection");
-  var strConn = "driver={sql server};server=db.doc.ic.ac.uk;database=g1627123_u;uid=g1627123_u;password=eyNCD7YSQJ";
-  objConnection.Open(strConn);
+  var connection = new ActiveXObject("ADODB.Connection") ;
+
+  var connectionstring="Data Source=db.doc.ic.ac.uk;Initial Catalog=g1627123_u;User ID=g1627123_u;Password=eyNCD7YSQJ;Provider=SQLOLEDB";
+
+  connection.Open(connectionstring);
   var rs = new ActiveXObject("ADODB.Recordset");
-  var strQuery = "SELECT * FROM  agents.grid";
-  rs.Open(strQuery, objConnection);
-  rs.MoveFirst();
-  while (!rs.EOF) {
-    document.write(rs.fields(0) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
-    document.write(rs.fields(1) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
-    document.write(rs.fields(2) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ");
-    document.write(rs.fields(3) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ");
-    document.write(rs.fields(4) + "<br/>");
-    rs.movenext();
+
+  rs.Open("SELECT * FROM agents.grid", connection);
+  rs.MoveFirst
+  while(!rs.eof)
+  {
+    document.write(rs.fields(1));
+    rs.movenext;
   }
+
+  rs.close;
+  connection.close; 
 }
 </script>
 
