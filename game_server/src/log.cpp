@@ -11,7 +11,7 @@ Logger::Logger(int max_buf)
   buffer_size = max_buf;
   buffer_read = 0;
   buffer_write = 0;
-  flags = 0;
+  flags = 1;
   buffer = new string[max_buf];
   parser_thread = new thread(&Logger::parse_buffer, this);
 }
@@ -24,7 +24,7 @@ Logger::~Logger()
   logger_lock.unlock();
   parser_thread -> join();
   delete parser_thread;
-  delete buffer;
+  delete[] buffer;
   if(file)
   {
     fclose(file);
@@ -70,7 +70,7 @@ void Logger::mute()
 void Logger::unmute()
 {
   logger_lock.lock();
-  flags = flags & JUST_27_MASK; // Log will resume record requrests.
+  flags = flags & NO_27_MASK; // Log will resume record requrests.
   logger_lock.unlock();
 }
 
