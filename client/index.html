@@ -4,9 +4,8 @@
 
 <head>
   <title>Cell Wars</title>
-  <link rel="icon" 
-  type="image/gif" 
-  href="./images/favicon.gif">
+  <!-- TODO : Make Harry design a relevant favicon -->
+  <link rel="icon" type="image/gif" href="./images/favicon.gif">
   <link rel="stylesheet" type="text/css" href="stylesheets/table.css">
   <link rel="stylesheet" type="text/css" href="stylesheets/body.css">
   <link rel="stylesheet" type="text/css" href="stylesheets/wrapper.css">
@@ -61,6 +60,31 @@
 function refreshCells() {
   // Simply updates cell[0][0] with X
     document.getElementById("cellTable").rows[0].cells[0].innerHTML = "X";
+}
+
+function connectSQL() {
+  /*
+   * Note : This currently only works on internet explorer and is a pasta example
+   *
+   * TODO : Actually connect to a database that exists and make use of 
+   *        it in refreshCells
+   * Current Error: SQL Server does not exist or access denied.
+  */
+    var objConnection = new ActiveXObject("ADODB.Connection");
+    var strConn = "driver={sql server};server=db.doc.ic.ac.uk;database=g1627123_u;uid=g1627123_u;password=eyNCD7YSQJ";
+    objConnection.Open(strConn);
+    var rs = new ActiveXObject("ADODB.Recordset");
+    var strQuery = "SELECT * FROM  agents.grid";
+    rs.Open(strQuery, objConnection);
+    rs.MoveFirst();
+    while (!rs.EOF) {
+        document.write(rs.fields(0) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+        document.write(rs.fields(1) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+        document.write(rs.fields(2) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ");
+        document.write(rs.fields(3) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ");
+        document.write(rs.fields(4) + "<br/>");
+        rs.movenext();
+    }
 }
 </script>
 
