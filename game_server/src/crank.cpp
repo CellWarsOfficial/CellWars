@@ -22,9 +22,9 @@ Block *crank(Block *block)
 }
 
 int valid_coordonate(int x, int y)
-  {
-    return (0 <= x && x < BLOCK_SIZE) && (0 <= y && y < BLOCK_SIZE);
-  }
+{
+  return (0 <= x && x < BLOCK_SIZE) && (0 <= y && y < BLOCK_SIZE);
+}
 
 int count_cell_neighbours(Block *block, int x, int y)
 {
