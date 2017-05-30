@@ -21,8 +21,7 @@ void correct_count_cell_neighbours(Block *b, int x, int y, int expected)
 
 void correct_revive_cell(Block *b, int x, int y, CELL_TYPE expected)
 {
-  revive_cell(b, x, y);
-  CELL_TYPE output = b->map[x][y];
+  CELL_TYPE output = revive_cell(b, x, y);
   if(output != expected)
   {
     fprintf(stderr, "FAILED TEST: revive cell\nOutput:\"%u\"\tExpected:\"%u\"\n", output, expected);
@@ -31,21 +30,21 @@ void correct_revive_cell(Block *b, int x, int y, CELL_TYPE expected)
 
 void correct_crank_cell(Block *b, int x, int y, CELL_TYPE expected)
 {
-  crank_cell(b, x, y);
-  CELL_TYPE output = b->map[x][y]; 
+  CELL_TYPE output = crank_cell(b, x, y); 
   if(output != expected)
   {
-    fprintf(stderr, "FAILED TEST: revive cell\nOutput:\"%u\"\tExpected:\"%u\"\n", output, expected);
+    fprintf(stderr, "FAILED TEST: crank cell\nOutput:\"%u\"\tExpected:\"%u\"\n", output, expected);
   }
 }
 
 void correct_crank(Block *b, Block *expected)
 {
-  crank(b);
-  if(equals(b, expected))
+  Block *result = crank(b);
+  if(!equals(result, expected))
   {
     fprintf(stderr, "FAILED TEST: crank\n");
   }
+  delete result;
 }
 
 //#int main(void)

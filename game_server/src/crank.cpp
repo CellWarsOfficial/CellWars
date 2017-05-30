@@ -3,16 +3,22 @@
 #include "block.hpp"
 #include <cstdio>
 
+/**
+ * NB: The object taken as parameter by this function is destroyed
+ * and the return object is a different one.
+ **/
 Block *crank(Block *block)
 {
+  Block *result = new Block(0, 0);
   for(int i = 0; i < BLOCK_SIZE; i++)
   {
     for(int j = 0; j < BLOCK_SIZE; j++)
     {
-      crank_cell(block, i, j);
+      result->map[i][j] = crank_cell(block, i, j);
     }
   }
-  return block;
+  delete block;
+  return result;
 }
 
 int valid_coordonate(int x, int y)
@@ -36,8 +42,9 @@ int count_cell_neighbours(Block *block, int x, int y)
   return n;
 }
 
-void revive_cell(Block *block, int x, int y)
+CELL_TYPE revive_cell(Block *block, int x, int y)
 {
+  CELL_TYPE result = DEAD_CELL;
   CELL_TYPE types[3];
   int h = 0;
   for(int i = -1; i < 2; i++)
@@ -51,33 +58,37 @@ void revive_cell(Block *block, int x, int y)
           if(block->map[x + i][y + j] == types[m])
           {
             block->map[x][y] = types[m];
+            result = types[m];
           }
         }
         types[h] = block->map[x + i][y + j];
       }
     }
   }
+  return result;
 }
 
-void crank_cell(Block *block, int x, int y)
+CELL_TYPE crank_cell(Block *block, int x, int y)
 {
   int n_neighbours = count_cell_neighbours(block, x, y);
+  CELL_TYPE result = DEAD_CELL;
   if(n_neighbours < 2 && block->map[x][y] != DEAD_CELL)
   {
-    block->map[x][y] = DEAD_CELL;
+    result =  DEAD_CELL;
   }
   else if(n_neighbours == 3 && block->map[x][y] == DEAD_CELL)
   {
-    revive_cell(block, x, y);
+    result = revive_cell(block, x, y);
   }
   else if (n_neighbours > 3 && block->map[x][y] != DEAD_CELL)
   {
-    block->map[x][y] = DEAD_CELL;
+    result = DEAD_CELL;
   }
   else
   {
-    return;
+    result = block->map[x][y]; 
   }
+  return result;
 }
 
 int equals(Block *current, Block *other)

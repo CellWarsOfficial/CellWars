@@ -26,6 +26,10 @@ Block::Block(int x, int y)
   {
     map[i] = new CELL_TYPE[BLOCK_SIZE];
     check_malloc(map[i]);
+    for(int j = 0; j < BLOCK_SIZE; j++)
+    {
+      map[i][j] = DEAD_CELL;
+    }
   }
 }
 
