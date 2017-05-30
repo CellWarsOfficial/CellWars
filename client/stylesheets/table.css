@@ -1,0 +1,25 @@
+table {
+	margin-top: 50px;
+	margin-left: auto;
+	margin-right: auto;
+	/*border-collapse: collapse;*/
+	font-family: "Trebuchet MS", Helvetica, sans-serif;
+}
+
+td {
+	border-style: solid;
+	border-width: 1px;
+	border-color: #ddd;
+	padding-bottom: 3%;
+	padding-top: 3%;
+	padding-left: 3%;
+	padding-right: 3%;
+}
+
+td:hover {
+	background-color: #f5f5f5;
+}
+
+.textcenter {
+	text-align: center;
+}
