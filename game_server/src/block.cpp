@@ -3,19 +3,6 @@
 #include "malloc_safety.hpp"
 #include <cstring>
 
-/* class Block
- * {
- *   public:
- *   CELL_TYPE **map;
- *   int originx, originy;
- *   Block(int x, int y);
- *   Block(Block &other);
- *   ~Block();
- *   int get_x_relative(int relativity);
- *   int get_y_relative(int relativity);
- * };
- * block class defined in block.hpp, copied here for convenience. */
-
 Block::Block(int x, int y)
 {
   originx = x;
