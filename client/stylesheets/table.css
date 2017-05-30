@@ -47,3 +47,11 @@ td:hover {
 .greencell:hover {
 	background-color: #00ff80;
 }
+
+.emptycell {
+	background-color: #ffffff;
+}
+
+.emptycell:hover {
+	background-color: #f5f5f5;
+}
