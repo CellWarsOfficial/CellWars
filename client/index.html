@@ -55,49 +55,49 @@
   </table>
 </div>
 
-<div class="wrapper">
+<div class="aligncenter">
   <button class="refreshbutton" onclick="refreshCells()">Refresh</button> 
 </div>
 <script>
 function refreshCells() {
 
-    // document.getElementById("cellTable").rows[0].cells[0].innerHTML = "X";
+  // document.getElementById("cellTable").rows[0].cells[0].innerHTML = "X";
 
-    document.getElementById("cellTable").rows[0].cells[0].className = "redcell";
-    document.getElementById("cellTable").rows[0].cells[1].className = "redcell";
-    document.getElementById("cellTable").rows[1].cells[1].className = "redcell";
+  document.getElementById("cellTable").rows[0].cells[0].className = "redcell";
+  document.getElementById("cellTable").rows[0].cells[1].className = "redcell";
+  document.getElementById("cellTable").rows[1].cells[1].className = "redcell";
 
-    document.getElementById("cellTable").rows[3].cells[3].className = "bluecell";
-    document.getElementById("cellTable").rows[2].cells[3].className = "bluecell";
+  document.getElementById("cellTable").rows[3].cells[3].className = "bluecell";
+  document.getElementById("cellTable").rows[2].cells[3].className = "bluecell";
 
-    document.getElementById("cellTable").rows[4].cells[4].className = "greencell";
+  document.getElementById("cellTable").rows[4].cells[4].className = "greencell";
 
-    document.getElementById("cellTable").rows[2].cells[2].className = "emptycell";
+  document.getElementById("cellTable").rows[2].cells[2].className = "emptycell";
 }
 
 function connectSQL() {
-  /*
-   * Note : This currently only works on internet explorer and is a pasta example
-   *
-   * TODO : Actually connect to a database that exists and make use of 
-   *        it in refreshCells
-   * Current Error: SQL Server does not exist or access denied.
-  */
-    var objConnection = new ActiveXObject("ADODB.Connection");
-    var strConn = "driver={sql server};server=db.doc.ic.ac.uk;database=g1627123_u;uid=g1627123_u;password=eyNCD7YSQJ";
-    objConnection.Open(strConn);
-    var rs = new ActiveXObject("ADODB.Recordset");
-    var strQuery = "SELECT * FROM  agents.grid";
-    rs.Open(strQuery, objConnection);
-    rs.MoveFirst();
-    while (!rs.EOF) {
-        document.write(rs.fields(0) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
-        document.write(rs.fields(1) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
-        document.write(rs.fields(2) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ");
-        document.write(rs.fields(3) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ");
-        document.write(rs.fields(4) + "<br/>");
-        rs.movenext();
-    }
+/*
+ * Note : This currently only works on internet explorer and is a pasta example
+ *
+ * TODO : Actually connect to a database that exists and make use of 
+ *        it in refreshCells
+ * Current Error: SQL Server does not exist or access denied.
+*/
+  var objConnection = new ActiveXObject("ADODB.Connection");
+  var strConn = "driver={sql server};server=db.doc.ic.ac.uk;database=g1627123_u;uid=g1627123_u;password=eyNCD7YSQJ";
+  objConnection.Open(strConn);
+  var rs = new ActiveXObject("ADODB.Recordset");
+  var strQuery = "SELECT * FROM  agents.grid";
+  rs.Open(strQuery, objConnection);
+  rs.MoveFirst();
+  while (!rs.EOF) {
+    document.write(rs.fields(0) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+    document.write(rs.fields(1) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+    document.write(rs.fields(2) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ");
+    document.write(rs.fields(3) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ");
+    document.write(rs.fields(4) + "<br/>");
+    rs.movenext();
+  }
 }
 </script>
 

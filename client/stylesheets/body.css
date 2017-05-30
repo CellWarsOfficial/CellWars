@@ -1,4 +1,8 @@
 .refreshbutton {
-  margin-top: 50px;
-  position: absolute;
+  margin-top: 15px;
+}
+
+.aligncenter {
+  text-align: center;
+  position: relative;
 }
