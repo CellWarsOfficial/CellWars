@@ -23,3 +23,27 @@ td:hover {
 .textcenter {
 	text-align: center;
 }
+
+.redcell {
+	background-color: #ff0000;
+}
+
+.redcell:hover {
+	background-color: #ff8000;
+}
+
+.bluecell {
+	background-color: #0000ff;
+}
+
+.bluecell:hover {
+	background-color: #00bfff;
+}
+
+.greencell {
+	background-color: #00ff00;
+}
+
+.greencell:hover {
+	background-color: #00ff80;
+}
