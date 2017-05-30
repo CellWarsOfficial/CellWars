@@ -1,6 +1,7 @@
 #include "crank.hpp"
 #include "constants.hpp"
 #include "block.hpp"
+#include <cstdio>
 
 Block *crank(Block *block)
 {
@@ -26,7 +27,7 @@ int count_cell_neighbours(Block *block, int x, int y)
   {
     for(int j = -1; j < 2; j++)
     {
-      if(valid_coordonate(x + i, y + j) && i != 0 && j != 0 && block->map[x + i][y + j] != DEAD_CELL)
+      if(valid_coordonate(x + i, y + j) && !(i == 0 & j == 0) && block->map[x + i][y + j] != DEAD_CELL)
       {
         n++;
       }
@@ -43,7 +44,7 @@ void revive_cell(Block *block, int x, int y)
   {
     for(int j = -1; j < 2; j++)
     {
-      if(valid_coordonate(x + i, y + j) && i != 0 && j != 0 && block->map[x + i][y + j] != DEAD_CELL)
+      if(count_cell_neighbours(block, x, y) == 3 && valid_coordonate(x + i, y + j) && !(i == 0 && j == 0) && block->map[x + i][y + j] != DEAD_CELL)
       {
         for (int m = 0; m < 3; m++)
         {
