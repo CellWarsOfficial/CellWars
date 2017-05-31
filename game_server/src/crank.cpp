@@ -33,7 +33,7 @@ int count_cell_neighbours(Block *block, int x, int y)
   {
     for(int j = -1; j < 2; j++)
     {
-      if(valid_coordonate(x + i, y + j) && !(i == 0 & j == 0) && 
+      if(valid_coordonate(x + i, y + j) && !(i == 0 && j == 0) && 
               block->map[x + i][y + j] != DEAD_CELL)
       {
         n++;
