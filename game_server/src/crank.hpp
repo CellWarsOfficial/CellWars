@@ -5,7 +5,7 @@
 #include <constants.hpp>
 #include <bitset>
 
-Block *crank(Block *block);
+void crank(Block *block);
 CELL_TYPE crank_cell(Block *block, int x, int y);
 CELL_TYPE revive_cell(Block *block, int x, int y);
 int count_cell_neighbours(Block *block, int x, int y);

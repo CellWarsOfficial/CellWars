@@ -7,18 +7,17 @@
  * NB: The object taken as parameter by this function is destroyed
  * and the return object is a different one.
  **/
-Block *crank(Block *block)
+void crank(Block *block)
 {
-  Block *result = new Block(0, 0);
+  Block *scratch = new Block(block);
   for(int i = 0; i < BLOCK_SIZE; i++)
   {
     for(int j = 0; j < BLOCK_SIZE; j++)
     {
-      result->map[i][j] = crank_cell(block, i, j);
+      block->map[i][j] = crank_cell(scratch, i, j);
     }
   }
-  block->~Block();
-  return result;
+  delete scratch;
 }
 
 int valid_coordonate(int x, int y)

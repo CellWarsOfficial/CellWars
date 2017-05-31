@@ -55,13 +55,12 @@ void correct_crank_cell(Block *b, int x, int y, CELL_TYPE expected)
 void correct_crank(Block *b, Block *expected)
 {
   tests++;
-  Block *result = crank(b);
-  if(!equals(result, expected))
+  crank(b);
+  if(!equals(b, expected))
   {
     fails++;
     fprintf(stderr, "FAILED TEST: crank\n");
   }
-  result->~Block();
 }
 
 int main(void)
