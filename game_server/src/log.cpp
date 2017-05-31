@@ -6,9 +6,10 @@
 #define ME "Logger"
 #define UNKNOWN "Unknown"
 
-Logger::Logger(int max_buf)
+Logger::Logger(int max_buf, int reaction_time)
 {
   buffer_size = max_buf;
+  react_time = reaction_time;
   buffer_read = 0;
   buffer_write = 0;
   flags = 1;
@@ -116,7 +117,7 @@ void Logger::parse_buffer()
   {
     if((buffer_read == buffer_write) || !LFLAG_running)
     {
-      std::this_thread::sleep_for(std::chrono::seconds(LOG_BUFFER_DELAY));
+      std::this_thread::sleep_for(std::chrono::milliseconds(react_time));
       continue;
     }
     logger_lock.lock();

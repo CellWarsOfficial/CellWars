@@ -20,7 +20,7 @@ void fast_fail()
 void test_init()
 {
   tests++;
-  l = new Logger(1000);
+  l = new Logger(100, 2000);
   if(l == 0)
   {
     fprintf(stderr, "Failed to create logger.\n");

@@ -46,10 +46,10 @@ int main(int argc, char **argv)
 /* Initialising default information
  */
   void *db_info = NULL;
-  uint32_t flags = 0;
+  FLAG_TYPE flags = 0;
   int gtc = DEFAULT_GTC;
   int wait_time = DEFAULT_WAIT_TIME;
-  Logger *log = new Logger(LOG_MAX_BUFFER_DEFAULT);
+  Logger *log = new Logger(LOG_MAX_BUFFER_DEFAULT, LOG_BUFFER_DELAY_DEFAULT);
 /* Parsing program arguments
  */
   int i;
@@ -63,7 +63,7 @@ int main(int argc, char **argv)
     }
     if(equ(argv[i], "-debug_step"))
     {
-      flags = flags | NO_30_MASK; // set stepped_debug flag
+      flags = flags | JUST_30_MASK; // set stepped_debug flag
       log -> record(ME, "Using debug steps.");
       continue;
     }
@@ -124,5 +124,7 @@ int main(int argc, char **argv)
   /* main terminating kills process.
    */
   game_thread -> join();
+  delete log;
+  delete game;
   return 0;
 }

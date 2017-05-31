@@ -13,12 +13,12 @@ void signal_interpreter(int s)
     game -> resume_running();
     return;
   }
-  if(s == SIGSTOP)
+  if(s == SIGQUIT)
   {
     game -> stop_running();
     return;
   }
-  if(s == SIGINT)
+  if((s == SIGINT) || (s == SIGTERM))
   {
     game -> slow_termination();
     return;
@@ -30,6 +30,7 @@ void init_server_ui(Logger *log)
 {
   log -> record(ME, "Initialising server UI");
   signal(SIGCONT, signal_interpreter); // will resume game.
-  signal(SIGSTOP, signal_interpreter); // will pause game.
+  signal(SIGQUIT, signal_interpreter); // will pause game.
   signal(SIGINT, signal_interpreter); // will tell game to terminate slowly.
+  signal(SIGTERM, signal_interpreter); // will tell game to terminate slowly.
 }

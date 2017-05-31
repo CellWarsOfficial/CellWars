@@ -21,7 +21,7 @@ using namespace std;
 class Logger
 {
   public:
-  Logger(int max_buf);
+  Logger(int max_buf, int reaction_time);
   ~Logger();
   void quiet();
   void loud();
@@ -39,8 +39,9 @@ class Logger
   int buffer_size;
   int buffer_read;
   int buffer_write;
+  int react_time;
   FILE *file;
-  uint32_t flags;
+  FLAG_TYPE flags;
   thread *parser_thread;
 };
 

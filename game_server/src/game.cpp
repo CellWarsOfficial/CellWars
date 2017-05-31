@@ -6,6 +6,9 @@
 
 #define ME "Game"
 
+/* Note that Game has default destructor, as clean_up takes care of memory.
+ */
+
 Game::Game(void* ptr, Logger *log)
 {
   this -> log = log;
@@ -30,8 +33,10 @@ void Game::resume_running()
     flags = flags | JUST_LAST_MASK;
     flag_protection.unlock();
     execution_lock.unlock();
+    log -> record(ME, "Resume");
+    return;
   }
-  log -> record(ME, "Resume");
+  log -> record(ME, "Resume called but already running");
 }
 
 void Game::stop_running()
@@ -42,8 +47,10 @@ void Game::stop_running()
     flag_protection.lock();
     flags = flags & NO_LAST_MASK;
     flag_protection.unlock();
+    log -> record(ME, "Stop");
+    return;
   }
-  log -> record(ME, "Stop");
+  log -> record(ME, "Stop called but already stopped");
 }
 
 void Game::slow_termination()
@@ -63,7 +70,7 @@ void Game::check_run()
   execution_lock.unlock();
 }
 
-void *Game::start(uint32_t f, int gtc, int w)
+void *Game::start(FLAG_TYPE f, int gtc, int w)
 {
   if(GFLAG_started)
   {
@@ -109,13 +116,14 @@ void Game::plan(int wait_time)
 
   if(GFLAG_stepped_tick)
   {
-    stop_running(); // wait for outside interaction to resume.
     log -> record(ME, "Planning time - debug step - waiting for UI");
+    stop_running();
+    check_run(); // wait for outside interaction to resume.
   }
   else
   {
-    std::this_thread::sleep_for(std::chrono::seconds(wait_time));
     log -> record(ME, "Planning time - waiting " + to_string(wait_time));
+    std::this_thread::sleep_for(std::chrono::seconds(wait_time));
   }
   log -> record(ME, "Planning time - timeout ");
   
@@ -126,6 +134,7 @@ void Game::plan(int wait_time)
 void Game::crank(int generations)
 {
   log -> record(ME, "Crank - start");
+  std::this_thread::sleep_for(std::chrono::seconds(1));
   // TODO call crank
   // TODO update database
   log -> record(ME, "Crank - finish");
@@ -144,4 +153,8 @@ void Game::clean_up()
     delete i -> second;
   }
   super_node.clear();
+/* Reset everything, allowing the game to be recycled.
+ */
+  execution_lock.lock();
+  flags = 0; // Important because it unsets running flag
 }

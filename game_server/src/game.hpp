@@ -19,7 +19,7 @@ class Game
 {
   public:
   Game(void *ptr, Logger *log);
-  void *start(uint32_t f, int gtc, int w);
+  void *start(FLAG_TYPE f, int gtc, int w);
   int get_status();
   void resume_running();
   void stop_running();
