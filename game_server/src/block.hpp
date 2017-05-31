@@ -9,7 +9,7 @@ class Block
   public:
   CELL_TYPE **map;
   int originx, originy;
-  std::bitset<BLOCK_SIZE * BLOCK_SIZE> bitmap;
+  //std::bitset<BITMAP_SIZE> *bitmap;
 /* Constructor, copy constructor and destructor
  */
   Block(int x, int y);

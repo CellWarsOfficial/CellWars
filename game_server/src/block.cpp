@@ -18,6 +18,7 @@ Block::Block(int x, int y)
       map[i][j] = DEAD_CELL;
     }
   }
+  //bitmap = new std::bitset<BITMAP_SIZE>();
 }
 
 Block::Block(Block &other)
@@ -41,7 +42,7 @@ Block::~Block()
     delete[] map[i];
   }
   delete[] map;
-  delete bitmap;
+  //delete bitmap;
 }
 
 int Block::get_x_relative(int relativity)

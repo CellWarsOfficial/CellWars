@@ -82,6 +82,10 @@ CELL_TYPE crank_cell(Block *block, int x, int y)
   else if(n_neighbours == 3 && block->map[x][y] == DEAD_CELL)
   {
     result = revive_cell(block, x, y);
+    //if(result != DEAD_CELL)
+    //{
+    //  block->bitmap[x * BITMAP_SIZE + y] = 1;
+    //}
   }
   else if (n_neighbours > 3 && block->map[x][y] != DEAD_CELL)
   {
@@ -109,19 +113,9 @@ int equals(Block *current, Block *other)
   return 1;
 }
 
-void set_area(Block *block, int x, int y)
-{
+//int dead_area(Block *block, int x, int y)
+//{
+//  return !(*(block->bitmap)[x * BITMAP_SIZE + y]);
+//}
 
 
-
-}
-
-int prune(Block *block, int x, int y)
-{
-  
-
-
-
-
-
-}

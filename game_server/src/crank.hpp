@@ -13,6 +13,5 @@ int valid_coordonate(int x, int y);
 int equals(Block *current, Block *other);
 void init_bitmap(Block *block);
 int prune_area(Block *block, int x, int y);
-void set_area(Block *block, int x, int y);
 
 #endif
