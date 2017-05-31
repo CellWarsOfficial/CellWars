@@ -2,6 +2,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+bool use_safety = 1;
+
 void check_malloc(void* pointer)
 {
   if(use_safety)

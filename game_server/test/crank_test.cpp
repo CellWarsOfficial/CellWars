@@ -1,11 +1,16 @@
 #include <cstdio>
 #include "crank_test.hpp"
 
+int tests = 0;
+int fails = 0;
+
 void correct_valid_coordonates(Block *b, int x, int y, int expected)
 {
+  tests++;
   int output = valid_coordonate(x, y);
   if(output != expected)
   {
+    fails++;
     fprintf(stderr, "FAILED TEST: valid coordonate\nOutput:\"%i\"\t \
             Expected:\"%i\"\n", output, expected);
   }
@@ -13,9 +18,11 @@ void correct_valid_coordonates(Block *b, int x, int y, int expected)
 
 void correct_count_cell_neighbours(Block *b, int x, int y, int expected)
 {
+  tests++;
   int output = count_cell_neighbours(b, x, y);
   if(output != expected)
   {
+    fails++;
     fprintf(stderr, "FAILED TEST: count cell neighbours\nOutput:\"%i\"\t \
             Expected:\"%i\"\n", output, expected);
   }
@@ -23,9 +30,11 @@ void correct_count_cell_neighbours(Block *b, int x, int y, int expected)
 
 void correct_revive_cell(Block *b, int x, int y, CELL_TYPE expected)
 {
+  tests++;
   CELL_TYPE output = revive_cell(b, x, y);
   if(output != expected)
   {
+    fails++;
     fprintf(stderr, "FAILED TEST: revive cell\nOutput:\"%u\"\t \
             Expected:\"%u\"\n", output, expected);
   }
@@ -33,9 +42,11 @@ void correct_revive_cell(Block *b, int x, int y, CELL_TYPE expected)
 
 void correct_crank_cell(Block *b, int x, int y, CELL_TYPE expected)
 {
+  tests++;
   CELL_TYPE output = crank_cell(b, x, y);
   if(output != expected)
   {
+    fails++;
     fprintf(stderr, "FAILED TEST: crank cell\nOutput:\"%u\"\t \
             Expected:\"%u\"\n", output, expected);
   }
@@ -43,17 +54,18 @@ void correct_crank_cell(Block *b, int x, int y, CELL_TYPE expected)
 
 void correct_crank(Block *b, Block *expected)
 {
+  tests++;
   Block *result = crank(b);
   if(!equals(result, expected))
   {
+    fails++;
     fprintf(stderr, "FAILED TEST: crank\n");
   }
   result->~Block();
 }
 
-void run_tests(void)
+int main(void)
 {
-  printf("\nTEST:\n");
   Block *test1 = new Block(0, 0);
   //TEST: valid coordonates
   correct_valid_coordonates(test1, 0, 0, 1);
@@ -139,4 +151,6 @@ void run_tests(void)
   expected->map[3][1] = 5;
   correct_crank(test2, expected);
   expected->~Block();
+  fprintf(stderr, "%d/%d tests passed\n", tests - fails, tests);
+  return fails;
 }

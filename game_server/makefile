@@ -1,17 +1,19 @@
-CC      = g++
-NEWDIR  = mkdir
-SRCDIR  = src
-BINDIR  = bin
-TESTDIR = test
-RM      = rm -rf
-TARGET  = $(BINDIR)/gameserver
-TEST = $(BINDIR)/test
-CFLAGS  = -Wall -Werror -I $(SRCDIR)/ -std=c++11
-HEADER  = $(wildcard $(SRCDIR)/*.hpp)
-TESTHEADER  = $(wildcard $(TESTDIR)/*.hpp)
+CC     = g++
+NEWDIR = mkdir
+SRCDIR = src
+TSTDIR = test
+BINDIR = bin
+RM     = rm -rf
+TARGET = $(BINDIR)/gameserver
+HEADER = $(wildcard $(SRCDIR)/*.hpp)
+CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11
+EFLAGS = -lpthread
+TFLAGS = 
+OBJECT = $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o $(BINDIR)/game.o $(BINDIR)/server_ui.o $(BINDIR)/log.o $(BINDIR)/crank.o
+TESTS  = $(BINDIR)/log_test $(BINDIR)/crank_test
 
 .phony: all
-all: installdirs $(TARGET)
+all: installdirs $(TARGET) $(TESTS)
 
 .phony: installdirs
 installdirs: $(BINDIR)
@@ -19,29 +21,43 @@ installdirs: $(BINDIR)
 $(BINDIR):
 	$(NEWDIR) $@
 
-$(TARGET): $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/crank.o 
-	$(CC) $(CFLAGS) $^ -o $@
+$(TARGET): $(OBJECT)
+	$(CC) $(CFLAGS) $^ -o $@ $(EFLAGS)
 
 $(BINDIR)/init.o: $(SRCDIR)/init.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
 
 $(BINDIR)/block.o: $(SRCDIR)/block.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
 
 $(BINDIR)/malloc_safety.o: $(SRCDIR)/malloc_safety.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
+
+$(BINDIR)/database.o: $(SRCDIR)/database.cpp $(HEADER)
+	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
+
+$(BINDIR)/game.o: $(SRCDIR)/game.cpp $(HEADER)
+	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
+
+$(BINDIR)/server_ui.o: $(SRCDIR)/server_ui.cpp $(HEADER)
+	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
+
+$(BINDIR)/log.o: $(SRCDIR)/log.cpp $(HEADER)
+	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
 
 $(BINDIR)/crank.o: $(SRCDIR)/crank.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
 
-$(TEST): $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/crank.o  $(BINDIR)/crank_test.o 
-	$(CC) $(CFLAGS) $^ -o $@
+$(BINDIR)/log_test: $(TSTDIR)/log_test.cpp $(BINDIR)/log.o $(TSTDIR)/log_test.hpp $(HEADER)
+	$(CC) $(CFLAGS) $(TFLAGS) $< $(BINDIR)/log.o -o $@ $(EFLAGS)
 
-$(BINDIR)/crank_test.o: $(TESTDIR)/crank_test.cpp $(TESTHEADER)
-	$(CC) $(CFLAGS) -c $< -o $@
+$(BINDIR)/crank_test: $(TSTDIR)/crank_test.cpp $(BINDIR)/block.o $(BINDIR)/crank.o $(BINDIR)/malloc_safety.o $(TSTDIR)/crank_test.hpp $(HEADER)
+	$(CC) $(CFLAGS) $(TFLAGS) $<  $(BINDIR)/block.o $(BINDIR)/crank.o $(BINDIR)/malloc_safety.o -o $@ $(EFLAGS)
 
 .phony: check
-check: $(TEST); $(BINDIR)/test 
+check: all
+	./$(BINDIR)/log_test
+	./$(BINDIR)/crank_test
 
 .phony: install
 install: all
