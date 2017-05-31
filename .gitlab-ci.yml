@@ -1,0 +1,20 @@
+before_script:
+    - apt-get update
+
+stages:
+    - check
+    - install
+
+check:
+    stage: check
+    only:
+        - master
+    script:
+        - make check
+
+install:
+    stage: install
+    only:
+        - master
+    script:
+        - echo echo "not implemented"
