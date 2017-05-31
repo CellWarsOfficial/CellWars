@@ -9,7 +9,7 @@
  **/
 void crank(Block *block)
 {
-  Block *scratch = new Block(block);
+  Block *scratch = new Block(*block);
   for(int i = 0; i < BLOCK_SIZE; i++)
   {
     for(int j = 0; j < BLOCK_SIZE; j++)
