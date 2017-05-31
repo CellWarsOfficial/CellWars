@@ -34,8 +34,8 @@ class Game
   int plan_time;
   std::map <long, Block*> super_node;
   void check_run();
-  void plan(int wait_time);
-  void crank(int generations);
+  void plan_stage(int wait_time);
+  void crank_stage(int generations);
   void up_db();
   void clean_up();
 };

@@ -106,15 +106,15 @@ void *Game::start(FLAG_TYPE f, int gtc, int w)
   while(GFLAG_continue)
   {
     check_run();
-    plan(plan_time);
+    plan_stage(plan_time);
     check_run();
-    crank(gen_to_run);
+    crank_stage(gen_to_run);
   }
   clean_up();
   return NULL;
 }
 
-void Game::plan(int wait_time)
+void Game::plan_stage(int wait_time)
 {
   // TODO instruct network manager to receive changes from users
 
@@ -135,11 +135,14 @@ void Game::plan(int wait_time)
   up_db();
 }
 
-void Game::crank(int generations)
+void Game::crank_stage(int generations)
 {
   log -> record(ME, "Crank - start");
-  std::this_thread::sleep_for(std::chrono::seconds(1));
-  // TODO call crank
+  std::map<long,Block*>::iterator i;
+  for (i = super_node.begin(); i != super_node.end(); i++)
+  {
+    crank(i -> second);
+  }
   up_db();
   log -> record(ME, "Crank - finish");
 }
