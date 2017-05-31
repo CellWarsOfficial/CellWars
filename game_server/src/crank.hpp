@@ -1,6 +1,7 @@
 #ifndef CRANK_HPP
 #define CRANK_HPP
 
+#include <bitset>
 #include "block.hpp"
 #include "constants.hpp"
 
