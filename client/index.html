@@ -1,3 +1,4 @@
+<!-- MODIFY javascript/refresh.js to connect to database -->
 <!DOCTYPE html>
 
 <html>
@@ -5,7 +6,7 @@
 <head>
   <title>Cell Wars</title>
   <script type="text/javascript" src="javascript/table.js"></script>
-  <!-- TODO : Make Harry design a relevant favicon -->
+  <script type="text/javascript" src="javascript/refresh.js"></script>
   <link rel="icon" type="image/gif" href="./images/favicon.gif">
   <link rel="stylesheet" type="text/css" href="stylesheets/table.css">
   <link rel="stylesheet" type="text/css" href="stylesheets/body.css">
@@ -14,57 +15,12 @@
 </head>
 
 <body onload="loadTable()">
-<!-- TODO : Convert into some sort of dynamic table to add lots of entries
-            but few lines of code -->
+
 <div id="dynamicTable"></div>
 
 <div class="aligncenter">
   <button class="refreshbutton" onclick="refreshCells()">Refresh</button> 
 </div>
-<script>
-function refreshCells() {
-
-  // document.getElementById("cellTable").rows[0].cells[0].innerHTML = "X";
-
-  document.getElementById("cellTable").rows[0].cells[0].className = "redcell";
-  document.getElementById("cellTable").rows[0].cells[1].className = "redcell";
-  document.getElementById("cellTable").rows[1].cells[1].className = "redcell";
-
-  document.getElementById("cellTable").rows[3].cells[3].className = "bluecell";
-  document.getElementById("cellTable").rows[2].cells[3].className = "bluecell";
-
-  document.getElementById("cellTable").rows[4].cells[4].className = "greencell";
-
-  document.getElementById("cellTable").rows[2].cells[2].className = "emptycell";
-}
-
-function connectSQL() {
-/*
- * Note : This currently only works on internet explorer and is a pasta example
- *
- * TODO : Actually connect to a database that exists and make use of 
- *        it in refreshCells
- * Current Error: SQL Server does not exist or access denied.
-*/
-  var connection = new ActiveXObject("ADODB.Connection") ;
-
-  var connectionstring="Data Source=db.doc.ic.ac.uk;Initial Catalog=g1627123_u;User ID=g1627123_u;Password=eyNCD7YSQJ;Provider=SQLOLEDB";
-
-  connection.Open(connectionstring);
-  var rs = new ActiveXObject("ADODB.Recordset");
-
-  rs.Open("SELECT * FROM agents.grid", connection);
-  rs.MoveFirst
-  while(!rs.eof)
-  {
-    document.write(rs.fields(1));
-    rs.movenext;
-  }
-
-  rs.close;
-  connection.close; 
-}
-</script>
 
 </body>
 
