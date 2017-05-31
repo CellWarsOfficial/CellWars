@@ -8,3 +8,6 @@ bin/
 .*
 # except gitignore itself
 !.gitignore
+# exclude log files
+*.l
+*.log
