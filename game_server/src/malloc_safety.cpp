@@ -1,6 +1,8 @@
-#include <malloc_safety.hpp>
+#include "malloc_safety.hpp"
 #include <cstdio>
 #include <cstdlib>
+
+bool use_safety = 1;
 
 void check_malloc(void* pointer)
 {

@@ -1,13 +1,15 @@
-#ifndef BLOCK_HPP
-#define BLOCK_HPP
+#ifndef BLOCK_H
+#define BLOCK_H
 
-#include <constants.hpp>
+#include <bitset>
+#include "constants.hpp"
 
 class Block
 {
   public:
   CELL_TYPE **map;
   int originx, originy;
+  //std::bitset<BITMAP_SIZE> *bitmap;
 /* Constructor, copy constructor and destructor
  */
   Block(int x, int y);
@@ -17,6 +19,17 @@ class Block
  */
   int get_x_relative(int relativity);
   int get_y_relative(int relativity);
+  int rectify_x(int raw);
+  int rectify_y(int raw);
 };
+
+/* 3 functions used for compressing 2 ints into a long.
+ */
+
+long compress_xy(int x, int y);
+
+int get_x(long origin);
+
+int get_y(long origin);
 
 #endif
