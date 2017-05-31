@@ -1,6 +1,7 @@
 function loadTable() {
 
-  var gridSize = 10;
+  var cols = 60;
+  var rows = 40;
 
   var myTableDiv = document.getElementById("dynamicTable");
 
@@ -15,15 +16,15 @@ function loadTable() {
 
   // Filling the table
 
-  for (var j = 0; j < gridSize; j++) {
+  for (var j = 0; j < rows; j++) {
     var tr = document.createElement("TR");
     tr.classList.add("textcenter");
     tableBody.appendChild(tr);
 
-    for (var i = 0; i < gridSize; i++) {
+    for (var i = 0; i < cols; i++) {
       var td = document.createElement("TD");
       td.width = "75";
-      td.appendChild(document.createTextNode("Z"));
+      td.appendChild(document.createTextNode(""));
       tr.appendChild(td);
     }
   }
