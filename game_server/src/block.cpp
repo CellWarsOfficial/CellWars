@@ -41,6 +41,7 @@ Block::~Block()
     delete[] map[i];
   }
   delete[] map;
+  delete bitmap;
 }
 
 int Block::get_x_relative(int relativity)

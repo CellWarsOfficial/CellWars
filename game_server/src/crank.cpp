@@ -108,3 +108,20 @@ int equals(Block *current, Block *other)
   }
   return 1;
 }
+
+void set_area(Block *block, int x, int y)
+{
+
+
+
+}
+
+int prune(Block *block, int x, int y)
+{
+  
+
+
+
+
+
+}
