@@ -91,9 +91,11 @@ void *Game::start(FLAG_TYPE f, int gtc, int w)
     compress_xy(MINX, MINY), 
     compress_xy(MAXX, MAXY)
     );
-  for(; *blocks; blocks++)
+  for(int i = 0; blocks[i]; i++)
   {
-    super_node[compress_xy((*blocks) -> originx, (*blocks) -> originy)] = *blocks;
+    super_node[
+      compress_xy((blocks[i]) -> originx, (blocks[i]) -> originy)
+      ] = blocks[i];
   }
   delete[] blocks;
   log -> record(ME, "Imported data from database for startup/resume.");
@@ -149,11 +151,13 @@ void Game::crank_stage(int generations)
 
 void Game::up_db()
 {
+  log -> record(ME, "Updating database");
   std::map<long,Block*>::iterator i;
   for (i = super_node.begin(); i != super_node.end(); i++)
   {
     update_db(i -> second);
   }
+  log -> record(ME, "Database updated");
 }
 
 /* clean_up assumes FR and database are in sync, as it is normally called

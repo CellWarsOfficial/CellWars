@@ -51,9 +51,9 @@ Block **load_from_db(long NW, long SE)
     ((maxx - minx) / BLOCK_SIZE + 1) * ((maxy - miny) / BLOCK_SIZE + 1) + 1
     ];
   int block_id = 0;
-  for(int px = minx; px <= maxx; px++)
+  for(int px = minx; px <= maxx; px += BLOCK_SIZE)
   {
-    for(int py = miny; py <= maxx; py++, block_id++)
+    for(int py = miny; py <= maxx; py += BLOCK_SIZE, block_id++)
     {
       blocks_to_return[block_id] = new Block(px, py);
       run_query("SELECT * FROM cell_info WHERE row>="
@@ -81,11 +81,14 @@ void update_db(Block *block)
   {
     for(j = BLOCK_PADDING; j < BLOCK_PADDING + BLOCK_SIZE; j++)
     {
-      run_query("INSERT INTO cell_info(type, row, col) VALUES ("
-        + to_string(block -> map[i][j]) + ", "
-        + to_string(i + block -> originx - BLOCK_PADDING) + ", "
-        + to_string(j + block -> originy - BLOCK_PADDING) + ")"
-        );
+      if(block -> map[i][j])
+      {
+        run_query("INSERT INTO cell_info(type, row, col) VALUES ("
+          + to_string(block -> map[i][j]) + ", "
+          + to_string(i + block -> originx - BLOCK_PADDING) + ", "
+          + to_string(j + block -> originy - BLOCK_PADDING) + ")"
+          );
+      }
     }
   }
 }
