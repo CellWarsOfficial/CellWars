@@ -4,6 +4,7 @@
 
 <head>
   <title>Cell Wars</title>
+  <script type="text/javascript" src="javascript/table.js"></script>
   <!-- TODO : Make Harry design a relevant favicon -->
   <link rel="icon" type="image/gif" href="./images/favicon.gif">
   <link rel="stylesheet" type="text/css" href="stylesheets/table.css">
@@ -12,48 +13,10 @@
   <meta name="description" content="Play Cell Wars MMO! A strategic turn based game">
 </head>
 
-<body>
+<body onload="loadTable()">
 <!-- TODO : Convert into some sort of dynamic table to add lots of entries
             but few lines of code -->
-<div>
-  <table id="cellTable" width="100%">
-    <tr class="textcenter">
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr class="textcenter">
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr class="textcenter">
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr class="textcenter">
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr class="textcenter">
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-    </tr>
-  </table>
-</div>
+<div id="dynamicTable"></div>
 
 <div class="aligncenter">
   <button class="refreshbutton" onclick="refreshCells()">Refresh</button> 
