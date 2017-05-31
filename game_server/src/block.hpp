@@ -17,6 +17,8 @@ class Block
  */
   int get_x_relative(int relativity);
   int get_y_relative(int relativity);
+  int rectify_x(int raw);
+  int rectify_y(int raw);
 };
 
 /* 3 functions used for compressing 2 ints into a long.

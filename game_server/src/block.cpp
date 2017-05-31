@@ -62,6 +62,19 @@ int Block::get_y_relative(int relativity)
   return originy + relativity * BLOCK_SIZE;
 }
 
+/* Rectify transforms absolute x and/or y into relative x/y.
+ * Generally, it's absx/y - block.originx/y + BLOCK_PADDING
+ */
+int Block::rectify_x(int raw_x)
+{
+  return raw_x - originx + BLOCK_PADDING;
+}
+
+int Block::rectify_y(int raw_y)
+{
+  return raw_y - originy + BLOCK_PADDING;
+}
+
 long compress_xy(int x, int y)
 {
   return (((long) x) << 32) + (long) y;
@@ -76,6 +89,11 @@ int get_y(long origin)
 {
   return (int)(origin & FULL_MASK);
 }
+
+/* Rectify transforms absolute x and/or y into relative x/y.
+ * Generally, it's abs(x/y) - block.originx/y + BLOCK_PADDING
+ * However, block.originx/y should always be a multiple of BLOCK_SIZE
+ */
 
 /* Block layout
  * <------------------BLOCK_FULL-------------------->

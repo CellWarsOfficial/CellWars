@@ -8,8 +8,8 @@
 
 void *init_db(const char *db, Logger *log);
 
-Block* load_from_db(int NWx, int NWy, int SEx, int SEy);
+Block **load_from_db(long NW, long SE);
 
-void update_db(Block* block, int NWx, int NWy, int SEx, int SEy);
+void update_db(Block* block);
 
 #endif

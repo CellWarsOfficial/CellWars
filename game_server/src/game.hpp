@@ -36,6 +36,7 @@ class Game
   void check_run();
   void plan(int wait_time);
   void crank(int generations);
+  void up_db();
   void clean_up();
 };
 
