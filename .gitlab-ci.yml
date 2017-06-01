@@ -27,7 +27,7 @@ deploy_job:
     only:
         - master
     script:
-        - chomod 700 id_rsa
+        - chmod 700 id_rsa
         - ssh -i id_rsa -o StrictHostKeyChecking=no ih1115@146.169.45.167 'ls -l'
     only: 
         - master
