@@ -1,6 +1,3 @@
-before_script:
-    - apt-get update
-
 stages:
     - build
     - test
@@ -30,5 +27,5 @@ install_job:
     only:
         - master
     script:
-        - echo echo "not implemented"
+        - make install
     when: manual
