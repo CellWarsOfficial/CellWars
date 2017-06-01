@@ -6,14 +6,12 @@ stages:
     - install
 
 check:
-    stage: check
     only:
         - master
     script:
         - make check
 
 install:
-    stage: install
     only:
         - master
     script:
