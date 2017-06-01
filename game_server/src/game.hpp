@@ -3,6 +3,7 @@
 #include <constants.hpp>
 #include <block.hpp>
 #include <log.hpp>
+#include <database.hpp>
 #include <map>
 #include <mutex>
 #include <cstdlib>
@@ -18,7 +19,7 @@
 class Game
 {
   public:
-  Game(void *ptr, Logger *log);
+  Game(DB_conn* db, Logger *log);
   void *start(FLAG_TYPE f, int gtc, int w);
   int get_status();
   void resume_running();
@@ -29,10 +30,10 @@ class Game
   std::mutex execution_lock;
   std::mutex flag_protection;
   FLAG_TYPE flags;
-  void* db_info;
+  DB_conn* db_info;
   int gen_to_run;
   int plan_time;
-  std::map <long, Block*> super_node;
+  std::map <uint64_t, Block*> super_node;
   void check_run();
   void plan_stage(int wait_time);
   void crank_stage(int generations);

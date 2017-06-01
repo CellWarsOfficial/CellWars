@@ -68,17 +68,17 @@ int Block::rectify_y(int raw_y)
   return raw_y - originy + BLOCK_PADDING;
 }
 
-long compress_xy(int x, int y)
+uint64_t compress_xy(int x, int y)
 {
-  return (((long) x) << 32) + (long) y;
+  return (((uint64_t)((uint32_t) x)) << 32) | (uint64_t)((uint32_t) y);
 }
 
-int get_x(long origin)
+int get_x(uint64_t origin)
 {
   return (int)(origin >> 32);
 }
 
-int get_y(long origin)
+int get_y(uint64_t origin)
 {
   return (int)(origin & FULL_MASK);
 }

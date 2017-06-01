@@ -9,10 +9,10 @@
 /* Note that Game has default destructor, as clean_up takes care of memory.
  */
 
-Game::Game(void* ptr, Logger *log)
+Game::Game(DB_conn* db, Logger *log)
 {
   this -> log = log;
-  db_info = ptr;
+  db_info = db;
   execution_lock.lock();
   flags = 0; // Important because it unsets running flag
 }
@@ -87,7 +87,7 @@ void *Game::start(FLAG_TYPE f, int gtc, int w)
   flags = (f & NO_LAST_MASK) | JUST_28_MASK; // unset running and set started.
   gen_to_run = gtc;
   plan_time = w;
-  Block **blocks = load_from_db(
+  Block **blocks = db_info -> load_from_db(
     compress_xy(MINX, MINY), 
     compress_xy(MAXX, MAXY)
     );
@@ -140,7 +140,7 @@ void Game::plan_stage(int wait_time)
 void Game::crank_stage(int generations)
 {
   log -> record(ME, "Crank - start");
-  std::map<long,Block*>::iterator i;
+  std::map<uint64_t,Block*>::iterator i;
   for (i = super_node.begin(); i != super_node.end(); i++)
   {
     crank(i -> second);
@@ -152,10 +152,10 @@ void Game::crank_stage(int generations)
 void Game::up_db()
 {
   log -> record(ME, "Updating database");
-  std::map<long,Block*>::iterator i;
+  std::map<uint64_t,Block*>::iterator i;
   for (i = super_node.begin(); i != super_node.end(); i++)
   {
-    update_db(i -> second);
+    db_info -> update_db(i -> second);
   }
   log -> record(ME, "Database updated");
 }
@@ -166,7 +166,7 @@ void Game::up_db()
 
 void Game::clean_up()
 {
-  std::map<long,Block*>::iterator i;
+  std::map<uint64_t,Block*>::iterator i;
   log -> record(ME, "Terminating");
   for (i = super_node.begin(); i != super_node.end(); i++)
   {

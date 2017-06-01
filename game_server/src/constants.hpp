@@ -36,11 +36,18 @@
  */
 #define MINX -1000
 #define MINY -1000
-#define MAXX 1000
-#define MAXY 1000
+#define MAXX 999
+#define MAXY 999
 #define DEFAULT_GTC 1
 #define DEFAULT_WAIT_TIME 30
 #define LOG_MAX_BUFFER_DEFAULT 500
 #define LOG_BUFFER_DELAY_DEFAULT 500
+
+/* Database related constants
+ */
+#define DB_PORT 7777
+#define EXPECT_READ 1
+#define NO_READ 0
+#define DB_MAX_BUF 2000
 
 #endif

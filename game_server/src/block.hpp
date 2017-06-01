@@ -23,13 +23,13 @@ class Block
   int rectify_y(int raw);
 };
 
-/* 3 functions used for compressing 2 ints into a long.
+/* 3 functions used for compressing 2 ints into a uint64_t.
  */
 
-long compress_xy(int x, int y);
+uint64_t compress_xy(int x, int y);
 
-int get_x(long origin);
+int get_x(uint64_t origin);
 
-int get_y(long origin);
+int get_y(uint64_t origin);
 
 #endif
