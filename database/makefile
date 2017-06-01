@@ -1,8 +1,10 @@
 NEWFIFO = mkfifo
-ADAPTER = adapter.sh
+ADAPTER1 = adapter.sh
+ADAPTER2 = sv_adapter.sh
 IGNORE = >/dev/null 2>&1
 KILLNAME = killall -q
-PIPENAME = fifo
+PIPE1 = fifo1
+PIPE2 = fifo2
 NETCAT = nc
 RM = rm -rf
 
@@ -16,12 +18,16 @@ check: all
 
 .phony: install
 install: all uninstall installpipe
-	nohup ./$(ADAPTER) $(IGNORE) &
+	nohup ./$(ADAPTER1) $(IGNORE) &
+	nohup ./$(ADAPTER2) $(IGNORE) &
 
 .phony: installpipe
-installpipe: $(PIPENAME)
+installpipe: $(PIPE1) $(PIPE2) 
 
-$(PIPENAME):
+$(PIPE1):
+	$(NEWFIFO) $@
+
+$(PIPE2):
 	$(NEWFIFO) $@
 
 .phony: uninstall
@@ -29,14 +35,15 @@ uninstall: remove_main remove_netcat remove_pipe
 
 .phony: remove_main remove_netcat remove_pipe
 remove_main:
-	-$(KILLNAME) $(ADAPTER)
+	-$(KILLNAME) $(ADAPTER1)
+	-$(KILLNAME) $(ADAPTER2)
 
 remove_netcat:
 	-$(KILLNAME) $(NETCAT)
 
 remove_pipe:
-	-$(RM) $(PIPENAME)
+	-$(RM) $(PIPE1) $(PIPE2) 
 
 .phony: clean
-clean:
+clean: uninstall
 	echo "not cleaning yet"
