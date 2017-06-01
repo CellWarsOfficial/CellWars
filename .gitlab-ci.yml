@@ -27,5 +27,5 @@ deploy_job:
     only:
         - master
     script:
-        - make install
+        - ssh ih1115@146.169.45.167 'ls -l'
     when: manual
