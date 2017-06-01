@@ -2,17 +2,33 @@ before_script:
     - apt-get update
 
 stages:
-    - check
-    - install
+    - build
+    - test
+    - cleanup
+    - deploy
 
-check:
+build_job:
+    stage: build
+    script:
+        - make
+
+test_job:
+    stage: test
     only:
         - master
     script:
         - make check
 
-install:
+cleanup_job:
+    stage: cleanup
+    script:
+        - make clean
+    when: always
+
+install_job:
+    stage: deploy
     only:
         - master
     script:
         - echo echo "not implemented"
+    when: manual
