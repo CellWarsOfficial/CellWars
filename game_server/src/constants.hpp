@@ -45,7 +45,7 @@
 
 /* Database related constants
  */
-#define DB_PORT 7777
+#define DB_PORT 7778
 #define EXPECT_READ 1
 #define NO_READ 0
 #define DB_MAX_BUF 2000
