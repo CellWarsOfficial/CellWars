@@ -1,9 +1,6 @@
 STDTAR := all check install uninstall clean
+SUBDIR := game_server
 
 .phony: $(STDTAR)
 $(STDTAR):
-	make TARGET="$@" run_command
-	
-.phony: run_command
-run_command:
-	$(MAKE) -C game_server $(TARGET)
+	for dir in $(SUBDIR); do $(MAKE) -C game_server $@; done
