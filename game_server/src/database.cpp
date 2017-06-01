@@ -9,19 +9,19 @@
 
 #define ME "Database"
 
-void *init_db(const char *db, Logger *log)
+DB_conn::DB_conn(const char *a, Logger *l)
 {
-  log -> record(ME, (string)"Connection to database \"" + db + "\" successful");
-  void* db_info = (void*)new int; // duck typing
-  return db_info;
+  address = a;
+  log = l;
+  log -> record(ME, (string)"Connection to database \"" + address + "\" successful");
 }
 
-void *run_query(string s)
+void *DB_conn::run_query(string s)
 {
   return NULL;
 }
 
-Block **load_from_db(long NW, long SE)
+Block **DB_conn::load_from_db(long NW, long SE)
 {
   int NWx = get_x(NW), NWy = get_y(NW), SEx = get_x(SE), SEy = get_y(SE);
   int minx, miny, maxx, maxy;
@@ -69,7 +69,7 @@ Block **load_from_db(long NW, long SE)
   return blocks_to_return;
 }
 
-void update_db(Block *block)
+void DB_conn::update_db(Block *block)
 {
   int i, j;
   run_query("DELETE FROM cell_info WHERE row>="

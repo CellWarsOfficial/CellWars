@@ -6,10 +6,15 @@
 
 // TODO figure out how to access the database
 
-void *init_db(const char *db, Logger *log);
-
-Block **load_from_db(long NW, long SE);
-
-void update_db(Block* block);
-
+class DB_conn
+{
+  public:
+  DB_conn(const char *a, Logger *l);
+  Block **load_from_db(long NW, long SE);
+  void update_db(Block* block);
+  private:
+  void* run_query(string s);
+  Logger *log;
+  const char *address;
+};
 #endif

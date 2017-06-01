@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 {
 /* Initialising default information
  */
-  void *db_info = NULL;
+  DB_conn *db_info = NULL;
   FLAG_TYPE flags = 0;
   int gtc = DEFAULT_GTC;
   int wait_time = DEFAULT_WAIT_TIME;
@@ -69,7 +69,12 @@ int main(int argc, char **argv)
     {
       i++;
       check_limit(i, argc);
-      db_info = init_db(argv[i], log);
+      db_info = new DB_conn(argv[i], log);
+      if(db_info == 0)
+      {
+        fprintf(stderr, "Database failure. Exiting\n");
+        exit(EXIT_FAILURE);
+      }
       continue;
     }
     if(equ(argv[i], "-generations", "-gtc"))
