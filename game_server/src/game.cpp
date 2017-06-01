@@ -140,7 +140,7 @@ void Game::plan_stage(int wait_time)
 void Game::crank_stage(int generations)
 {
   log -> record(ME, "Crank - start");
-  std::map<long,Block*>::iterator i;
+  std::map<uint64_t,Block*>::iterator i;
   for (i = super_node.begin(); i != super_node.end(); i++)
   {
     crank(i -> second);
@@ -152,7 +152,7 @@ void Game::crank_stage(int generations)
 void Game::up_db()
 {
   log -> record(ME, "Updating database");
-  std::map<long,Block*>::iterator i;
+  std::map<uint64_t,Block*>::iterator i;
   for (i = super_node.begin(); i != super_node.end(); i++)
   {
     db_info -> update_db(i -> second);
@@ -166,7 +166,7 @@ void Game::up_db()
 
 void Game::clean_up()
 {
-  std::map<long,Block*>::iterator i;
+  std::map<uint64_t,Block*>::iterator i;
   log -> record(ME, "Terminating");
   for (i = super_node.begin(); i != super_node.end(); i++)
   {

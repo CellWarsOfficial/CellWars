@@ -33,7 +33,7 @@ class Game
   DB_conn* db_info;
   int gen_to_run;
   int plan_time;
-  std::map <long, Block*> super_node;
+  std::map <uint64_t, Block*> super_node;
   void check_run();
   void plan_stage(int wait_time);
   void crank_stage(int generations);

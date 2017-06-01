@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <string>
 #include <unistd.h>
+#include <chrono>
+#include <ctime>
 
 // TODO all functions in here.
 
@@ -52,15 +54,18 @@ DB_conn::DB_conn(const char *a, Logger *l)
 void *DB_conn::run_query(int expectation, string s)
 {
   const char *c = s.c_str();
+  log -> record(ME, (string)"Running query " + c);
   write(socketid, c, strlen(c));
-  write(socketid, ";", 1);
+  write(socketid, ";\n", 2);
   if(expectation)
   {
     char answer_buf[DB_MAX_BUF];
     struct answer *result = 0;
     bzero(answer_buf, DB_MAX_BUF);
-    read(socketid, answer_buf, DB_MAX_BUF);
-    printf("%s\n", answer_buf);
+    while(read(socketid, answer_buf, DB_MAX_BUF - 1) == 0)
+    {
+      std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+    }
     int ni = 0;
     int number[3] = {0, 0, 0};
     int neg = 1;
@@ -98,7 +103,7 @@ void *DB_conn::run_query(int expectation, string s)
   return NULL;
 }
 
-Block **DB_conn::load_from_db(long NW, long SE)
+Block **DB_conn::load_from_db(uint64_t NW, uint64_t SE)
 {
   int NWx = get_x(NW), NWy = get_y(NW), SEx = get_x(SE), SEy = get_y(SE);
   int minx, miny, maxx, maxy;
@@ -136,10 +141,10 @@ Block **DB_conn::load_from_db(long NW, long SE)
       struct answer *a, *b;
       a = (struct answer *)run_query(EXPECT_READ, 
         "SELECT * FROM cell_info WHERE row>="
-        + to_string(minx - BLOCK_PADDING) + " AND row<"
-        + to_string(minx + BLOCK_SIZE + BLOCK_PADDING) + " AND col>="
-        + to_string(miny - BLOCK_PADDING) + " AND col<"
-        + to_string(miny + BLOCK_SIZE + BLOCK_PADDING)
+        + to_string(px - BLOCK_PADDING) + " AND row<"
+        + to_string(px + BLOCK_SIZE + BLOCK_PADDING) + " AND col>="
+        + to_string(py - BLOCK_PADDING) + " AND col<"
+        + to_string(py + BLOCK_SIZE + BLOCK_PADDING)
         );
       // TODO place returned information inside block
       while(a)

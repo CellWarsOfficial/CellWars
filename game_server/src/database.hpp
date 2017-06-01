@@ -15,7 +15,7 @@ class DB_conn
 {
   public:
   DB_conn(const char *a, Logger *l);
-  Block **load_from_db(long NW, long SE);
+  Block **load_from_db(uint64_t NW, uint64_t SE);
   void update_db(Block* block);
   int safe;
   private:
