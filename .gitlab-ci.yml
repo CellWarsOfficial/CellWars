@@ -22,7 +22,7 @@ cleanup_job:
         - make clean
     when: always
 
-install_job:
+deploy_job:
     stage: deploy
     only:
         - master
