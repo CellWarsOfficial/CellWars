@@ -27,7 +27,8 @@ deploy_job:
     only:
         - master
     script:
-        - chmod 700 id_rsa
-        - ssh -i id_rsa -o StrictHostKeyChecking=no ih1115@146.169.45.167 'ls -l'
+        - chmod 600 id_rsa
+        - scp -r -i id_rsa -o StrictHostKeyChecking=no . ih1115@146.169.45.167:~/webapps_23/
+        - ssh -i id_rsa -o StrictHostKeyChecking=no . ih1115@146.169.45.167 'cd webapps_23 && make install'
     only: 
         - master
