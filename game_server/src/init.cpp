@@ -70,7 +70,7 @@ int main(int argc, char **argv)
       i++;
       check_limit(i, argc);
       db_info = new DB_conn(argv[i], log);
-      if(db_info == 0)
+      if((db_info == 0) || !(db_info -> safe))
       {
         fprintf(stderr, "Database failure. Exiting\n");
         exit(EXIT_FAILURE);

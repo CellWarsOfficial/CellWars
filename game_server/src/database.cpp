@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#include <unistd.h>
 
 // TODO all functions in here.
 
@@ -19,12 +20,14 @@ DB_conn::DB_conn(const char *a, Logger *l)
   {
     safe = 0;
     log -> record(ME, "Failed to initialise socket");
+    return;
   }
   server = gethostbyname(address);
   if(server == NULL)
   {
     safe = 0;
     log -> record(ME, "Failed to detect database");
+    return;
   }
 
   bzero((char *) &server_address, sizeof(server_address));
@@ -41,12 +44,57 @@ DB_conn::DB_conn(const char *a, Logger *l)
   {
     safe = 0;
     log -> record(ME, "Failed to connect to database");
+    return;
   }
   log -> record(ME, "Connection successful");
 }
 
-void *DB_conn::run_query(string s)
+void *DB_conn::run_query(int expectation, string s)
 {
+  const char *c = s.c_str();
+  write(socketid, c, strlen(c));
+  write(socketid, ";", 1);
+  if(expectation)
+  {
+    char answer_buf[DB_MAX_BUF];
+    struct answer *result = 0;
+    bzero(answer_buf, DB_MAX_BUF);
+    read(socketid, answer_buf, DB_MAX_BUF);
+    printf("%s\n", answer_buf);
+    int ni = 0;
+    int number[3] = {0, 0, 0};
+    int neg = 1;
+    for(int i = 0; answer_buf[i]; i++)
+    {
+      if(answer_buf[i] == '-')
+      {
+        neg = -1;
+        continue;
+      }
+      if((answer_buf[i] >= '0') || (answer_buf[i] <= '9'))
+      {
+        number[ni] = number[ni] * 10 + (int)(answer_buf[i] - '0');
+        continue;
+      }
+      number[ni] = number[ni] * neg;
+      neg = 1;
+      ni++;
+      if(ni == 3)
+      {
+        void *aux = malloc(sizeof(struct answer));
+        ((struct answer *)aux) -> next = result;
+        result = (struct answer *)aux;
+        result -> row = number[0];
+        result -> col = number[1];
+        result -> t = number[2];
+        number[0] = 0;
+        number[1] = 0;
+        number[2] = 0;
+        ni = 0;
+      }
+    }
+    return (void *)result;
+  }
   return NULL;
 }
 
@@ -84,14 +132,24 @@ Block **DB_conn::load_from_db(long NW, long SE)
   {
     for(int py = miny; py <= maxx; py += BLOCK_SIZE, block_id++)
     {
-      blocks_to_return[block_id] = new Block(px, py);
-      run_query("SELECT * FROM cell_info WHERE row>="
+      Block* blk = new Block(px, py);
+      struct answer *a, *b;
+      a = (struct answer *)run_query(EXPECT_READ, 
+        "SELECT * FROM cell_info WHERE row>="
         + to_string(minx - BLOCK_PADDING) + " AND row<"
         + to_string(minx + BLOCK_SIZE + BLOCK_PADDING) + " AND col>="
         + to_string(miny - BLOCK_PADDING) + " AND col<"
         + to_string(miny + BLOCK_SIZE + BLOCK_PADDING)
         );
       // TODO place returned information inside block
+      while(a)
+      {
+        blk -> map[blk -> rectify_x(a -> row)][blk -> rectify_y(a -> col)] = a -> t;
+        b = a;
+        a = a -> next;
+        free((void*) b);
+      }
+      blocks_to_return[block_id] = blk;
     }
   }
   blocks_to_return[block_id] = NULL; // Sentinel marking the end of the list
@@ -101,7 +159,7 @@ Block **DB_conn::load_from_db(long NW, long SE)
 void DB_conn::update_db(Block *block)
 {
   int i, j;
-  run_query("DELETE FROM cell_info WHERE row>="
+  run_query(NO_READ, "DELETE FROM cell_info WHERE row>="
     + to_string(block -> originx) + " AND row<"
     + to_string(block -> originx + BLOCK_SIZE) + " AND col>="
     + to_string(block -> originy) + " AND col<"
@@ -112,7 +170,7 @@ void DB_conn::update_db(Block *block)
     {
       if(block -> map[i][j])
       {
-        run_query("INSERT INTO cell_info(type, row, col) VALUES ("
+        run_query(NO_READ, "INSERT INTO cell_info(type, row, col) VALUES ("
           + to_string(block -> map[i][j]) + ", "
           + to_string(i + block -> originx - BLOCK_PADDING) + ", "
           + to_string(j + block -> originy - BLOCK_PADDING) + ")"

@@ -19,11 +19,19 @@ class DB_conn
   void update_db(Block* block);
   int safe;
   private:
-  void* run_query(string s);
+  void* run_query(int expectation, string s);
   Logger *log;
   const char *address;
   int socketid;
   struct hostent *server;
   struct sockaddr_in server_address;
+};
+
+struct answer
+{
+  int row;
+  int col;
+  CELL_TYPE t;
+  struct answer *next;
 };
 #endif
