@@ -11,9 +11,38 @@
 
 DB_conn::DB_conn(const char *a, Logger *l)
 {
+  safe = 1;
   address = a;
   log = l;
-  log -> record(ME, (string)"Connection to database \"" + address + "\" successful");
+  socketid = socket(AF_INET, SOCK_STREAM, 0);
+  if(socketid < 0)
+  {
+    safe = 0;
+    log -> record(ME, "Failed to initialise socket");
+  }
+  server = gethostbyname(address);
+  if(server == NULL)
+  {
+    safe = 0;
+    log -> record(ME, "Failed to detect database");
+  }
+
+  bzero((char *) &server_address, sizeof(server_address));
+  server_address.sin_family = AF_INET;
+  bcopy((char *)server->h_addr, 
+       (char *)&server_address.sin_addr.s_addr,
+       server->h_length);
+  server_address.sin_port = htons(DB_PORT);
+  if(connect(
+     socketid, 
+     (struct sockaddr *)&server_address, 
+     sizeof(server_address)
+     ) < 0)
+  {
+    safe = 0;
+    log -> record(ME, "Failed to connect to database");
+  }
+  log -> record(ME, "Connection successful");
 }
 
 void *DB_conn::run_query(string s)

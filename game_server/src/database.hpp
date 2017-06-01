@@ -3,6 +3,11 @@
 
 #include <block.hpp>
 #include <log.hpp>
+#include <cstdio>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h> 
 
 // TODO figure out how to access the database
 
@@ -12,9 +17,13 @@ class DB_conn
   DB_conn(const char *a, Logger *l);
   Block **load_from_db(long NW, long SE);
   void update_db(Block* block);
+  int safe;
   private:
   void* run_query(string s);
   Logger *log;
   const char *address;
+  int socketid;
+  struct hostent *server;
+  struct sockaddr_in server_address;
 };
 #endif

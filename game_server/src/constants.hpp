@@ -43,4 +43,8 @@
 #define LOG_MAX_BUFFER_DEFAULT 500
 #define LOG_BUFFER_DELAY_DEFAULT 500
 
+/* Networking related constants
+ */
+#define DB_PORT 7778
+
 #endif
