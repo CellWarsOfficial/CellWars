@@ -28,4 +28,5 @@ deploy_job:
         - master
     script:
         - ssh ih1115@146.169.45.167 'ls -l'
-    when: manual
+    only: 
+        - master
