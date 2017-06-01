@@ -11,3 +11,5 @@ bin/
 # exclude log files
 *.l
 *.log
+# exclude nohup accidental files
+nohup.out

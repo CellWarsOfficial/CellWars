@@ -6,6 +6,10 @@ BINDIR = bin
 RM     = rm -rf
 TARGET = $(BINDIR)/gameserver
 HEADER = $(wildcard $(SRCDIR)/*.hpp)
+IP     = 146.169.45.167
+RUNFLG = -db $(IP) -w 10 -log log.l -q
+IGNORE = >/dev/null 2>&1
+KILLNAME = killall -q
 OS := $(shell uname)
 ifeq ($(OS), Darwin)
 	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11
@@ -64,12 +68,12 @@ check: all
 	./$(BINDIR)/crank_test
 
 .phony: install
-install: all
-	echo "not installing yet"
+install: all uninstall
+	nohup ./$(TARGET) $(RUNFLG) $(IGNORE) &
 
 .phony: uninstall
 uninstall:
-	echo "not uninstalling yet"
+	-$(KILLNAME) -SIGINT gameserver
 
 .phony: clean
 clean:

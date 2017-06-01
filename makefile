@@ -1,5 +1,5 @@
 STDTAR := all check install uninstall clean
-SUBDIR := game_server database
+SUBDIR := database game_server
 
 .phony: $(STDTAR)
 $(STDTAR):
