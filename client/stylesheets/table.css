@@ -33,11 +33,11 @@ td:hover {
 }
 
 .redcell {
-  background-color: #ff0000;
+  background-color: #ff33d4;
 }
 
 .redcell:hover {
-  background-color: #ff8000;
+  background-color: #ff66df;
 }
 
 .bluecell {
