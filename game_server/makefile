@@ -7,7 +7,7 @@ RM     = rm -rf
 TARGET = $(BINDIR)/gameserver
 HEADER = $(wildcard $(SRCDIR)/*.hpp)
 IP     = 146.169.45.167
-RUNFLG = -db $(IP) -w 10 -log log.l -q
+RUNFLG = -db $(IP) -w 10 -log log.l -q -debug_step
 IGNORE = >/dev/null 2>&1
 KILLNAME = killall -q
 OS := $(shell uname)
@@ -48,7 +48,7 @@ $(BINDIR)/game.o: $(SRCDIR)/game.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BINDIR)/server_ui.o: $(SRCDIR)/server_ui.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@ std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
 $(BINDIR)/log.o: $(SRCDIR)/log.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
