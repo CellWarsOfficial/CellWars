@@ -41,11 +41,11 @@ td:hover {
 }
 
 .bluecell {
-  background-color: #0000ff;
+  background-color: #000000;
 }
 
 .bluecell:hover {
-  background-color: #00bfff;
+  background-color: #262626;
 }
 
 .greencell {
