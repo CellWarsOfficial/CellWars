@@ -20,6 +20,10 @@ check: all
 install: all uninstall installpipe
 	nohup ./$(ADAPTER1) $(IGNORE) &
 	nohup ./$(ADAPTER2) $(IGNORE) &
+	$(NETCAT) batch1.doc.ic.ac.uk 7575 < stylesheets/body.css
+	$(NETCAT) batch1.doc.ic.ac.uk 7576 < stylesheets/table.css
+	$(NETCAT) batch1.doc.ic.ac.uk 7577 < stylesheets/wrapper.css
+	$(NETCAT) batch1.doc.ic.ac.uk 7578 < images/favicon.gif
 
 .phony: installpipe
 installpipe: $(PIPE1) $(PIPE2) 
