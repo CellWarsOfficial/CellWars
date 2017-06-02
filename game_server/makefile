@@ -48,7 +48,7 @@ $(BINDIR)/game.o: $(SRCDIR)/game.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BINDIR)/server_ui.o: $(SRCDIR)/server_ui.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@ std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BINDIR)/log.o: $(SRCDIR)/log.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
