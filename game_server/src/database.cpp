@@ -53,15 +53,24 @@ DB_conn::DB_conn(const char *a, Logger *l)
 
 void *DB_conn::run_query(int expectation, string s)
 {
-  string wrapper = "copy (" + s + ") TO STDOUT WITH CSV;\n";
+  string wrapper;
+  if(expectation)
+  {
+    wrapper = "copy (" + s + ") TO STDOUT WITH CSV;\n";
+  }
+  else
+  {
+    wrapper = s + ";\n";
+  }
   const char *c = wrapper.c_str();
+  char answer_buf[DB_MAX_BUF];
   log -> record(ME, (string)"Running query " + s.c_str());
   write(socketid, c, strlen(c));
   if(expectation)
   {
-    char answer_buf[DB_MAX_BUF];
     struct answer *result = 0;
     bzero(answer_buf, DB_MAX_BUF);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     while(read(socketid, answer_buf, DB_MAX_BUF - 1) == 0)
     {
       std::this_thread::sleep_for(std::chrono::milliseconds(5000));
@@ -76,7 +85,7 @@ void *DB_conn::run_query(int expectation, string s)
         neg = -1;
         continue;
       }
-      if((answer_buf[i] >= '0') || (answer_buf[i] <= '9'))
+      if((answer_buf[i] >= '0') && (answer_buf[i] <= '9'))
       {
         number[ni] = number[ni] * 10 + (int)(answer_buf[i] - '0');
         continue;
