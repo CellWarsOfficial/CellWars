@@ -7,7 +7,7 @@ function gen_page() {
   do
     pos=#$(( ${array[$i]} * 60 + ${array[$((i + 1))]} ))
     typ=$(( array[$((i + 2))] % 3 ))
-    color=redcell
+    color=greencell
     if [[ $typ -eq 1 ]]
     then
       color=bluecell
