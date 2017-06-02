@@ -73,7 +73,7 @@ install: all uninstall
 
 .phony: uninstall
 uninstall:
-	-$(KILLNAME) -SIGINT gameserver
+	-$(KILLNAME) -SIGKILL gameserver #faster closing time, but risky
 
 .phony: clean
 clean:

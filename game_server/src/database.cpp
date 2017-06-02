@@ -53,10 +53,10 @@ DB_conn::DB_conn(const char *a, Logger *l)
 
 void *DB_conn::run_query(int expectation, string s)
 {
-  const char *c = s.c_str();
-  log -> record(ME, (string)"Running query " + c);
+  string wrapper = "copy (" + s + ") TO STDOUT WITH CSV;\n";
+  const char *c = wrapper.c_str();
+  log -> record(ME, (string)"Running query " + s.c_str());
   write(socketid, c, strlen(c));
-  write(socketid, ";\n", 2);
   if(expectation)
   {
     char answer_buf[DB_MAX_BUF];
@@ -140,10 +140,10 @@ Block **DB_conn::load_from_db(uint64_t NW, uint64_t SE)
       Block* blk = new Block(px, py);
       struct answer *a, *b;
       a = (struct answer *)run_query(EXPECT_READ, 
-        "SELECT * FROM cell_info WHERE row>="
-        + to_string(px - BLOCK_PADDING) + " AND row<"
-        + to_string(px + BLOCK_SIZE + BLOCK_PADDING) + " AND col>="
-        + to_string(py - BLOCK_PADDING) + " AND col<"
+        "SELECT * FROM agents.grid WHERE x>="
+        + to_string(px - BLOCK_PADDING) + " AND x<"
+        + to_string(px + BLOCK_SIZE + BLOCK_PADDING) + " AND y>="
+        + to_string(py - BLOCK_PADDING) + " AND y<"
         + to_string(py + BLOCK_SIZE + BLOCK_PADDING)
         );
       // TODO place returned information inside block
@@ -164,10 +164,10 @@ Block **DB_conn::load_from_db(uint64_t NW, uint64_t SE)
 void DB_conn::update_db(Block *block)
 {
   int i, j;
-  run_query(NO_READ, "DELETE FROM cell_info WHERE row>="
-    + to_string(block -> originx) + " AND row<"
-    + to_string(block -> originx + BLOCK_SIZE) + " AND col>="
-    + to_string(block -> originy) + " AND col<"
+  run_query(NO_READ, "DELETE FROM agents.grid WHERE x>="
+    + to_string(block -> originx) + " AND x<"
+    + to_string(block -> originx + BLOCK_SIZE) + " AND y>="
+    + to_string(block -> originy) + " AND y<"
     + to_string(block -> originy + BLOCK_SIZE));
   for(i = BLOCK_PADDING; i < BLOCK_PADDING + BLOCK_SIZE; i++)
   {
@@ -175,7 +175,7 @@ void DB_conn::update_db(Block *block)
     {
       if(block -> map[i][j])
       {
-        run_query(NO_READ, "INSERT INTO cell_info(type, row, col) VALUES ("
+        run_query(NO_READ, "INSERT INTO agents.grid(user_id, x, y) VALUES ("
           + to_string(block -> map[i][j]) + ", "
           + to_string(i + block -> originx - BLOCK_PADDING) + ", "
           + to_string(j + block -> originy - BLOCK_PADDING) + ")"

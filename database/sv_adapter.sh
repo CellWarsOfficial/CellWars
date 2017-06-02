@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function db_sv_adapter() {
-  while(true) do nc -l -p 7778 <fifo2 | psql >fifo2; done
+  socat TCP4-LISTEN:7778,reuseaddr,fork EXEC:"psql"
 }
 
 . ~/.pgdb-g1627123_u-g1627123_u
