@@ -59,7 +59,6 @@ CELL_TYPE revive_cell(Block *block, int x, int y)
         {
           if(block->map[x + i][y + j] == types[m])
           {
-            block->map[x][y] = types[m];
             result = types[m];
           }
         }
