@@ -9,7 +9,7 @@ HEADER = $(wildcard $(SRCDIR)/*.hpp)
 IP     = 146.169.45.167
 RUNFLG = -db $(IP) -w 10 -log log.l -q
 IGNORE = >/dev/null 2>&1
-KILLNAME = killall -q
+KILLNAME = pkill
 OS := $(shell uname)
 ifeq ($(OS), Darwin)
 	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11

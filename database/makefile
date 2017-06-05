@@ -1,7 +1,7 @@
 ADAPTER1 = adapter.sh
 ADAPTER2 = sv_adapter.sh
 IGNORE   = >/dev/null 2>&1
-KILLNAME = killall -q -g
+KILLNAME = pkill -x
 RM       = rm -rf
 
 .phony: all
