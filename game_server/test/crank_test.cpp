@@ -236,6 +236,7 @@ int main(void)
   expected2->map[11][6] = 2;
 
   expected2->map[9][7] = 2;
+  expected2->map[9][8] = 1;
   expected2->map[11][11] = 1;
   expected2->map[12][7] = 2;
   expected2->map[12][8] = 1;

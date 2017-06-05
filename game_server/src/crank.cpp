@@ -62,8 +62,7 @@ CELL_TYPE revive_cell(Block *block, int x, int y)
             result = types[m];
           }
         }
-        types[h] = block->map[x + i][y + j];
-        h++;
+        types[h++] = block->map[x + i][y + j];
       }
     }
   }
@@ -74,19 +73,15 @@ CELL_TYPE crank_cell(Block *block, int x, int y)
 {
   int n_neighbours = count_cell_neighbours(block, x, y);
   CELL_TYPE result = block->map[x][y];
-  if(n_neighbours < 2 && block->map[x][y] != DEAD_CELL)
+  if(n_neighbours < 2 && block->map[x][y] != DEAD_CELL) 
   {
     result = DEAD_CELL;
-  }
-  else if(n_neighbours == 3 && block->map[x][y] == DEAD_CELL)
+  } 
+  else if (n_neighbours == 3 && block->map[x][y] == DEAD_CELL) 
   {
     result = revive_cell(block, x, y);
-    //if(result != DEAD_CELL)
-    //{
-    //  block->bitmap[x * BITMAP_SIZE + y] = 1;
-    //}
-  }
-  else if (n_neighbours > 3 && block->map[x][y] != DEAD_CELL)
+  } 
+  else if (n_neighbours > 3 && block->map[x][y] != DEAD_CELL) 
   {
     result = DEAD_CELL;
   }
