@@ -2,16 +2,21 @@
 #define CRANK_HPP
 
 #include <block.hpp>
+#include <action.hpp>
 #include <constants.hpp>
 #include <bitset>
 
-void crank(Block *block);
-CELL_TYPE crank_cell(Block *block, int x, int y);
-CELL_TYPE revive_cell(Block *block, int x, int y);
-int count_cell_neighbours(Block *block, int x, int y);
-int valid_coordonate(int x, int y);
-int equals(Block *current, Block *other);
+class Crank: public Action
+{
+public:
+virtual ~Crank() = default;
+virtual void crank(Block *block);
+virtual CELL_TYPE crank_cell(Block *block, int x, int y);
+virtual CELL_TYPE revive_cell(Block *block, int x, int y);
+virtual int count_cell_neighbours(Block *block, int x, int y);
+virtual int valid_coordonate(int x, int y);
+virtual int equals(Block *current, Block *other);
 void init_bitmap(Block *block);
 int prune_area(Block *block, int x, int y);
-
+};
 #endif

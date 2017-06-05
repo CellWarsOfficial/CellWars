@@ -7,7 +7,8 @@
  * NB: The object taken as parameter by this function is destroyed
  * and the return object is a different one.
  **/
-void crank(Block *block)
+
+void Crank::crank(Block *block)
 {
   Block *scratch = new Block(*block);
   for(int i = 0; i < BLOCK_SIZE; i++)
@@ -20,12 +21,12 @@ void crank(Block *block)
   delete scratch;
 }
 
-int valid_coordonate(int x, int y)
+int Crank::valid_coordonate(int x, int y)
 {
   return (0 <= x && x < BLOCK_SIZE) && (0 <= y && y < BLOCK_SIZE);
 }
 
-int count_cell_neighbours(Block *block, int x, int y)
+int Crank::count_cell_neighbours(Block *block, int x, int y)
 {
   int n = 0;
   for(int i = -1; i < 2; i++)
@@ -42,7 +43,7 @@ int count_cell_neighbours(Block *block, int x, int y)
   return n;
 }
 
-CELL_TYPE revive_cell(Block *block, int x, int y)
+CELL_TYPE Crank::revive_cell(Block *block, int x, int y)
 {
   CELL_TYPE result = DEAD_CELL;
   CELL_TYPE types[3];
@@ -69,7 +70,7 @@ CELL_TYPE revive_cell(Block *block, int x, int y)
   return result;
 }
 
-CELL_TYPE crank_cell(Block *block, int x, int y)
+CELL_TYPE Crank::crank_cell(Block *block, int x, int y)
 {
   int n_neighbours = count_cell_neighbours(block, x, y);
   CELL_TYPE result = DEAD_CELL;
@@ -96,7 +97,7 @@ CELL_TYPE crank_cell(Block *block, int x, int y)
   return result;
 }
 
-int equals(Block *current, Block *other)
+int Crank::equals(Block *current, Block *other)
 {
   for (int i = 0; i < BLOCK_SIZE; i++)
   {
@@ -115,5 +116,3 @@ int equals(Block *current, Block *other)
 //{
 //  return !(*(block->bitmap)[x * BITMAP_SIZE + y]);
 //}
-
-
