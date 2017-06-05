@@ -145,8 +145,61 @@ void Game::crank_stage(int generations)
   {
     crank(i -> second);
   }
+  sync_padding();
   up_db();
   log -> record(ME, "Crank - finish");
+}
+
+void Game::sync_padding()
+{
+  std::map<uint64_t,Block*>::iterator i, find_res;
+  Block *b, *ans;
+  void *new_blocks = NULL;
+  int dx, dy, region;
+  for (i = super_node.begin(); i != super_node.end(); i++)
+  {
+    b = i -> second;
+    for(dx = -1, region = 0; dx <= 1; dx++)
+    {
+      for(dy = -1; dy <= 1; dy++)
+      {
+        if((dx == 0) && (dy == 0))
+        {
+          continue;
+        }
+/* This iteration only works because of the way regions are defined inside
+ * constants.hpp file. Otherwise, too many ifs.
+ */
+        if(b -> border_changes[region])
+        {
+          find_res = super_node.find(b -> get_xy_relative(dx, dy));
+          if(find_res != super_node.end())
+          {
+            ans = find_res -> second;
+            ans -> sync_with(b, region); // tell, don't ask
+          }
+          else
+          {
+/* Can't add the block straight away without breaking/trashing iterator.
+ */
+            ans = new Block(b -> get_x_relative(dx)
+                           ,b -> get_x_relative(dy)
+                           );
+            ans -> sync_with(b, region);
+            ans -> duck = new_blocks;
+            new_blocks = (void*) ans;
+          }
+        }
+        b -> border_changes[region] = 0; // reset region changes.
+        region++;
+      }
+    }
+  }
+  for(; new_blocks; new_blocks = b -> duck)
+  {
+    b = (Block*) new_blocks;
+    super_node[compress_xy(b -> originx, b -> originy)] = b;
+  }
 }
 
 void Game::up_db()

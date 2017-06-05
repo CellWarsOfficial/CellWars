@@ -9,6 +9,7 @@ class Block
   public:
   CELL_TYPE **map;
   int originx, originy;
+  uint8_t border_changes[8];
   //std::bitset<BITMAP_SIZE> *bitmap;
 /* Constructor, copy constructor and destructor
  */
@@ -19,8 +20,12 @@ class Block
  */
   int get_x_relative(int relativity);
   int get_y_relative(int relativity);
+  uint64_t get_xy_relative(int x_rel, int y_rel);
   int rectify_x(int raw);
   int rectify_y(int raw);
+  void set(int x, int y, CELL_TYPE cell);
+  void sync_with(Block *other, int region);
+  void *duck;
 };
 
 /* 3 functions used for compressing 2 ints into a uint64_t.

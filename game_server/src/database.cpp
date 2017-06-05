@@ -114,7 +114,8 @@ void *DB_conn::run_query(int expectation, string s)
 
 Block **DB_conn::load_from_db(uint64_t NW, uint64_t SE)
 {
-  int NWx = get_x(NW), NWy = get_y(NW), SEx = get_x(SE), SEy = get_y(SE);
+  int NWx = get_x(NW) - BLOCK_PADDING, NWy = get_y(NW) - BLOCK_PADDING;
+  int SEx = get_x(SE) + BLOCK_PADDING, SEy = get_y(SE) + BLOCK_PADDING;
   int minx, miny, maxx, maxy;
   if((NWx > SEx) || (NWy > SEy))
   {
