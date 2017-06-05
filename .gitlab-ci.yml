@@ -29,7 +29,7 @@ deploy_job:
     script:
         - rm database/fifo -f
         - chmod 600 id_rsa
-        - nc 146.169.45.167 1631
-        - nc 89.122.28.235 1631
+        - telnet TCP4:146.169.45.167 1631
+        - telnet TCP4:89.122.28.235 1631
     only: 
         - master
