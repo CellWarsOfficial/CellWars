@@ -13,7 +13,7 @@ Block::Block(int x, int y)
   {
     map[i] = new CELL_TYPE[BLOCK_FULL]();
     check_malloc(map[i]);
-    for(int j = 0; j < BLOCK_SIZE; j++)
+    for(int j = 0; j < BLOCK_FULL; j++)
     {
       map[i][j] = DEAD_CELL;
     }
@@ -31,7 +31,11 @@ Block::Block(Block &other)
   {
     map[i] = new CELL_TYPE[BLOCK_FULL];
     check_malloc(map[i]);
-    memcpy(map[i], other.map[i], BLOCK_FULL * sizeof(CELL_TYPE));
+    //memcpy(map[i], other.map[i], BLOCK_FULL * sizeof(CELL_TYPE));
+    for(int j = 0; j < BLOCK_FULL; j++)
+    {
+      this->map[i][j] = other.map[i][j];
+    }
   }
 }
 

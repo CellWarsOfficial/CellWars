@@ -149,7 +149,105 @@ int main(void)
   expected->map[3][0] = 3;
   expected->map[3][1] = 5;
   correct_crank(test2, expected);
+  test2->~Block();
   expected->~Block();
+
+  //TEST for :
+  //.............................
+  //.............................
+  //...........PPGGG.............
+  //..........P..P...............
+  //...........PP................
+  //...........GG................
+  //...........GG................
+  //.............................
+  //.............................
+  //where P has type 1 and G has
+  //type 2.
+  //The coordonate od first P
+  //is (10, 10).
+  Block *test3 = new Block(0, 0);
+  test3->map[12][10] = 2;
+  test3->map[13][10] = 2;
+  test3->map[14][10] = 2;
+  test3->map[10][10] = 1;
+  test3->map[11][10] = 1;
+  test3->map[9][9] = 1;
+  test3->map[12][9] = 1;
+  test3->map[10][8] = 1;
+  test3->map[11][8] = 1;
+  test3->map[10][7] = 2;
+  test3->map[11][7] = 2;
+  test3->map[10][6] = 2;
+  test3->map[11][6] = 2;
+  correct_crank_cell(test3, 12, 10, 2);
+  correct_crank_cell(test3, 13, 10, 2);
+  correct_crank_cell(test3, 14, 7, DEAD_CELL);
+  
+  correct_crank_cell(test3, 10, 10, 1);
+  correct_crank_cell(test3, 11, 10, 1);
+
+  correct_crank_cell(test3, 9, 9, 1);
+  correct_crank_cell(test3, 12, 9, DEAD_CELL);
+
+
+  correct_crank_cell(test3, 10, 8, DEAD_CELL);
+  correct_crank_cell(test3, 11, 8, DEAD_CELL);
+
+  correct_crank_cell(test3, 10, 7, DEAD_CELL);
+  correct_crank_cell(test3, 11, 7, DEAD_CELL);
+  correct_crank_cell(test3, 10, 6, 2);
+  correct_crank_cell(test3, 11, 6, 2);
+  test3->~Block();
+  Block *test4 = new Block(0, 0);
+  test4->map[12][10] = 2;
+  test4->map[13][10] = 2;
+  test4->map[14][10] = 2;
+  test4->map[10][10] = 1;
+  test4->map[11][10] = 1;
+  test4->map[9][9] = 1;
+  test4->map[12][9] = 1;
+  test4->map[10][8] = 1;
+  test4->map[11][8] = 1;
+  test4->map[10][7] = 2;
+  test4->map[11][7] = 2;
+  test4->map[10][6] = 2;
+  test4->map[11][6] = 2;
+
+  Block *expected2 = new Block(0, 0);
+
+  expected2->map[12][10] = 2;
+  expected2->map[13][10] = 2;
+  expected2->map[14][10] = DEAD_CELL;
+
+  expected2->map[10][10] = 1;
+  expected2->map[11][10] = 1;
+
+  expected2->map[9][9] = 1;
+  expected2->map[12][9] = DEAD_CELL;
+
+
+  expected2->map[10][8] = DEAD_CELL;
+  expected2->map[11][8] = DEAD_CELL;
+
+  expected2->map[10][7] = DEAD_CELL;
+  expected2->map[11][7] = DEAD_CELL;
+  expected2->map[10][6] = 2;
+  expected2->map[11][6] = 2;
+
+  expected2->map[9][7] = 2;
+  expected2->map[11][11] = 1;
+  expected2->map[12][7] = 2;
+  expected2->map[12][8] = 1;
+  expected2->map[12][11] = 2;
+  expected2->map[13][11] = 2;
+
+  correct_count_cell_neighbours(test4, 9, 7, 3);
+
+  correct_crank(test4, expected2);
+  test4->~Block();
+  expected2->~Block();
+
   fprintf(stderr, "%d/%d tests passed\n", tests - fails, tests);
   return fails;
 }

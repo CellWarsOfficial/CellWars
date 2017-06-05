@@ -10,9 +10,9 @@
 void crank(Block *block)
 {
   Block *scratch = new Block(*block);
-  for(int i = 0; i < BLOCK_SIZE; i++)
+  for(int i = 0; i < BLOCK_FULL; i++)
   {
-    for(int j = 0; j < BLOCK_SIZE; j++)
+    for(int j = 0; j < BLOCK_FULL; j++)
     {
       block->map[i][j] = crank_cell(scratch, i, j);
     }
@@ -22,7 +22,7 @@ void crank(Block *block)
 
 int valid_coordonate(int x, int y)
 {
-  return (0 <= x && x < BLOCK_SIZE) && (0 <= y && y < BLOCK_SIZE);
+  return (0 <= x && x < BLOCK_FULL) && (0 <= y && y < BLOCK_FULL);
 }
 
 int count_cell_neighbours(Block *block, int x, int y)
@@ -72,10 +72,10 @@ CELL_TYPE revive_cell(Block *block, int x, int y)
 CELL_TYPE crank_cell(Block *block, int x, int y)
 {
   int n_neighbours = count_cell_neighbours(block, x, y);
-  CELL_TYPE result = DEAD_CELL;
+  CELL_TYPE result = block->map[x][y];
   if(n_neighbours < 2 && block->map[x][y] != DEAD_CELL)
   {
-    result =  DEAD_CELL;
+    result = DEAD_CELL;
   }
   else if(n_neighbours == 3 && block->map[x][y] == DEAD_CELL)
   {
@@ -89,18 +89,14 @@ CELL_TYPE crank_cell(Block *block, int x, int y)
   {
     result = DEAD_CELL;
   }
-  else
-  {
-    result = block->map[x][y]; 
-  }
   return result;
 }
 
 int equals(Block *current, Block *other)
 {
-  for (int i = 0; i < BLOCK_SIZE; i++)
+  for (int i = 0; i < BLOCK_FULL; i++)
   {
-    for (int j = 0; j < BLOCK_SIZE; j++)
+    for (int j = 0; j < BLOCK_FULL; j++)
     {
       if(current->map[i][j] != other->map[i][j])
       {
