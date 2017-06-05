@@ -9,7 +9,7 @@ HEADER = $(wildcard $(SRCDIR)/*.hpp)
 IP     = 146.169.45.167
 RUNFLG = -db $(IP) -w 10 -log log.l -q
 IGNORE = >/dev/null 2>&1
-KILLNAME = pkill
+KILLCOM = /bin/kill -SIGKILL
 OS := $(shell uname)
 ifeq ($(OS), Darwin)
 	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11
@@ -73,7 +73,7 @@ install: all uninstall
 
 .phony: uninstall
 uninstall:
-	-$(KILLNAME) -SIGKILL gameserver #faster closing time, but risky
+	-ps -A | grep gameserver | awk '{print "$(KILLCOM) " $$1}' | sh
 
 .phony: clean
 clean:

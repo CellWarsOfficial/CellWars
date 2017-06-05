@@ -1,7 +1,7 @@
 ADAPTER1 = adapter.sh
 ADAPTER2 = sv_adapter.sh
 IGNORE   = >/dev/null 2>&1
-KILLNAME = pkill -x
+KILLCOM  = /bin/kill -SIGKILL
 RM       = rm -rf
 
 .phony: all
@@ -26,8 +26,8 @@ uninstall: remove_main
 
 .phony: remove_main
 remove_main:
-	-$(KILLNAME) $(ADAPTER1)
-	-$(KILLNAME) $(ADAPTER2)
+	-ps -A | grep $(ADAPTER1) | awk '{print "$(KILLCOM) " $$1}' | sh
+	-ps -A | grep $(ADAPTER2) | awk '{print "$(KILLCOM) " $$1}' | sh
 
 .phony: clean
 clean: uninstall
