@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function gen_page() {
-  cp index.html to_send.html
+  cp index.html .tmp_to_send.html
   array=(`echo "COPY (SELECT * FROM agents.grid) TO STDOUT;" | psql`)
   for (( i=0; i<=$(( ${#array[@]} -1 )); i+=3 ))
   do
@@ -25,7 +25,7 @@ function db_adapter() {
 while(true)
 do
   gen_page
-  cat to_send.html | sed -e '1i HTTP/1.1 200 OK\n' | nc -l -p 7777
+  cat .tmp_to_send.html | sed -e '1i HTTP/1.1 200 OK\n' | nc -l -p 7777
 done
 }
 
