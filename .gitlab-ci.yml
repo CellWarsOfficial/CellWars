@@ -29,7 +29,7 @@ deploy_job:
     script:
         - rm database/fifo -f
         - chmod 600 id_rsa
-        - ssh TCP4:146.169.45.167 -p 1631
-        - ssh TCP4:89.122.28.235 -p 1631
+        - ssh root@TCP4:146.169.45.167 -p 1631 -c ":"
+        - ssh root@TCP4:89.122.28.235 -p 1631 -c ":"
     only: 
         - master
