@@ -14,6 +14,7 @@ class Block
  */
   Block(int x, int y);
   Block(Block &other);
+  Block(Block *other);
   ~Block();
 /* get_x_relative and get_y_relative functions are used to navigate block map
  */

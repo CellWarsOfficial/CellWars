@@ -9,7 +9,7 @@
  **/
 void crank(Block *block)
 {
-  Block *scratch = new Block(*block);
+  Block *scratch = new Block(block);
   for(int i = 0; i < BLOCK_FULL; i++)
   {
     for(int j = 0; j < BLOCK_FULL; j++)
@@ -55,7 +55,7 @@ CELL_TYPE revive_cell(Block *block, int x, int y)
               valid_coordonate(x + i, y + j) && !(i == 0 && j == 0) && 
               block->map[x + i][y + j] != DEAD_CELL)
       {
-        for (int m = 0; m < 3; m++)
+        for (int m = 0; m < h; m++)
         {
           if(block->map[x + i][y + j] == types[m])
           {
@@ -63,6 +63,7 @@ CELL_TYPE revive_cell(Block *block, int x, int y)
           }
         }
         types[h] = block->map[x + i][y + j];
+        h++;
       }
     }
   }

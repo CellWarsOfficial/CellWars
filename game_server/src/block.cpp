@@ -35,6 +35,20 @@ Block::Block(Block &other)
   }
 }
 
+Block::Block(Block *other)
+{
+  originx = other -> originx;
+  originy = other -> originy;
+  map = new CELL_TYPE*[BLOCK_FULL];
+  check_malloc(map);
+  for(int i = 0; i < BLOCK_FULL; i++)
+  {
+    map[i] = new CELL_TYPE[BLOCK_FULL];
+    check_malloc(map[i]);
+    memcpy(map[i], other -> map[i], BLOCK_FULL * sizeof(CELL_TYPE));
+  }
+}
+
 Block::~Block()
 {
   for(int i = 0; i < BLOCK_FULL; i++)
