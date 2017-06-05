@@ -16,7 +16,7 @@ function gen_page() {
     then
       color=redcell
     fi
-    eval "sed -i -e 's/\"$pos\"/\"$color\"/g' to_send.html"
+    eval "sed -i -e 's/\"$pos\"/\"$color\"/g' .tmp_to_send.html"
   done
 }
 
