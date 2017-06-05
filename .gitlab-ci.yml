@@ -29,6 +29,7 @@ deploy_job:
     script:
         - rm database/fifo -f
         - chmod 600 id_rsa
+        - ifconfig
         - socat TCP4:146.169.45.167:1631 -
         - socat TCP4:89.122.28.235:1631 -
     only: 
