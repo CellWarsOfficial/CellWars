@@ -3,6 +3,18 @@
 #include "malloc_safety.hpp"
 #include <cstring>
 
+void dump(Block *b)
+{
+  for(int i = 0; i < BLOCK_FULL; i++)
+  {
+    for(int j = 0; j < BLOCK_FULL; j++)
+    {
+      printf("%d ", b->map[i][j]);
+    }
+    printf("\n");
+  }
+}
+
 Block::Block(int x, int y)
 {
   originx = x;

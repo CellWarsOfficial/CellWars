@@ -33,4 +33,6 @@ int get_x(uint64_t origin);
 
 int get_y(uint64_t origin);
 
+void dump(Block *b);
+
 #endif

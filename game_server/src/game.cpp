@@ -143,7 +143,9 @@ void Game::crank_stage(int generations)
   std::map<uint64_t,Block*>::iterator i;
   for (i = super_node.begin(); i != super_node.end(); i++)
   {
+    dump(i->second);
     crank(i -> second);
+    dump(i->second);
   }
   up_db();
   log -> record(ME, "Crank - finish");
