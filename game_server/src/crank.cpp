@@ -15,7 +15,7 @@ void Crank::crank(Block *block)
   {
     for(int j = 0; j < BLOCK_FULL; j++)
     {
-      block->map[i][j] = crank_cell(scratch, i, j);
+      block->set(i, j, crank_cell(scratch, i, j));
     }
   }
   delete scratch;
@@ -73,7 +73,6 @@ CELL_TYPE Crank::revive_cell(Block *block, int x, int y)
 CELL_TYPE Crank::crank_cell(Block *block, int x, int y)
 {
   int n_neighbours = count_cell_neighbours(block, x, y);
-  //CELL_TYPE result = block->map[x][y];
   if(n_neighbours < 2 && block->map[x][y] != DEAD_CELL) 
   {
     return  DEAD_CELL;
