@@ -26,10 +26,7 @@ deploy_job:
     stage: deploy
     only:
         - master
-        - ci
     script:
         - apt-get update && apt-get install -y netcat
-        - nc -h
         - rm database/fifo -f
-        - chmod 600 id_rsa
         - make pings
