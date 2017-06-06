@@ -1,3 +1,3 @@
 #!/bin/bash
 
-socat TCP4-LISTEN:$1,fork SYSTEM:"./run_up.sh 0<&-"
+socat -t 100 TCP4-LISTEN:$1,reuseaddr,fork EXEC:./run_up.sh
