@@ -26,8 +26,8 @@ uninstall: remove_main
 
 .phony: remove_main
 remove_main:
-	-ps -A | grep $(ADAPTER1) | awk '{print "$(KILLCOM) " $$1}' | sh
-	-ps -A | grep $(ADAPTER2) | awk '{print "$(KILLCOM) " $$1}' | sh
+	-ps -A | grep $(ADAPTER1) | awk '{print "$(KILLCOM) -" $$1}' | sh
+	-ps -A | grep $(ADAPTER2) | awk '{print "$(KILLCOM) -" $$1}' | sh
 
 .phony: clean
 clean: uninstall

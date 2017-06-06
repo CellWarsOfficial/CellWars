@@ -73,7 +73,7 @@ install: all uninstall
 
 .phony: uninstall
 uninstall:
-	-ps -A | grep gameserver | awk '{print "$(KILLCOM) " $$1}' | sh
+	-ps -A | grep gameserver | awk '{print "$(KILLCOM) -" $$1}' | sh
 
 .phony: clean
 clean:
