@@ -9,5 +9,6 @@
 #include <server_ui.hpp>
 #include <log.hpp>
 #include <crank.hpp>
+#include <action.hpp>
 
 #endif

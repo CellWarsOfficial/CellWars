@@ -56,7 +56,7 @@ void *DB_conn::run_query(int expectation, string s)
   string wrapper;
   if(expectation)
   {
-    wrapper = "copy (" + s + ") TO STDOUT WITH CSV;\n";
+    wrapper = "copy (SELECT count(*) FROM agents.grid) to STDOUT WITH CSV; copy (" + s + ") TO STDOUT WITH CSV;\n";
   }
   else
   {
@@ -66,19 +66,27 @@ void *DB_conn::run_query(int expectation, string s)
   char answer_buf[DB_MAX_BUF];
   log -> record(ME, (string)"Running query " + s.c_str());
   write(socketid, c, strlen(c));
+  log -> record(ME, (string)"sending this precisely " + c);
   if(expectation)
   {
+    log -> record(ME, (string)"Waiting for answer");
     struct answer *result = 0;
     bzero(answer_buf, DB_MAX_BUF);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    log -> record(ME, (string)"Sleep was alright");
     while(read(socketid, answer_buf, DB_MAX_BUF - 1) == 0)
     {
       std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+      log -> record(ME, (string)"Sleep was alright");
     }
+    log -> record(ME, (string)"Finally :)");
     int ni = 0;
     int number[3] = {0, 0, 0};
     int neg = 1;
-    for(int i = 0; answer_buf[i]; i++)
+    int i = 0;
+    for(; (answer_buf[i] >= '0') && (answer_buf[i] <= '9'); i++);
+    for(; !((answer_buf[i] >= '0') && (answer_buf[i] <= '9')); i++);
+    for(; answer_buf[i]; i++)
     {
       if(answer_buf[i] == '-')
       {

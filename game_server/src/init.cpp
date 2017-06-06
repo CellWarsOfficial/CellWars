@@ -128,6 +128,7 @@ int main(int argc, char **argv)
    */
   game_thread -> join();
   delete log;
+  delete game->action;
   delete game;
   return 0;
 }

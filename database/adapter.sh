@@ -2,7 +2,7 @@
 
 function gen_page() {
   cp index.html .tmp_to_send.html
-  array=(`echo "COPY (SELECT * FROM agents.grid) TO STDOUT;" | psql`)
+  array=(`echo "COPY (SELECT * FROM agents.grid WHERE x>=0 AND x<60 AND y>=0 AND y<60) TO STDOUT;" | psql`)
   for (( i=0; i<=$(( ${#array[@]} -1 )); i+=3 ))
   do
     pos=#$(( ${array[$i]} * 60 + ${array[$((i + 1))]} ))

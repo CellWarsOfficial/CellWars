@@ -3,6 +3,18 @@
 #include "malloc_safety.hpp"
 #include <cstring>
 
+void dump(Block *b)
+{
+  for(int i = 0; i < BLOCK_FULL; i++)
+  {
+    for(int j = 0; j < BLOCK_FULL; j++)
+    {
+      printf("%d ", b->map[i][j]);
+    }
+    printf("\n");
+  }
+}
+
 Block::Block(int x, int y)
 {
   originx = x;
@@ -13,7 +25,7 @@ Block::Block(int x, int y)
   {
     map[i] = new CELL_TYPE[BLOCK_FULL]();
     check_malloc(map[i]);
-    for(int j = 0; j < BLOCK_SIZE; j++)
+    for(int j = 0; j < BLOCK_FULL; j++)
     {
       map[i][j] = DEAD_CELL;
     }
@@ -32,6 +44,20 @@ Block::Block(Block &other)
     map[i] = new CELL_TYPE[BLOCK_FULL];
     check_malloc(map[i]);
     memcpy(map[i], other.map[i], BLOCK_FULL * sizeof(CELL_TYPE));
+  }
+}
+
+Block::Block(Block *other)
+{
+  originx = other -> originx;
+  originy = other -> originy;
+  map = new CELL_TYPE*[BLOCK_FULL];
+  check_malloc(map);
+  for(int i = 0; i < BLOCK_FULL; i++)
+  {
+    map[i] = new CELL_TYPE[BLOCK_FULL];
+    check_malloc(map[i]);
+    memcpy(map[i], other -> map[i], BLOCK_FULL * sizeof(CELL_TYPE));
   }
 }
 

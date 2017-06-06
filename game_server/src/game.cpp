@@ -12,6 +12,7 @@
 Game::Game(DB_conn* db, Logger *log)
 {
   this -> log = log;
+  this->action = new Crank(); 
   db_info = db;
   execution_lock.lock();
   flags = 0; // Important because it unsets running flag
@@ -143,7 +144,7 @@ void Game::crank_stage(int generations)
   std::map<uint64_t,Block*>::iterator i;
   for (i = super_node.begin(); i != super_node.end(); i++)
   {
-    crank(i -> second);
+    action->crank(i -> second);
   }
   sync_padding();
   up_db();

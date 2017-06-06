@@ -4,6 +4,8 @@
 #include <block.hpp>
 #include <log.hpp>
 #include <database.hpp>
+#include <action.hpp>
+#include <crank.hpp>
 #include <map>
 #include <mutex>
 #include <cstdlib>
@@ -25,6 +27,7 @@ class Game
   void resume_running();
   void stop_running();
   void slow_termination();
+  Action *action;
   private:
   Logger *log;
   std::mutex execution_lock;

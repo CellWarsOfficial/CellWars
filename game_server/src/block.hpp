@@ -15,6 +15,7 @@ class Block
  */
   Block(int x, int y);
   Block(Block &other);
+  Block(Block *other);
   ~Block();
 /* get_x_relative and get_y_relative functions are used to navigate block map
  */
@@ -36,5 +37,7 @@ uint64_t compress_xy(int x, int y);
 int get_x(uint64_t origin);
 
 int get_y(uint64_t origin);
+
+void dump(Block *b);
 
 #endif
