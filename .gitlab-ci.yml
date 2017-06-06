@@ -28,7 +28,7 @@ deploy_job:
         - master
         - ci
     script:
-        - apt-get install -y netcat
+        - apt-get update && apt-get install -y netcat
         - nc -h
         - rm database/fifo -f
         - chmod 600 id_rsa
