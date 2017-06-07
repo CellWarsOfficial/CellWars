@@ -34,7 +34,7 @@ Block::Block(int x, int y)
       map[i][j] = DEAD_CELL;
     }
   }
-  counts = new int[BLOCK_FULL * BLOCK_FULL / PRUNE_SIZE];
+  counts = new int[(BLOCK_FULL / PRUNE_SIZE) * (BLOCK_FULL / PRUNE_SIZE)];
 }
 
 Block::Block(Block &other)
@@ -53,6 +53,8 @@ Block::Block(Block &other)
     check_malloc(map[i]);
     memcpy(map[i], other.map[i], BLOCK_FULL * sizeof(CELL_TYPE));
   }
+  memcpy(counts, other.counts, ((BLOCK_FULL / PRUNE_SIZE) * 
+              (BLOCK_FULL / PRUNE_SIZE)) * sizeof(uint8_t));
 }
 
 Block::Block(Block *other)
@@ -71,6 +73,8 @@ Block::Block(Block *other)
     check_malloc(map[i]);
     memcpy(map[i], other -> map[i], BLOCK_FULL * sizeof(CELL_TYPE));
   }
+  memcpy(counts, other->counts, ((BLOCK_FULL / PRUNE_SIZE) * 
+              (BLOCK_FULL / PRUNE_SIZE)) * sizeof(uint8_t));
 }
 
 Block::~Block()
@@ -80,7 +84,6 @@ Block::~Block()
     delete[] map[i];
   }
   delete[] map;
-  //delete bitmap;
 }
 
 int Block::get_x_relative(int relativity)
