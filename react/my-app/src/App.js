@@ -3,15 +3,32 @@ import logo from './logo.svg';
 import './App.css';
 
 const width = 20;
-const height = 20;
-const players = 10; //determines colour generation
+const height = 20; //dimensions of the board
+
+const players = 10; //determines how colours are split between userID's
 
 const x1Home = width/2 - 2;
 const x2Home = width/2 + 2;
 const y1Home = height/2 - 2;
-const y2Home = height/2 + 2;
+const y2Home = height/2 + 2; //location of the editable home region
+
+
+
 
 class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      isColourBlind: false
+    }
+  }
+
+  toggleColourBlind() {
+    this.setState({
+      isColourBlind: !this.state.isColourBlind
+    });
+  }
+
   render() {
     return (
       <div className="App">
@@ -20,33 +37,52 @@ class App extends Component {
           <h2>Cell Wars</h2>
         </div>
         <div className="App-grid">
-          <Grid/>
+          <Grid isColourBlind = {this.state.isColourBlind}/>
+        </div>
+        <div className="Colour-blind-toggler">
+          <ColourBlindToggler onClick={() => this.toggleColourBlind()}/>
         </div>
       </div>
     );
   }
 }
 
+
+
+
+class ColourBlindToggler extends Component {
+  render() {
+    return (
+      <button className="colour-blind-button" onClick={this.props.onClick}>
+      Colour Blind
+      </button>
+    );
+  }
+}
+
+
+
+
 function rainbow(n) {
-    if (n === 0) { return '#FFFFFF'}
-    n = n * 240 / players;
+    if (n === 0) { return '#FFFFFF'} //userID 0 is always mapped to white
+    n = n * 240 / players; //splits assigned colours based on the number of players
     return 'hsl(' + n + ',100%,50%)';
 }
 
-function ColourBlindSquare(props) {
+function Square(props) {
+  var label = "";
+  if (props.isColourBlind) {
+    label = props.userID; //Write the userIDs on squares when colourblind mode is on
+  }
   return (
     <button className="square" onClick={props.onClick} style={{backgroundColor:rainbow(props.userID)}}>
-      {props.userID}
+    {label}
     </button>
   );
 }
 
-function Square(props) {
-  return (
-    <button className="square" onClick={props.onClick} style={{backgroundColor:rainbow(props.userID)}}>
-    </button>
-  );
-}
+
+
 
 class Row extends Component {
   renderSquare(userIDturtle, r, c) {
@@ -54,6 +90,7 @@ class Row extends Component {
       <Square
       userID={userIDturtle}
       onClick={() => this.props.onClick(r, c)}
+      isColourBlind={this.props.isColourBlind}
       />
     );
   }
@@ -68,6 +105,9 @@ class Row extends Component {
     );
   }
 }
+
+
+
 
 function fittedExample() {
   var ret = [];
@@ -98,7 +138,6 @@ class Grid extends Component {
 
   handleClick(clickedRow, clickedCol) { // Would prefer to only copy and set the one peice that i have to rather than the whole thing but i dont know how
     var temp = this.state.board;
-
     if (clickedRow < y1Home || clickedRow >= y2Home ||
         clickedCol < x1Home || clickedCol >= x2Home) {
       window.alert("You may only toggle cells in your home area.");
@@ -122,6 +161,7 @@ class Grid extends Component {
           squares={this.state.board[r]}
           theRow={r}
           onClick={(r, c) => this.handleClick(r, c)}
+          isColourBlind={this.props.isColourBlind}
         />
       </div>
     );
@@ -135,6 +175,7 @@ class Grid extends Component {
     return <div>{rows}</div>;
   }
 }
+
 
 
 
