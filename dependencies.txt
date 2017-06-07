@@ -1,0 +1,7 @@
+nc - install using aptitude
+socat - install using aptitude
+asio - download from web. 
+     - configure steps:
+	2. run ./configure script with flag: --without-boost
+	3. make
+	4. make check
