@@ -17,6 +17,7 @@ class DB_conn
   DB_conn(const char *a, Logger *l);
   Block **load_from_db(uint64_t NW, uint64_t SE);
   void update_db(Block* block);
+  void rewrite_db(const char *f);
   int safe;
   private:
   void* run_query(int expectation, string s);

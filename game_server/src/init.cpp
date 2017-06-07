@@ -44,6 +44,7 @@ int main(int argc, char **argv)
 /* Initialising default information
  */
   DB_conn *db_info = NULL;
+  thread *game_thread = NULL;
   FLAG_TYPE flags = 0;
   int gtc = DEFAULT_GTC;
   int wait_time = DEFAULT_WAIT_TIME;
@@ -53,6 +54,22 @@ int main(int argc, char **argv)
   int i;
   for(i = 1; i < argc; i++)
   {
+    if(equ(argv[i], "-exit"))
+    {
+      goto cleanup;
+    }
+    if(equ(argv[i], "-load"))
+    {
+      if(db_info == 0)
+      {
+        fprintf(stderr, "Database missing when loading.\n");
+        exit(EXIT_FAILURE);
+      }
+      i++;
+      check_limit(i, argc);
+      db_info -> rewrite_db(argv[i]);
+      continue;
+    }
     if(equ(argv[i], "-no_safe"))
     {
       use_safety = 0;
@@ -106,7 +123,7 @@ int main(int argc, char **argv)
       log -> quiet();
       continue;
     }
-    if(equ(argv[i], "-log"))
+    if(equ(argv[i], "-log", "-l"))
     {
       i++;
       check_limit(i, argc);
@@ -122,14 +139,24 @@ int main(int argc, char **argv)
   }
   game = new Game(db_info, log);
   init_server_ui(log);
-  thread *game_thread = new thread(&Game::start, game, flags, gtc, wait_time);
+  game_thread = new thread(&Game::start, game, flags, gtc, wait_time);
 
   /* main terminating kills process.
    */
   game_thread -> join();
-  delete log;
-  delete game->action;
-  delete game;
+cleanup:
+  if(game)
+  {
+    delete game;
+  }
+  if(db_info)
+  {
+    delete db_info;
+  }
+  if(log)
+  {
+    delete log;
+  }
   return 0;
 }
 

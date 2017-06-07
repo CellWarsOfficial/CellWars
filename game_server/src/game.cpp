@@ -11,8 +11,7 @@
 
 Game::Game(DB_conn* db, Logger *log)
 {
-  this -> log = log;
-  this->action = new Crank(); 
+  this -> log = log; 
   db_info = db;
   execution_lock.lock();
   flags = 0; // Important because it unsets running flag
@@ -88,6 +87,7 @@ void *Game::start(FLAG_TYPE f, int gtc, int w)
   flags = (f & NO_LAST_MASK) | JUST_28_MASK; // unset running and set started.
   gen_to_run = gtc;
   plan_time = w;
+  action = new Crank();
   Block **blocks = db_info -> load_from_db(
     compress_xy(MINX, MINY), 
     compress_xy(MAXX, MAXY)
@@ -227,6 +227,7 @@ void Game::clean_up()
     delete i -> second;
   }
   super_node.clear();
+  delete action;
 /* Reset everything, allowing the game to be recycled.
  */
   execution_lock.lock();

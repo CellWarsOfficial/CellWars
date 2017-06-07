@@ -1,6 +1,7 @@
 #include <database.hpp>
 #include <block.hpp>
 #include <constants.hpp>
+#include <malloc_safety.hpp>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -201,4 +202,32 @@ void DB_conn::update_db(Block *block)
       }
     }
   }
+}
+
+void DB_conn::rewrite_db(const char *f)
+{
+  FILE *file = fopen(f, "r");
+  check_malloc(file);
+  if(file == 0)
+  {
+    return;
+  }
+  log -> record(ME, (string)"Loading database with values defined in " + f);
+  run_query(NO_READ, "DELETE FROM agents.grid");
+  int n, x, y, i, k;
+  CELL_TYPE c;
+  fscanf(file, "%d", &n);
+  log -> record(ME, (string)"Loading #values = " + to_string(n));
+  for(i = 1; i <= n; i++)
+  {
+    fscanf(file, "%d %d %d", &x, &y, &k);
+    log -> record(ME, (string)"Loading " + to_string(x) + ' ' + to_string(y) + ' ' + to_string(k));
+    c = CELL_TYPE(k);
+    run_query(NO_READ, "INSERT INTO agents.grid(user_id, x, y) VALUES ("
+      + to_string(c) + ", "
+      + to_string(x) + ", "
+      + to_string(y) + ")"
+      );
+  }
+  fclose(file);
 }
