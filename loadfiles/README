@@ -1,0 +1,5 @@
+0 - don't load me, baka.
+
+The first number within a load file should contain the number of cells to be loaded.
+
+The next n lines should contain triplets of (x, y, type).

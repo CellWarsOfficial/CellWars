@@ -15,7 +15,7 @@ void Crank::crank(Block *block)
   {
     for(int j = 0; j < BLOCK_FULL; j++)
     {
-      block->map[i][j] = crank_cell(scratch, i, j);
+      block->set(i, j, crank_cell(scratch, i, j));
     }
   }
   delete scratch;

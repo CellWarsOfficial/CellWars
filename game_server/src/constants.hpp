@@ -15,6 +15,19 @@
 #define BITMAP_SIZE ((BLOCK_SIZE / 10) * (BLOCK_SIZE / 10))
 #define BLOCK_FULL (BLOCK_SIZE + 2 * BLOCK_PADDING)
 
+/* Block padding regions(used to optimise sync)
+ */
+
+#define BLOCK_NEIGHBOURING_REGIONS 8
+#define P_REGION_NW 0
+#define P_REGION_N 1
+#define P_REGION_NE 2
+#define P_REGION_W 3
+#define P_REGION_E 4
+#define P_REGION_SW 5
+#define P_REGION_S 6
+#define P_REGION_SE 7
+
 /* Flag related constants
  */
 #define FLAG_TYPE uint32_t
@@ -34,10 +47,10 @@
 
 /* Game limit related constants
  */
-#define MINX -1000
-#define MINY -1000
-#define MAXX 999
-#define MAXY 999
+#define MINX -500
+#define MINY -500
+#define MAXX 499
+#define MAXY 499
 #define DEFAULT_GTC 1
 #define DEFAULT_WAIT_TIME 30
 #define LOG_MAX_BUFFER_DEFAULT 500

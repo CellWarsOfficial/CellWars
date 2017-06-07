@@ -1,6 +1,7 @@
 #include <database.hpp>
 #include <block.hpp>
 #include <constants.hpp>
+#include <malloc_safety.hpp>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -64,22 +65,17 @@ void *DB_conn::run_query(int expectation, string s)
   }
   const char *c = wrapper.c_str();
   char answer_buf[DB_MAX_BUF];
-  log -> record(ME, (string)"Running query " + s.c_str());
+  log -> record(ME, (string)"Running query " + wrapper);
   write(socketid, c, strlen(c));
-  log -> record(ME, (string)"sending this precisely " + c);
   if(expectation)
   {
-    log -> record(ME, (string)"Waiting for answer");
     struct answer *result = 0;
     bzero(answer_buf, DB_MAX_BUF);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    log -> record(ME, (string)"Sleep was alright");
     while(read(socketid, answer_buf, DB_MAX_BUF - 1) == 0)
     {
       std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-      log -> record(ME, (string)"Sleep was alright");
     }
-    log -> record(ME, (string)"Finally :)");
     int ni = 0;
     int number[3] = {0, 0, 0};
     int neg = 1;
@@ -122,7 +118,8 @@ void *DB_conn::run_query(int expectation, string s)
 
 Block **DB_conn::load_from_db(uint64_t NW, uint64_t SE)
 {
-  int NWx = get_x(NW), NWy = get_y(NW), SEx = get_x(SE), SEy = get_y(SE);
+  int NWx = get_x(NW) - BLOCK_PADDING, NWy = get_y(NW) - BLOCK_PADDING;
+  int SEx = get_x(SE) + BLOCK_PADDING, SEy = get_y(SE) + BLOCK_PADDING;
   int minx, miny, maxx, maxy;
   if((NWx > SEx) || (NWy > SEy))
   {
@@ -200,4 +197,32 @@ void DB_conn::update_db(Block *block)
       }
     }
   }
+}
+
+void DB_conn::rewrite_db(const char *f)
+{
+  FILE *file = fopen(f, "r");
+  check_malloc(file);
+  if(file == 0)
+  {
+    return;
+  }
+  log -> record(ME, (string)"Loading database with values defined in " + f);
+  run_query(NO_READ, "DELETE FROM agents.grid");
+  int n, x, y, i, k;
+  CELL_TYPE c;
+  fscanf(file, "%d", &n);
+  log -> record(ME, (string)"Loading #values = " + to_string(n));
+  for(i = 1; i <= n; i++)
+  {
+    fscanf(file, "%d %d %d", &x, &y, &k);
+    log -> record(ME, (string)"Loading " + to_string(x) + ' ' + to_string(y) + ' ' + to_string(k));
+    c = CELL_TYPE(k);
+    run_query(NO_READ, "INSERT INTO agents.grid(user_id, x, y) VALUES ("
+      + to_string(c) + ", "
+      + to_string(x) + ", "
+      + to_string(y) + ")"
+      );
+  }
+  fclose(file);
 }

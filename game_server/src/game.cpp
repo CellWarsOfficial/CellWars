@@ -11,8 +11,7 @@
 
 Game::Game(DB_conn* db, Logger *log)
 {
-  this -> log = log;
-  this->action = new Crank(); 
+  this -> log = log; 
   db_info = db;
   execution_lock.lock();
   flags = 0; // Important because it unsets running flag
@@ -88,6 +87,7 @@ void *Game::start(FLAG_TYPE f, int gtc, int w)
   flags = (f & NO_LAST_MASK) | JUST_28_MASK; // unset running and set started.
   gen_to_run = gtc;
   plan_time = w;
+  action = new Crank();
   Block **blocks = db_info -> load_from_db(
     compress_xy(MINX, MINY), 
     compress_xy(MAXX, MAXY)
@@ -146,8 +146,61 @@ void Game::crank_stage(int generations)
   {
     action->crank(i -> second);
   }
+  sync_padding();
   up_db();
   log -> record(ME, "Crank - finish");
+}
+
+void Game::sync_padding()
+{
+  std::map<uint64_t,Block*>::iterator i, find_res;
+  Block *b, *ans;
+  void *new_blocks = NULL;
+  int dx, dy, region;
+  for (i = super_node.begin(); i != super_node.end(); i++)
+  {
+    b = i -> second;
+    for(dx = -1, region = 0; dx <= 1; dx++)
+    {
+      for(dy = -1; dy <= 1; dy++)
+      {
+        if((dx == 0) && (dy == 0))
+        {
+          continue;
+        }
+/* This iteration only works because of the way regions are defined inside
+ * constants.hpp file. Otherwise, too many ifs.
+ */
+        if(b -> border_changes[region])
+        {
+          find_res = super_node.find(b -> get_xy_relative(dx, dy));
+          if(find_res != super_node.end())
+          {
+            ans = find_res -> second;
+            ans -> sync_with(b, region); // tell, don't ask
+          }
+          else
+          {
+/* Can't add the block straight away without breaking/trashing iterator.
+ */
+            ans = new Block(b -> get_x_relative(dx)
+                           ,b -> get_x_relative(dy)
+                           );
+            ans -> sync_with(b, region);
+            ans -> duck = new_blocks;
+            new_blocks = (void*) ans;
+          }
+        }
+        b -> border_changes[region] = 0; // reset region changes.
+        region++;
+      }
+    }
+  }
+  for(; new_blocks; new_blocks = b -> duck)
+  {
+    b = (Block*) new_blocks;
+    super_node[compress_xy(b -> originx, b -> originy)] = b;
+  }
 }
 
 void Game::up_db()
@@ -174,6 +227,7 @@ void Game::clean_up()
     delete i -> second;
   }
   super_node.clear();
+  delete action;
 /* Reset everything, allowing the game to be recycled.
  */
   execution_lock.lock();
