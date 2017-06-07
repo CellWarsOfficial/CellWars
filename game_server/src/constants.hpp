@@ -18,6 +18,7 @@
 /* Block padding regions(used to optimise sync)
  */
 
+#define BLOCK_NEIGHBOURING_REGIONS 8
 #define P_REGION_NW 0
 #define P_REGION_N 1
 #define P_REGION_NE 2

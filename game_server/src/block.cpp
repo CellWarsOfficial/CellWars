@@ -19,6 +19,10 @@ Block::Block(int x, int y)
 {
   originx = x;
   originy = y;
+  memset(border_changes
+        , 0
+        , BLOCK_NEIGHBOURING_REGIONS * sizeof(uint8_t)
+        );
   map = new CELL_TYPE*[BLOCK_FULL];
   check_malloc(map);
   for(int i = 0; i < BLOCK_FULL; i++)
@@ -37,6 +41,10 @@ Block::Block(Block &other)
 {
   originx = other.originx;
   originy = other.originy;
+  memcpy(border_changes
+        , other.border_changes
+        , BLOCK_NEIGHBOURING_REGIONS * sizeof(uint8_t)
+        );
   map = new CELL_TYPE*[BLOCK_FULL];
   check_malloc(map);
   for(int i = 0; i < BLOCK_FULL; i++)
@@ -51,6 +59,10 @@ Block::Block(Block *other)
 {
   originx = other -> originx;
   originy = other -> originy;
+  memcpy(border_changes
+        , other -> border_changes
+        , BLOCK_NEIGHBOURING_REGIONS * sizeof(uint8_t)
+        );
   map = new CELL_TYPE*[BLOCK_FULL];
   check_malloc(map);
   for(int i = 0; i < BLOCK_FULL; i++)
