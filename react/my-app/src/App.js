@@ -4,6 +4,12 @@ import './App.css';
 
 const width = 20;
 const height = 20;
+const players = 10; //determines colour generation
+
+const x1Home = width/2 - 2;
+const x2Home = width/2 + 2;
+const y1Home = height/2 - 2;
+const y2Home = height/2 + 2;
 
 class App extends Component {
   render() {
@@ -11,11 +17,8 @@ class App extends Component {
       <div className="App">
         <div className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
+          <h2>Cell Wars</h2>
         </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
         <div className="App-grid">
           <Grid/>
         </div>
@@ -24,10 +27,23 @@ class App extends Component {
   }
 }
 
+function rainbow(n) {
+    if (n === 0) { return '#FFFFFF'}
+    n = n * 240 / players;
+    return 'hsl(' + n + ',100%,50%)';
+}
+
+function ColourBlindSquare(props) {
+  return (
+    <button className="square" onClick={props.onClick} style={{backgroundColor:rainbow(props.userID)}}>
+      {props.userID}
+    </button>
+  );
+}
+
 function Square(props) {
   return (
-    <button className="square" onClick={props.onClick}>
-      {props.userID}
+    <button className="square" onClick={props.onClick} style={{backgroundColor:rainbow(props.userID)}}>
     </button>
   );
 }
@@ -82,7 +98,18 @@ class Grid extends Component {
 
   handleClick(clickedRow, clickedCol) { // Would prefer to only copy and set the one peice that i have to rather than the whole thing but i dont know how
     var temp = this.state.board;
-    temp[clickedRow][clickedCol] = 22;
+
+    if (clickedRow < y1Home || clickedRow >= y2Home ||
+        clickedCol < x1Home || clickedCol >= x2Home) {
+      window.alert("You may only toggle cells in your home area.");
+      return;
+    }
+
+    if (temp[clickedRow][clickedCol] === 0) {
+      temp[clickedRow][clickedCol] = 1;
+    } else {
+      temp[clickedRow][clickedCol] = 0;
+    }
     this.setState({
       board:temp
     });
