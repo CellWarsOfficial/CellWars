@@ -47,7 +47,7 @@ class App extends Component {
   }
 }
 
-
+//<ColourBlindToggler onClick={() => this.toggleColourBlind()}/>
 
 
 class ColourBlindToggler extends Component {
@@ -70,13 +70,21 @@ function rainbow(n) {
 }
 
 function Square(props) {
-  var label = "";
+  var label = null;
   if (props.isColourBlind) {
     label = props.userID; //Write the userIDs on squares when colourblind mode is on
   }
+  var borderz = '1px solid #999'
+  if (props.inHomeArea) {
+    borderz = '1px solid #200'
+  }
+
   return (
-    <button className="square" onClick={props.onClick} style={{backgroundColor:rainbow(props.userID)}}>
-    {label}
+    <button
+      className="square"
+      onClick={props.onClick}
+      style={{backgroundColor:rainbow(props.userID), border:borderz}}>
+      {label}
     </button>
   );
 }
@@ -86,11 +94,13 @@ function Square(props) {
 
 class Row extends Component {
   renderSquare(userIDturtle, r, c) {
+    const inHomeArea = !outsideHomeArea(r, c);
     return (
       <Square
       userID={userIDturtle}
       onClick={() => this.props.onClick(r, c)}
       isColourBlind={this.props.isColourBlind}
+      inHomeArea={inHomeArea}
       />
     );
   }
@@ -128,6 +138,11 @@ function fittedExample() {
   return ret;
 }
 
+function outsideHomeArea(row, col) {
+  return (row < y1Home || row >= y2Home ||
+          col < x1Home || col >= x2Home);
+}
+
 class Grid extends Component {
   constructor() {
     super();
@@ -136,21 +151,22 @@ class Grid extends Component {
     }
   }
 
-  handleClick(clickedRow, clickedCol) { // Would prefer to only copy and set the one peice that i have to rather than the whole thing but i dont know how
-    var temp = this.state.board;
-    if (clickedRow < y1Home || clickedRow >= y2Home ||
-        clickedCol < x1Home || clickedCol >= x2Home) {
+  handleClick(clickedRow, clickedCol) {
+    const board = this.state.board.slice();
+    if (outsideHomeArea(clickedRow, clickedCol)) {
       window.alert("You may only toggle cells in your home area.");
       return;
     }
 
-    if (temp[clickedRow][clickedCol] === 0) {
-      temp[clickedRow][clickedCol] = 1;
+    var clickedCell = board[clickedRow][clickedCol];
+    if (clickedCell === 0) {
+      clickedCell = 1;
     } else {
-      temp[clickedRow][clickedCol] = 0;
+      clickedCell = 0;
     }
+    board[clickedRow][clickedCol] = clickedCell;
     this.setState({
-      board:temp
+      board: board
     });
   }
 
