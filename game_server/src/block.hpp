@@ -10,6 +10,7 @@ class Block
   CELL_TYPE **map;
   int originx, originy;
   //std::bitset<BITMAP_SIZE> *bitmap;
+  int *counts;
 /* Constructor, copy constructor and destructor
  */
   Block(int x, int y);

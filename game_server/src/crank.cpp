@@ -73,7 +73,6 @@ CELL_TYPE Crank::revive_cell(Block *block, int x, int y)
 CELL_TYPE Crank::crank_cell(Block *block, int x, int y)
 {
   int n_neighbours = count_cell_neighbours(block, x, y);
-  //CELL_TYPE result = block->map[x][y];
   if(n_neighbours < 2 && block->map[x][y] != DEAD_CELL) 
   {
     return  DEAD_CELL;
@@ -104,3 +103,14 @@ int Crank::equals(Block *current, Block *other)
   }
   return 1;
 }
+
+int prune_area(Block *block, int x, int y)
+{
+
+  return 0;
+}
+
+
+
+
+

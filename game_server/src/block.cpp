@@ -31,6 +31,7 @@ Block::Block(int x, int y)
     }
   }
   //bitmap = new std::bitset<BITMAP_SIZE>();
+  counts = new int[(int) BLOCK_FULL / 10];
 }
 
 Block::Block(Block &other)
