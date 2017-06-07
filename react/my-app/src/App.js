@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-const width = 10;
-const height = 10;
+const width = 20;
+const height = 20;
 
 class App extends Component {
   render() {
@@ -53,24 +53,30 @@ class Row extends Component {
   }
 }
 
-var example = [
-  [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
-  [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
-  [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
-  [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
-  [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
-  [2, 2, 2, 2, 2, 0, 0, 0, 0, 0],
-  [2, 2, 2, 2, 2, 0, 0, 0, 0, 0],
-  [2, 2, 2, 2, 2, 0, 0, 0, 0, 0],
-  [2, 2, 2, 2, 2, 0, 0, 0, 0, 0],
-  [2, 2, 2, 2, 2, 0, 0, 0, 0, 0]
-];
+function fittedExample() {
+  var ret = [];
+  for (var i = 0; i < height; i++) {
+    var row = [];
+    for (var j = 0; j < width; j++) {
+      var temp = 0;
+      if (i < height/2) {
+        temp++;
+      }
+      if (j < width/2) {
+        temp++;
+      }
+      row.push(temp);
+    }
+    ret.push(row);
+  }
+  return ret;
+}
 
 class Grid extends Component {
   constructor() {
     super();
     this.state = {
-      board: example
+      board: fittedExample()
     }
   }
 
