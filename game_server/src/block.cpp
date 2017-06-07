@@ -34,8 +34,7 @@ Block::Block(int x, int y)
       map[i][j] = DEAD_CELL;
     }
   }
-  //bitmap = new std::bitset<BITMAP_SIZE>();
-  counts = new int[(int) BLOCK_FULL / 10];
+  counts = new int[BLOCK_FULL * BLOCK_FULL / PRUNE_SIZE];
 }
 
 Block::Block(Block &other)

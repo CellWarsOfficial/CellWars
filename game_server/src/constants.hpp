@@ -10,6 +10,7 @@
 #define CELL_TYPE uint8_t
 #define BLOCK_PADDING 8
 #define BLOCK_SIZE 1000
+#define PRUNE_SIZE 10
 #define DEAD_CELL 0
 #define LIVE_CELL 255
 #define BITMAP_SIZE ((BLOCK_SIZE / 10) * (BLOCK_SIZE / 10))

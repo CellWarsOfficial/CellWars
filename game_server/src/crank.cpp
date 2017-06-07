@@ -15,7 +15,19 @@ void Crank::crank(Block *block)
   {
     for(int j = 0; j < BLOCK_FULL; j++)
     {
-      block->set(i, j, crank_cell(scratch, i, j));
+      int jump = prune_area(scratch, i, j);
+      if(jump == 0)
+      {
+        CELL_TYPE inp = scratch->map[i][j];
+        CELL_TYPE out = crank_cell(scratch, i, j);
+        int new_count = get_area_count(i, j, inp, out); 
+        update_area_count(block, i, j, new_count);
+        block->set(i, j, out);
+      }
+      else
+      {
+        i = i + jump - 1;
+      }
     }
   }
   delete scratch;
@@ -96,7 +108,6 @@ int Crank::equals(Block *current, Block *other)
     {
       if(current->map[i][j] != other->map[i][j])
       {
-        printf("%i\t%i\tEXPECTED: %i\tRESULT: %i", i, j, other->map[i][j], current->map[i][j]);
         return 0;
       }
     }
@@ -104,13 +115,50 @@ int Crank::equals(Block *current, Block *other)
   return 1;
 }
 
-int prune_area(Block *block, int x, int y)
+int Crank::prune_area(Block *block, int x, int y)
 {
-
+  int p_x = x / 10;
+  int p_y = y / 10;
+  if(block->counts[p_x + BLOCK_FULL * p_y] == 0)
+  {
+    return PRUNE_SIZE - x % PRUNE_SIZE;
+  }
   return 0;
 }
 
+int Crank::get_area_count(int x, int y, CELL_TYPE before, CELL_TYPE after)
+{
+  if(before == DEAD_CELL && after != DEAD_CELL)
+  {
+    return 1;
+  }
+  else if(before != DEAD_CELL && after == DEAD_CELL)
+  {
+    return -1;
+  }
+  else
+  {
+    return 0;
+  }
+}
 
+void Crank::inc_area_count(Block *block, int x, int y)
+{
+  int p_x = x / 10;
+  int p_y = y / 10;
+  block->counts[p_x + BLOCK_FULL * p_y]++;
+}
 
+void Crank::dec_area_count(Block *block, int x, int y)
+{
+  int p_x = x / 10;
+  int p_y = y / 10;
+  block->counts[p_x + BLOCK_FULL * p_y]--;
+}
 
-
+void Crank::update_area_count(Block *block, int x, int y, int c)
+{
+  int p_x = x / 10;
+  int p_y = y / 10;
+  block->counts[p_x + BLOCK_FULL * p_y] += c;
+}
