@@ -1,0 +1,51 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+}
+
+.App-header {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+.clickerbase {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 160px 320px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  -webkit-transition-duration: 0.4s;
+
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+.clicker {
+    background-color: white; 
+    color: black; 
+    border: 2px solid #4CAF50;
+}
+
+.clicker:hover {
+    background-color: #4CAF50;
+    color: white;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
