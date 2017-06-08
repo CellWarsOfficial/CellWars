@@ -118,14 +118,14 @@ void Block::set(int x, int y, CELL_TYPE cell)
     return;
   }
   map[x][y] = cell;
-  bool w = (x >= BLOCK_PADDING) && (x < 2 * BLOCK_PADDING);
-  bool n = (y >= BLOCK_PADDING) && (y < 2 * BLOCK_PADDING);
+  bool n = (x >= BLOCK_PADDING) && (x < 2 * BLOCK_PADDING);
+  bool w = (y >= BLOCK_PADDING) && (y < 2 * BLOCK_PADDING);
 /* BLOCK_SIZE and BLOCK_SIZE + BLOCK_PADDING are notation abuse, they should be
  * BLOCK_FULL - 2 * BLOCK_PADDING and BLOCK_FULL - BLOCK_PADDING, notation
  * similar to w and n. Notation abuse is a result of BLOCK_FULL's definition.
  */ 
-  bool e = (x >= BLOCK_SIZE) && (x < BLOCK_SIZE + BLOCK_PADDING);
-  bool s = (y >= BLOCK_SIZE) && (y < BLOCK_SIZE + BLOCK_PADDING);
+  bool s = (x >= BLOCK_SIZE) && (x < BLOCK_SIZE + BLOCK_PADDING);
+  bool e = (y >= BLOCK_SIZE) && (y < BLOCK_SIZE + BLOCK_PADDING);
   if(n)
   {
     border_changes[P_REGION_N] = 1;
