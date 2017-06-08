@@ -22,20 +22,23 @@ pseudo_block - b
 "->" - crank
 "=" - copy from left to right 
 1:    B
-      s -> b = B
+      b ->  B // no scratch required
 2:    B
-      b -> s -> b = B
+      s -> b -> B
 3:    B
-      s -> b -> s -> b = B
+      b -> s -> b -> B
 2x:   B
-      b -> s -> b -> s -> ... -> s -> b = B
+      s -> b -> s -> b -> ... -> b -> B
 2x+1: B
-      s -> b -> s -> b -> ... -> s -> b = B
+      b -> s -> b -> s -> ... -> b -> B
 
 bssb makes nice dresses >.>
  */
   pseudo_block = new Block(block);
-  scratch = new Block(block);
+  if(generations != 1)
+  {
+    scratch = new Block(block);
+  }
   for(k = 1; k <= generations; k++)
   {
     aux = scratch;
@@ -43,7 +46,10 @@ bssb makes nice dresses >.>
     pseudo_block = aux;
     if(k == generations)
     {
-      delete pseudo_block;
+      if(generations != 1)
+      {
+        delete pseudo_block;
+      }
       pseudo_block = block;
     }
     for(i = k; i < BLOCK_FULL - k; i++)
@@ -54,6 +60,7 @@ bssb makes nice dresses >.>
       }
     }
   }
+  delete scratch;
 }
 
 int Crank::count_cell_neighbours(Block *block, int x, int y)
