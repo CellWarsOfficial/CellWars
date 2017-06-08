@@ -8,6 +8,6 @@
 #include<all.hpp>
 
 string encode(string input);
-string get_binary();
+string get_bin(unsigned long input);
 
 #endif

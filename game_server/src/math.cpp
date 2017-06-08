@@ -5,11 +5,11 @@ string encode(string input)
   input = input + FIXED_STRING; 
   std::hash<std::string> str_hash;
   //printf("%i\n", str_hash(input));
-  long unsigned int hash = str_hash(input); 
+  unsigned long int hash = str_hash(input); 
 
 }
 
-string get_binary(long unsigned int input)
+string get_bin(unsigned long input)
 {
   std::string output;
   int q;
