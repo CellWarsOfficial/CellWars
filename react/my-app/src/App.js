@@ -58,7 +58,9 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h2>Cell Wars</h2>
         </div>
-        <p></p>
+        <br></br>
+        <br></br>
+        <br></br>
         <div className="App-grid">
           <UserPicker isVisible = {this.state.isVisible} onClick={() => this.handleClick()}/>
           <Grid displayMode = {this.state.displayMode} isVisible = {this.state.isVisible}/>
