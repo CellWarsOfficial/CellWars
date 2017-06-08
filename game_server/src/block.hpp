@@ -11,7 +11,7 @@ class Block
   int originx, originy;
   uint8_t border_changes[8];
   //std::bitset<BITMAP_SIZE> *bitmap;
-  int *counts;
+  uint8_t *counts;
 /* Constructor, copy constructor and destructor
  */
   Block(int x, int y);
