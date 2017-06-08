@@ -80,6 +80,17 @@ void correct_crank(Block *b, Block *expected, Action *a)
   }
 }
 
+void correct_crank_for(Block *b, Block *expected, Action *a, int gens)
+{
+  tests++;
+  a->crank_for(b, gens);
+  if(!equals(b, expected, gens, gens, BLOCK_FULL - gens - 1, BLOCK_FULL - gens - 1))
+  {
+    fails++;
+    fprintf(stderr, "FAILED TEST: crank\n");
+  }
+}
+
 int main(void)
 {
   Block *test1 = new Block(0, 0);
@@ -268,6 +279,73 @@ int main(void)
   delete test2;
   delete expected;
 
+  Block *test5 = new Block(0, 0);
+  test5 -> map[21][27] = 1;
+  test5 -> map[21][28] = 1;
+  test5 -> map[22][27] = 1;
+  test5 -> map[22][28] = 1;
+
+  test5 -> map[25][21] = 1;
+  test5 -> map[25][22] = 1;
+  test5 -> map[26][21] = 1;
+  test5 -> map[26][22] = 1;
+
+  test5 -> map[31][25] = 1;
+  test5 -> map[31][26] = 1;
+  test5 -> map[32][25] = 1;
+  test5 -> map[32][26] = 1;
+
+  test5 -> map[27][31] = 1;
+  test5 -> map[27][32] = 1;
+  test5 -> map[28][31] = 1;
+  test5 -> map[28][32] = 1;
+
+  test5 -> map[24][25] = 2;
+  test5 -> map[24][26] = 2;
+  test5 -> map[24][27] = 2;
+  test5 -> map[24][28] = 2;
+
+  test5 -> map[25][24] = 2;
+  test5 -> map[26][24] = 2;
+  test5 -> map[27][24] = 2;
+  test5 -> map[28][24] = 2;
+
+  test5 -> map[25][29] = 2;
+  test5 -> map[26][29] = 2;
+  test5 -> map[27][29] = 2;
+  test5 -> map[28][29] = 2;
+
+  test5 -> map[29][25] = 2;
+  test5 -> map[29][26] = 2;
+  test5 -> map[29][27] = 2;
+  test5 -> map[29][28] = 2;
+
+  test5 -> map[25][27] = 2;
+  test5 -> map[26][26] = 3;
+  test5 -> map[27][26] = 3;
+
+  Block *test6 = new Block(test5);
+
+  correct_crank_for(test5, test6, action, 0);
+  correct_crank_for(test5, test6, action, 4);
+  correct_crank_for(test5, test6, action, 8);
+
+  Block *test7 = new Block(test6);
+
+  test7 -> map[25][27] = 0;
+  test7 -> map[26][26] = 0;
+  test7 -> map[27][26] = 0;
+  test7 -> map[26][27] = 3;
+  test7 -> map[27][27] = 3;
+  test7 -> map[28][26] = 2;
+
+  correct_crank_for(test5, test7, action, 2);
+  correct_crank_for(test5, test6, action, 2);
+  correct_crank_for(test5, test7, action, 6);
+  delete test5;
+  delete test6;
+  delete test7;
+  delete action;
 
   fprintf(stderr, "%d/%d tests passed\n", tests - fails, tests);
   return fails;
