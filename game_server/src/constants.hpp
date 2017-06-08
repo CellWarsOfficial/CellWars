@@ -65,7 +65,8 @@
 
 /* Server related constants
  */
-#define SV_PORT 7777
+#define SV_DEF_PORT 7777
+#define SV_MAX_PORT 65535
 #define SV_MAX_LISTEN 5
 #define SV_MAX_BUF 2000
 #define SV_HTML_PATH "../client"

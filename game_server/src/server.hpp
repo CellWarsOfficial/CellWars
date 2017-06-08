@@ -13,10 +13,12 @@ class Server
 {
   public:
   Server(int port, Logger *l);
+  ~Server();
   void start(Game *game);
   private:
   void act(int s, int id);
   int socketid;
+  Game *game;
   Logger *log;
 };
 

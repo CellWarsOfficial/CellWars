@@ -27,10 +27,18 @@ Server::Server(int port, Logger *l)
     return;
   }
   listen(socketid, SV_MAX_LISTEN);
+  log -> record(ME, "Successfully listening to port: " + to_string(port));
+}
+
+Server::~Server()
+{
+  close(socketid);
+  log -> record(ME, "Server closed");
 }
 
 void Server::start(Game *game)
 {
+  this -> game = game;
   struct sockaddr_in cli_addr;
   socklen_t clilen = sizeof(cli_addr);
   int news;
