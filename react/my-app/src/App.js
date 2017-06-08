@@ -47,6 +47,7 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h2>Cell Wars</h2>
         </div>
+        <p></p>
         <div className="App-grid">
           <Grid isColourBlind = {this.state.isColourBlind}/>
         </div>
