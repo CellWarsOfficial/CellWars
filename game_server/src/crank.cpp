@@ -3,11 +3,6 @@
 #include <block.hpp>
 #include <cstdio>
 
-/**
- * NB: The object taken as parameter by this function is destroyed
- * and the return object is a different one.
- **/
-
 void Crank::crank(Block *block)
 {
   crank_for(block, 1);
@@ -15,6 +10,8 @@ void Crank::crank(Block *block)
 
 void Crank::crank_for(Block *block, int generations)
 {
+  // if k is not less than BLOCK_PADDING, sync problems may appear.
+  // For single block, any k is fine.
   int i, j, k;
   for(k = 1; k <= generations; k++)
   {
@@ -37,8 +34,7 @@ int Crank::count_cell_neighbours(Block *block, int x, int y)
   {
     for(j = -1; j < 2; j++)
     {
-      if(valid_coordonate(x + i, y + j) && !(i == 0 && j == 0) && 
-              block->map[x + i][y + j] != DEAD_CELL)
+      if(block->map[x + i][y + j] != DEAD_CELL && !(i == 0 && j == 0))
       {
         n = n + 1;
       }
@@ -56,8 +52,7 @@ CELL_TYPE Crank::revive_cell(Block *block, int x, int y)
   {
     for(j = -1; j < 2; j++)
     {
-      if(valid_coordonate(x + i, y + j) && !(i == 0 && j == 0) &&
-         block->map[x + i][y + j] != DEAD_CELL)
+      if(block->map[x + i][y + j] != DEAD_CELL && !(i == 0 && j == 0))
       {
         for (int k = 0; k < h; k++)
         {
