@@ -7,7 +7,7 @@ const width = 20;
 const height = 20; //dimensions of the board
 
 const players = 10; //determines how colours are split between userID's
-const yourUserID = 1;
+var yourUserID = 1;
 
 const x1Home = width/2 - 2;
 const x2Home = width/2 + 2;
@@ -25,7 +25,8 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      displayMode: 0
+      displayMode: 0,
+      isVisible: false,
     }
   }
 
@@ -46,6 +47,10 @@ class App extends Component {
     });
   }
 
+  handleClick() {
+    this.setState({isVisible: true});
+  }
+
   render() {
     return (
       <div className="App">
@@ -55,12 +60,13 @@ class App extends Component {
         </div>
         <p></p>
         <div className="App-grid">
-          <Grid displayMode = {this.state.displayMode}/>
+          <UserPicker isVisible = {this.state.isVisible} onClick={() => this.handleClick()}/>
+          <Grid displayMode = {this.state.displayMode} isVisible = {this.state.isVisible}/>
         </div>
         <p></p>
-          <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()}/> &nbsp;
-          <GetButton onClick={() => this.get()}/> &nbsp;
-          <SubmitButton onClick={() => this.submit()}/> &nbsp;
+          <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()} isVisible = {this.state.isVisible}/> &nbsp;
+          <GetButton onClick={() => this.get()} isVisible = {this.state.isVisible}/> &nbsp;
+          <SubmitButton onClick={() => this.submit()} isVisible = {this.state.isVisible}/> &nbsp;
       </div>
     );
   }
@@ -70,6 +76,9 @@ class App extends Component {
 
 class SubmitButton extends Component {
   render() {
+  if (!this.props.isVisible) {
+    return null;
+  }
   return (
       <button onClick = {this.props.onClick}>
       Submit
@@ -80,6 +89,9 @@ class SubmitButton extends Component {
 
 class GetButton extends Component {
   render() {
+  if (!this.props.isVisible) {
+    return null;
+  }
   return (
       <button onClick = {this.props.onClick}>
       Get
@@ -91,6 +103,9 @@ class GetButton extends Component {
 
 class DisplayModeAdvancer extends Component {
   render() {
+  if (!this.props.isVisible) {
+    return null;
+  }
     return (
       <button className="display-mode-button" onClick={this.props.onClick}>
       Advance Display
@@ -202,7 +217,7 @@ class Row extends Component {
 
 
 
-function fittedExample() { // Generates an example board fitting to the width and height global variables
+function fittedExample(width, height) { // Generates an example board fitting to the width and height global variables
   var ret = [];
   for (var i = 0; i < height; i++) {
     var row = [];
@@ -222,13 +237,42 @@ function fittedExample() { // Generates an example board fitting to the width an
 }
 
 
+class UserPicker extends Component {
+  render() {
+    if (this.props.isVisible)
+    {
+     return null;
+    }
 
+    return (<div><br></br><h2>Pick your player</h2><br></br><br></br><br></br><table width="100%">
+      <tr className = "textcenter">
+        <td width = "75" onClick={() => this.handleClick(1)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(1)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(2)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(2)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(3)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(3)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(4)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(4)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(5)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(5)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(6)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(6)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(7)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(7)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(8)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(8)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(9)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(9)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(10)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(10)}}></img></td>    
+      </tr>
+    </table></div>);
+
+  }
+
+  handleClick(uid) {
+    yourUserID = uid;
+    this.props.onClick();
+  }
+
+}
 
 class Grid extends Component {
   constructor() {
     super();
     this.state = {
-      board: fittedExample()
+      board: fittedExample(width, height)
     }
   }
 
@@ -259,6 +303,9 @@ class Grid extends Component {
   }
 
   render() {
+    if (!this.props.isVisible) {
+      return null;
+    }
     var rows = [];
     for (var i = 0; i < height; i++) {
       rows.push(this.renderRow(i));
