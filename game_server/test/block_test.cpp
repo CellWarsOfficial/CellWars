@@ -1,6 +1,7 @@
 #include "block_test.hpp"
 #include <cstring>
 #include <cstdio>
+#include <set>
 
 using namespace std;
 
@@ -99,6 +100,16 @@ void expect_cell(CELL_TYPE value1, CELL_TYPE value2)
   {
     fails++;
     fprintf(stderr, "%d: unmatching cells, got %d expected %d.\n", tests, value1, value2);
+  }
+}
+
+void expect_int(int value1, int value2)
+{
+  tests++;
+  if(value1 != value2)
+  {
+    fails++;
+    fprintf(stderr, "%d: unmatching integers, got %d expected %d.\n", tests, value1, value2);
   }
 }
 
@@ -318,11 +329,71 @@ void check_sync()
   delete b2;
 }
 
+void check_compression()
+{
+  uint64_t compressed;
+  int i, j, ineg, jneg;
+  set<uint64_t> unique_map;
+  for(i = 1, ineg = 0; i; i <<= 1)
+  {
+    do
+    {
+      if(i > 0)//can be negated
+      {
+        ineg = 1;
+        i *= -1;
+      }
+      else
+      {
+        if(ineg)
+        {
+          i *= -1;
+        }
+        ineg = 0;
+      }
+      for(j = 1, jneg = 0; j; j <<= 1)
+      {
+        do
+        {
+          if(j > 0)//can be negated
+          {
+            jneg = 1;
+            j *= -1;
+          }
+          else
+          {
+            if(jneg)
+            {
+              j *= -1;
+            }
+            jneg = 0;
+          }
+          compressed = compress_xy(i,j);
+          expect_int(get_x(compressed), i);
+          expect_int(get_y(compressed), j);
+          tests++;
+          if(unique_map.find(compressed) != unique_map.end())
+          {
+            fails++;
+            fprintf(stderr, "value %ld obtained from %d and %d not unique", compressed, i, j);
+          }
+          else
+          {
+            unique_map.insert(compressed);
+          }
+        } while (jneg);
+      }
+    } while (ineg);
+  }
+  unique_map.clear();
+}
+
 int main()
 {
   b1 = new Block(0, 0);
   check_region_change_flag();
   check_sync();
+  check_compression();
   fprintf(stderr, "%d/%d tests passed\n", tests - fails, tests);
   return fails;
 }
