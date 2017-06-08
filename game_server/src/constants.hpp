@@ -70,7 +70,7 @@
 #define SV_MAX_BUF 2000
 #define SV_HTML_PATH "../client"
 #define SV_HTTP_OK "HTTP/1.1 200 OK\n\n"
-#define SV_HTTP_NOT_FOUND "HTTP/1.1 404 NOT FOUND\n\n"
+#define SV_HTTP_NOT_FOUND "HTTP/1.1 404 Not Found\n\n"
 #define SV_HTTP_END "\r\n"
 
 #endif

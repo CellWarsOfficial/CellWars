@@ -2,6 +2,8 @@
 #include <cstdio>
 #include <stdlib.h>
 #include <unistd.h>
+#include <cctype>
+#include <thread>
 
 #define ME "server"
 
@@ -32,6 +34,7 @@ void Server::start(Game *game)
   struct sockaddr_in cli_addr;
   socklen_t clilen = sizeof(cli_addr);
   int news;
+  int con_id = 0;
   while(true){
     news = accept(socketid, (struct sockaddr *) &cli_addr, &clilen);
     if (news < 0) 
@@ -39,66 +42,113 @@ void Server::start(Game *game)
       log -> record(ME, "Failed to accept client.");
       continue;
     }
-    act(news);
+    con_id++;
+    new thread(&Server::act, this, news, con_id);
   }
 }
 
-void Server::act(int s)
+int buffer_parse_detector(char *b, const char *pattern)
 {
-  int n, i;
-  string file_path;
+  int i = 0, j = 0;
+  while(b[i])
+  {
+    if(b[i] == pattern[j])
+    {
+      j++;
+      if(pattern[j] == 0)
+      {
+        return i + 1;
+      }
+    }
+    else
+    {
+      j = 0;
+    }
+    i++;
+  }
+  return -1;
+}
+
+int buffer_parse_detector(char *b, string pattern)
+{
+  return buffer_parse_detector(b, pattern.c_str());
+}
+
+void Server::act(int s, int id)
+{
+  int n, i, m, key;
+  string file_path, token;
+  string this_con = ME + to_string(id);
   char *comm_buf = new char[SV_MAX_BUF];
-  read(s, comm_buf, SV_MAX_BUF - 1);
-  log -> record(ME, "new connection ");
-  for(i = 0; (comm_buf[i] != '/') && (comm_buf[i]); i++);
-  if(!comm_buf[i])
+  bzero(comm_buf, SV_MAX_BUF);
+  m = read(s, comm_buf, SV_MAX_BUF - 1);
+  log -> record(this_con, "new connection");
+  i = buffer_parse_detector(comm_buf, "GET");
+  if(i >= 0) // no get = ignore straight away
   {
-    log -> record(ME, "dropped");
-    close(s);
-    return;
-  }
-  file_path = SV_HTML_PATH;
-  if(comm_buf[i + 1] == ' ')
-  {
-    log -> record(ME, "client asking for index");
-    file_path = file_path + "/index.html";
-  }
-  else
-  {
-    log -> record(ME, "client asking for file");
-    for(; (comm_buf[i] != ' '&& (comm_buf[i])); i++)
+// what's the client looking for
+    file_path = get_next_token(comm_buf, i);
+    if(file_path.compare("/") == 0)
     {
-      file_path = file_path + comm_buf[i];
+      log -> record(this_con, "client asking for index");
+      file_path = (string)SV_HTML_PATH + "/index.html";
     }
-    if(!comm_buf[i])
+    else
     {
-      log -> record(ME, "dropped");
-      close(s);
-      return;
+      log -> record(this_con, "client asking for file " + file_path);
+      file_path = (string)SV_HTML_PATH + file_path;
     }
-  }
-  log -> record(ME, "responding with " + file_path);
-  FILE *f = fopen(file_path.c_str(), "r");
-  if(f)
-  {
-    log -> record(ME, "file found");
-    write(s, SV_HTTP_OK, 17);
+// does he want to upgrade to ws?
+    key = buffer_parse_detector(comm_buf, "Sec-WebSocket-Key:");
+    if(key >= 0)
+    {
+      token = get_next_token(comm_buf, key);
+    }
+// finished parsing
+    bzero(comm_buf, m);
+// deliverr the file
+    FILE *f = fopen(file_path.c_str(), "r");
+    if(f)
+    {
+      log -> record(this_con, "file found");
+      write(s, SV_HTTP_OK, strlen(SV_HTTP_OK));
 write_now:
-    while((n = fread(comm_buf, 1, SV_MAX_BUF - 1, f)) > 0)
-    {
-      write(s, comm_buf, n);
+      while((n = fread(comm_buf, 1, SV_MAX_BUF - 1, f)) > 0)
+      {
+        write(s, comm_buf, n);
+      }
+      fclose(f);
     }
-    write(s, SV_HTTP_END, 2);
-    fclose(f);
+    else
+    {
+      log -> record(this_con, "file not found");
+      write(s, SV_HTTP_NOT_FOUND, strlen(SV_HTTP_NOT_FOUND));
+      file_path = (string)SV_HTML_PATH + "/not_found.html";
+      f = fopen(file_path.c_str(), "r");
+      goto write_now;
+    }
   }
-  else
+// update to ws if required
+  if(key >= 0)
   {
-    log -> record(ME, "file not found");
-    write(s, SV_HTTP_NOT_FOUND, 24);
-    file_path = (string)SV_HTML_PATH + "/not_found.html";
-    f = fopen(file_path.c_str(), "r");
-    goto write_now;
+    bzero(comm_buf, SV_MAX_BUF);
+    log -> record(this_con, "Executing websocket handshakira");
+    log -> record(this_con, "token is: " + token);
+    // Solve handshake
   }
+// be done with it
+  write(s, SV_HTTP_END, 2);
   delete comm_buf;
   close(s);
+}
+
+string get_next_token(char *b, int i)
+{
+  string result = "";
+  for(; (isspace(b[i]) && (b[i])); i++);
+  for(; (!isspace(b[i]) && (b[i])); i++)
+  {
+    result = result + b[i];
+  }
+  return result;
 }
