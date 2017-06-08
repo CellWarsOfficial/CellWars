@@ -32,6 +32,8 @@ class Block
 /* 3 functions used for compressing 2 ints into a uint64_t.
  */
 
+int valid_coordonate(int x, int y);
+
 uint64_t compress_xy(int x, int y);
 
 int get_x(uint64_t origin);
