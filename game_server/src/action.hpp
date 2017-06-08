@@ -13,7 +13,6 @@ public:
   virtual CELL_TYPE crank_cell(Block *block, int x, int y) = 0;
   virtual CELL_TYPE revive_cell(Block *block, int x, int y) = 0;
   virtual int count_cell_neighbours(Block *block, int x, int y) = 0;
-  virtual int equals(Block *current, Block *other) = 0;
 };
 
 #endif

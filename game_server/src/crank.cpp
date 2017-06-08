@@ -10,15 +10,7 @@
 
 void Crank::crank(Block *block)
 {
-  Block *scratch = new Block(block);
-  for(int i = 0; i < BLOCK_FULL; i++)
-  {
-    for(int j = 0; j < BLOCK_FULL; j++)
-    {
-      block->set(i, j, crank_cell(scratch, i, j));
-    }
-  }
-  delete scratch;
+  crank_for(block, 1);
 }
 
 void Crank::crank_for(Block *block, int generations)
@@ -97,20 +89,4 @@ CELL_TYPE Crank::crank_cell(Block *block, int x, int y)
     return DEAD_CELL;
   }
   return block->map[x][y];
-}
-
-int Crank::equals(Block *current, Block *other)
-{
-  for (int i = 0; i < BLOCK_FULL; i++)
-  {
-    for (int j = 0; j < BLOCK_FULL; j++)
-    {
-      if(current->map[i][j] != other->map[i][j])
-      {
-        printf("%i\t%i\tEXPECTED: %i\tRESULT: %i", i, j, other->map[i][j], current->map[i][j]);
-        return 0;
-      }
-    }
-  }
-  return 1;
 }
