@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
+import pac_thing from './pac_thing.png';
 import './App.css';
 
 const width = 20;
@@ -13,6 +14,10 @@ const x2Home = width/2 + 2;
 const y1Home = height/2 - 2;
 const y2Home = height/2 + 2; //location of the editable home region
 
+var DISPLAYMODE = {
+  COLOURS: {value: 0, name: "colours"},
+  EMOJIS: {value: 1, name: "emojis"}
+};
 
 
 
@@ -20,13 +25,13 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      isColourBlind: false
+      displayMode: 0
     }
   }
 
-  toggleColourBlind() {
+  advanceDisplayMode() {
     this.setState({
-      isColourBlind: !this.state.isColourBlind
+      displayMode: (this.state.displayMode + 1) % 2
     });
   }
 
@@ -38,10 +43,10 @@ class App extends Component {
           <h2>Cell Wars</h2>
         </div>
         <div className="App-grid">
-          <Grid isColourBlind = {this.state.isColourBlind}/>
+          <Grid displayMode = {this.state.displayMode}/>
         </div>
-        <div className="Colour-blind-toggler">
-          <ColourBlindToggler onClick={() => this.toggleColourBlind()}/>
+        <div className="Display-mode-advancer">
+          <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()}/>
         </div>
       </div>
     );
@@ -51,11 +56,11 @@ class App extends Component {
 
 
 
-class ColourBlindToggler extends Component {
+class DisplayModeAdvancer extends Component {
   render() {
     return (
-      <button className="colour-blind-button" onClick={this.props.onClick}>
-      Colour Blind
+      <button className="display-mode-button" onClick={this.props.onClick}>
+      Advance Display
       </button>
     );
   }
@@ -65,9 +70,9 @@ class ColourBlindToggler extends Component {
 
 
 function rainbow(n) {
-    if (n === 0) { return '#FFFFFF'} //userID 0 is always mapped to white
-    n = n * 240 / players; //splits assigned colours based on the number of players
-    return 'hsl(' + n + ',100%,50%)';
+  if (n === 0) { return '#FFFFFF'} //userID 0 is always mapped to white
+  n = n * 240 / players; //splits assigned colours based on the number of players
+  return 'hsl(' + n + ',100%,50%)';
 }
 
 function Square(props) {
@@ -92,6 +97,44 @@ function Square(props) {
 
 
 
+
+function addHexColor(c1, c2) {
+  var hexStr = (parseInt(c1, 16) + parseInt(c2, 16)).toString(16);
+  while (hexStr.length < 5) { hexStr = '0' + hexStr; } // Zero pad.
+  return hexStr;
+}
+
+
+
+
+function ImgSquare(props) {
+  var src = null;
+
+  if (props.displayMode == DISPLAYMODE.COLOURS.value) {
+    src = pac_thing;
+  } else if (props.displayMode == DISPLAYMODE.EMOJIS.value) {
+
+    var hexRet = addHexColor("1f638", (props.userID).toString());
+    var src = "//cdn.jsdelivr.net/emojione/assets/png/".concat(hexRet).concat(".png");
+
+
+
+  }
+
+  return (
+    <input
+    type="image"
+    src={src}
+    onClick={props.onClick}
+    style={{width:20, height:20, backgroundColor:rainbow(props.userID)}}>
+    </input>
+    );
+
+}
+
+
+
+
 function outsideHomeArea(row, col) {
   return (row < y1Home || row >= y2Home ||
           col < x1Home || col >= x2Home);
@@ -100,10 +143,10 @@ function outsideHomeArea(row, col) {
 class Row extends Component {
   renderSquare(userIDturtle, row, col) {
     return (
-      <Square
+      <ImgSquare
       userID={userIDturtle}
       onClick={() => this.props.onClick(row, col)}
-      isColourBlind={this.props.isColourBlind}
+      displayMode={this.props.displayMode}
       inHomeArea={!outsideHomeArea(row, col)}
       />
     );
@@ -173,7 +216,7 @@ class Grid extends Component {
           squares={this.state.board[row]}
           row={row}
           onClick={(r, c) => this.handleClick(r, c)}
-          isColourBlind={this.props.isColourBlind}
+          displayMode={this.props.displayMode}
         />
       </div>
     );
