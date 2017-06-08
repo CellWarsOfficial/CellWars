@@ -26,8 +26,6 @@ class DB_conn
   Logger *log;
   const char *address;
   int socketid;
-  struct hostent *server;
-  struct sockaddr_in server_address;
 };
 
 struct answer

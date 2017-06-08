@@ -45,8 +45,10 @@ int main(int argc, char **argv)
  */
   DB_conn *db_info = NULL;
   thread *game_thread = NULL;
+  Server *server;
   FLAG_TYPE flags = 0;
   int gtc = DEFAULT_GTC;
+  int server_p = SV_DEF_PORT;
   int wait_time = DEFAULT_WAIT_TIME;
   Logger *log = new Logger(LOG_MAX_BUFFER_DEFAULT, LOG_BUFFER_DELAY_DEFAULT);
 /* Parsing program arguments
@@ -106,6 +108,18 @@ int main(int argc, char **argv)
       }
       continue;
     }
+    if(equ(argv[i], "-http_port"))
+    {
+      i++;
+      check_limit(i, argc);
+      server_p = atoi(argv[i]);
+      if((server_p <= 0) || (server_p > SV_MAX_PORT))
+      {
+        fprintf(stderr, "Inappropiate server port. Defaulting.\n");
+        server_p = SV_DEF_PORT;
+      }
+      continue;
+    }
     if(equ(argv[i], "-wait", "-w"))
     {
       i++;
@@ -137,7 +151,9 @@ int main(int argc, char **argv)
     fprintf(stderr, "Initialisation failure, missing database.\n");
     exit(EXIT_FAILURE);
   }
+  server = new Server(server_p, log);
   game = new Game(db_info, log);
+  new thread(&Server::start, server, game);
   init_server_ui(log);
   game_thread = new thread(&Game::start, game, flags, gtc, wait_time);
 
@@ -145,6 +161,10 @@ int main(int argc, char **argv)
    */
   game_thread -> join();
 cleanup:
+  if(server)
+  {
+    delete server;
+  }
   if(game)
   {
     delete game;

@@ -20,12 +20,15 @@ DB_conn::DB_conn(const char *a, Logger *l)
   address = a;
   log = l;
   socketid = socket(AF_INET, SOCK_STREAM, 0);
-  //sio::client c;
-  //log -> record(ME, string(a) + ":" + DB_PORT);
-  //c.connect(string(a) + ":" +DB_PORT);
-  //c.socket()->emit("login");
-  //return;
-  socketid = socket(AF_INET, SOCK_STREAM, 0);
+  struct hostent *server;
+  struct sockaddr_in server_address;
+/*
+  sio::client c;
+  log -> record(ME, string(a) + ":" + DB_PORT);
+  c.connect(string(a) + ":" +DB_PORT);
+  c.socket()->emit("login");
+  return;
+ */
   if(socketid < 0)
   {
     safe = 0;

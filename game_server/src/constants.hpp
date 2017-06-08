@@ -67,4 +67,15 @@
  */
 
 #define FIXED_STRING 258EAFA5-E914-47DA-95CA-C5AB0DC85B11
+/* Server related constants
+ */
+#define SV_DEF_PORT 7777
+#define SV_MAX_PORT 65535
+#define SV_MAX_LISTEN 5
+#define SV_MAX_BUF 2000
+#define SV_HTML_PATH "../client"
+#define SV_HTTP_OK "HTTP/1.1 200 OK\n\n"
+#define SV_HTTP_NOT_FOUND "HTTP/1.1 404 Not Found\n\n"
+#define SV_HTTP_END "\r\n"
+
 #endif
