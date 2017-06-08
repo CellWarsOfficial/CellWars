@@ -172,7 +172,7 @@ void Block::sync_with(Block *other, int region)
     {
       for(j = 0; j < BLOCK_PADDING; j++)
       {
-        this -> map[BLOCK_SIZE + i][BLOCK_SIZE + j] = other -> map[i][j];
+        this -> map[BLOCK_SIZE + BLOCK_PADDING + i][BLOCK_SIZE + BLOCK_PADDING + j] = other -> map[i + BLOCK_PADDING][j + BLOCK_PADDING];
       }
     }
   }
@@ -182,7 +182,7 @@ void Block::sync_with(Block *other, int region)
     {
       for(j = BLOCK_PADDING; j < BLOCK_SIZE + BLOCK_PADDING; j++)
       {
-        this -> map[BLOCK_SIZE + i][j] = other -> map[i][j];
+        this -> map[BLOCK_SIZE + BLOCK_PADDING + i][j] = other -> map[i + BLOCK_PADDING][j];
       }
     }
   }
@@ -192,7 +192,7 @@ void Block::sync_with(Block *other, int region)
     {
       for(j = BLOCK_SIZE + BLOCK_PADDING; j < BLOCK_FULL; j++)
       {
-        this -> map[BLOCK_SIZE + i][j - BLOCK_SIZE - BLOCK_PADDING] = other -> map[i][j];
+        this -> map[BLOCK_SIZE + BLOCK_PADDING + i][j - BLOCK_SIZE - BLOCK_PADDING] = other -> map[i + BLOCK_PADDING][j - BLOCK_PADDING];
       }
     }
   }
@@ -202,7 +202,7 @@ void Block::sync_with(Block *other, int region)
     {
       for(j = 0; j < BLOCK_PADDING; j++)
       {
-        this -> map[i][BLOCK_SIZE + j] = other -> map[i][j];
+        this -> map[i][BLOCK_SIZE + BLOCK_PADDING + j] = other -> map[i][j + BLOCK_PADDING];
       }
     }
   }
@@ -212,7 +212,7 @@ void Block::sync_with(Block *other, int region)
     {
       for(j = BLOCK_SIZE + BLOCK_PADDING; j < BLOCK_FULL; j++)
       {
-        this -> map[i][j - BLOCK_SIZE - BLOCK_PADDING] = other -> map[i][j];
+        this -> map[i][j - BLOCK_SIZE - BLOCK_PADDING] = other -> map[i][j - BLOCK_PADDING];
       }
     }
   }
@@ -222,7 +222,7 @@ void Block::sync_with(Block *other, int region)
     {
       for(j = 0; j < BLOCK_PADDING; j++)
       {
-        this -> map[i - BLOCK_SIZE - BLOCK_PADDING][BLOCK_SIZE + j] = other -> map[i][j];
+        this -> map[i - BLOCK_SIZE - BLOCK_PADDING][BLOCK_SIZE + BLOCK_PADDING + j] = other -> map[i - BLOCK_PADDING][j + BLOCK_PADDING];
       }
     }
   }
@@ -232,17 +232,17 @@ void Block::sync_with(Block *other, int region)
     {
       for(j = BLOCK_PADDING; j < BLOCK_SIZE + BLOCK_PADDING; j++)
       {
-        this -> map[i - BLOCK_SIZE - BLOCK_PADDING][j] = other -> map[i][j];
+        this -> map[i - BLOCK_SIZE - BLOCK_PADDING][j] = other -> map[i - BLOCK_PADDING][j];
       }
     }
   }
-  if(region == P_REGION_E)
+  if(region == P_REGION_SE)
   {
     for(i = BLOCK_SIZE + BLOCK_PADDING; i < BLOCK_FULL; i++)
     {
       for(j = BLOCK_SIZE + BLOCK_PADDING; j < BLOCK_FULL; j++)
       {
-        this -> map[i - BLOCK_SIZE - BLOCK_PADDING][j - BLOCK_SIZE - BLOCK_PADDING] = other -> map[i][j];
+        this -> map[i - BLOCK_SIZE - BLOCK_PADDING][j - BLOCK_SIZE - BLOCK_PADDING] = other -> map[i - BLOCK_PADDING][j - BLOCK_PADDING];
       }
     }
   }

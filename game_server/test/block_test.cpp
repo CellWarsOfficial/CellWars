@@ -260,14 +260,14 @@ void check_sync()
   b2 = new Block(0, 0);
   set_inside(b2);
   b2 -> sync_with(b1, P_REGION_N);
-  expect_cell(b2 -> map[BLOCK_FULL - 1][BLOCK_PADDING], 1); // 57
-  expect_cell(b2 -> map[BLOCK_SIZE + BLOCK_PADDING][2 * BLOCK_PADDING - 1], 1); // 58
-  expect_cell(b2 -> map[BLOCK_SIZE + BLOCK_PADDING][BLOCK_SIZE], 1); // 59
-  expect_cell(b2 -> map[BLOCK_FULL - 1][BLOCK_SIZE + BLOCK_PADDING - 1], 1); // 60
-  b2 -> map[BLOCK_FULL - 1][BLOCK_PADDING] = 0;
-  b2 -> map[BLOCK_SIZE + BLOCK_PADDING][2 * BLOCK_PADDING - 1] = 0;
-  b2 -> map[BLOCK_SIZE + BLOCK_PADDING][BLOCK_SIZE] = 0;
-  b2 -> map[BLOCK_FULL - 1][BLOCK_SIZE + BLOCK_PADDING - 1] = 0;
+  expect_cell(b2 -> map[BLOCK_SIZE + BLOCK_PADDING][BLOCK_PADDING], 1); // 57
+  expect_cell(b2 -> map[BLOCK_FULL - 1][2 * BLOCK_PADDING - 1], 1); // 58
+  expect_cell(b2 -> map[BLOCK_FULL - 1][BLOCK_SIZE], 1); // 59
+  expect_cell(b2 -> map[BLOCK_SIZE + BLOCK_PADDING][BLOCK_SIZE + BLOCK_PADDING - 1], 1); // 60
+  b2 -> map[BLOCK_SIZE + BLOCK_PADDING][BLOCK_PADDING] = 0;
+  b2 -> map[BLOCK_FULL - 1][2 * BLOCK_PADDING - 1] = 0;
+  b2 -> map[BLOCK_FULL - 1][BLOCK_SIZE] = 0;
+  b2 -> map[BLOCK_SIZE + BLOCK_PADDING][BLOCK_SIZE + BLOCK_PADDING - 1] = 0;
   validate_block(b2); // 61
   empty_inside(b2); // 62
   delete b2;
@@ -275,14 +275,14 @@ void check_sync()
   b2 = new Block(0, 0);
   set_inside(b2);
   b2 -> sync_with(b1, P_REGION_S);
-  expect_cell(b2 -> map[0][BLOCK_PADDING], 1); // 63
-  expect_cell(b2 -> map[BLOCK_PADDING - 1][2 * BLOCK_PADDING - 1], 1); // 64
-  expect_cell(b2 -> map[BLOCK_PADDING - 1][BLOCK_SIZE], 1); // 65
-  expect_cell(b2 -> map[0][BLOCK_SIZE + BLOCK_PADDING - 1], 1); // 66
-  b2 -> map[0][BLOCK_PADDING] = 0;
-  b2 -> map[BLOCK_PADDING - 1][2 * BLOCK_PADDING - 1] = 0;
-  b2 -> map[BLOCK_PADDING - 1][BLOCK_SIZE] = 0;
-  b2 -> map[0][BLOCK_SIZE + BLOCK_PADDING - 1] = 0;
+  expect_cell(b2 -> map[BLOCK_PADDING - 1][BLOCK_PADDING], 1); // 63
+  expect_cell(b2 -> map[0][2 * BLOCK_PADDING - 1], 1); // 64
+  expect_cell(b2 -> map[0][BLOCK_SIZE], 1); // 65
+  expect_cell(b2 -> map[BLOCK_PADDING - 1][BLOCK_SIZE + BLOCK_PADDING - 1], 1); // 66
+  b2 -> map[BLOCK_PADDING - 1][BLOCK_PADDING] = 0;
+  b2 -> map[0][2 * BLOCK_PADDING - 1] = 0;
+  b2 -> map[0][BLOCK_SIZE] = 0;
+  b2 -> map[BLOCK_PADDING - 1][BLOCK_SIZE + BLOCK_PADDING - 1] = 0;
   validate_block(b2); // 67
   empty_inside(b2); // 68
   delete b2;
@@ -290,14 +290,14 @@ void check_sync()
   b2 = new Block(0, 0);
   set_inside(b2);
   b2 -> sync_with(b1, P_REGION_W);
-  expect_cell(b2 -> map[BLOCK_PADDING][BLOCK_FULL - 1], 1); // 69
-  expect_cell(b2 -> map[2 * BLOCK_PADDING - 1][BLOCK_SIZE + BLOCK_PADDING], 1); // 70
-  expect_cell(b2 -> map[BLOCK_SIZE][BLOCK_SIZE + BLOCK_PADDING], 1); // 71
-  expect_cell(b2 -> map[BLOCK_SIZE + BLOCK_PADDING - 1][BLOCK_FULL - 1], 1); // 72
-  b2 -> map[BLOCK_PADDING][BLOCK_FULL - 1] = 0;
-  b2 -> map[2 * BLOCK_PADDING - 1][BLOCK_SIZE + BLOCK_PADDING] = 0;
-  b2 -> map[BLOCK_SIZE][BLOCK_SIZE + BLOCK_PADDING] = 0;
-  b2 -> map[BLOCK_SIZE + BLOCK_PADDING - 1][BLOCK_FULL - 1] = 0;
+  expect_cell(b2 -> map[BLOCK_PADDING][BLOCK_SIZE + BLOCK_PADDING], 1); // 69
+  expect_cell(b2 -> map[2 * BLOCK_PADDING - 1][BLOCK_FULL - 1], 1); // 70
+  expect_cell(b2 -> map[BLOCK_SIZE][BLOCK_FULL - 1], 1); // 71
+  expect_cell(b2 -> map[BLOCK_SIZE + BLOCK_PADDING - 1][BLOCK_SIZE + BLOCK_PADDING], 1); // 72
+  b2 -> map[BLOCK_PADDING][BLOCK_SIZE + BLOCK_PADDING] = 0;
+  b2 -> map[2 * BLOCK_PADDING - 1][BLOCK_FULL - 1] = 0;
+  b2 -> map[BLOCK_SIZE][BLOCK_FULL - 1] = 0;
+  b2 -> map[BLOCK_SIZE + BLOCK_PADDING - 1][BLOCK_SIZE + BLOCK_PADDING] = 0;
   validate_block(b2); // 73
   empty_inside(b2); // 74
   delete b2;
@@ -305,14 +305,14 @@ void check_sync()
   b2 = new Block(0, 0);
   set_inside(b2);
   b2 -> sync_with(b1, P_REGION_E);
-  expect_cell(b2 -> map[BLOCK_PADDING][0], 1); // 75
-  expect_cell(b2 -> map[2 * BLOCK_PADDING - 1][BLOCK_PADDING - 1], 1); // 76
-  expect_cell(b2 -> map[BLOCK_SIZE][BLOCK_PADDING - 1], 1); // 77
-  expect_cell(b2 -> map[BLOCK_SIZE + BLOCK_PADDING - 1][0], 1); // 78
-  b2 -> map[BLOCK_PADDING][0] = 0;
-  b2 -> map[2 * BLOCK_PADDING - 1][BLOCK_PADDING - 1] = 0;
-  b2 -> map[BLOCK_SIZE][BLOCK_PADDING - 1] = 0;
-  b2 -> map[BLOCK_SIZE + BLOCK_PADDING - 1][0] = 0;
+  expect_cell(b2 -> map[BLOCK_PADDING][BLOCK_PADDING - 1], 1); // 75
+  expect_cell(b2 -> map[2 * BLOCK_PADDING - 1][0], 1); // 76
+  expect_cell(b2 -> map[BLOCK_SIZE][0], 1); // 77
+  expect_cell(b2 -> map[BLOCK_SIZE + BLOCK_PADDING - 1][BLOCK_PADDING - 1], 1); // 78
+  b2 -> map[BLOCK_PADDING][BLOCK_PADDING - 1] = 0;
+  b2 -> map[2 * BLOCK_PADDING - 1][0] = 0;
+  b2 -> map[BLOCK_SIZE][0] = 0;
+  b2 -> map[BLOCK_SIZE + BLOCK_PADDING - 1][BLOCK_PADDING - 1] = 0;
   validate_block(b2); // 79
   empty_inside(b2); // 80
   delete b2;
