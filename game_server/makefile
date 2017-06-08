@@ -3,7 +3,7 @@ NEWDIR = mkdir
 SRCDIR = src
 TSTDIR = test
 BINDIR = bin
-ASIO   = $(SRCDIR)/../../asio-1.10.6
+ASIOD  = ../asio-1.10.6/include
 RM     = rm -rf
 TARGET = $(BINDIR)/gameserver
 HEADER = $(wildcard $(SRCDIR)/*.hpp)
@@ -13,9 +13,9 @@ IGNORE = >/dev/null 2>&1
 KILLCOM = /bin/kill -9
 OS := $(shell uname)
 ifeq ($(OS), Darwin)
-	CFLAGS = -Wall -Werror -I $(SRCDIR)/ $(ASIO)/ -std=c++11
+	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -I $(ASIOD)/ -std=c++11
 else
-	CFLAGS = -Wall -Werror -I $(SRCDIR)/ $(ASIO)/ -std=c++11 -pthread
+	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -I $(ASIOD)/ -std=c++11 -pthread
 endif
 TFLAGS = 
 OBJECT = $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o $(BINDIR)/game.o $(BINDIR)/server_ui.o $(BINDIR)/log.o $(BINDIR)/crank.o
@@ -33,7 +33,7 @@ $(BINDIR):
 $(TARGET): $(OBJECT)
 	$(CC) $(CFLAGS) $^ -o $@
 
-$(BINDIR)/init.o: $(SRCDIR)/init.cpp $(HEADER) $(ASIO)/include/asio.hpp
+$(BINDIR)/init.o: $(SRCDIR)/init.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BINDIR)/block.o: $(SRCDIR)/block.cpp $(HEADER)
