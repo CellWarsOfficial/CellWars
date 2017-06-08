@@ -177,6 +177,7 @@ function ImgSquare(props) {
   return (
     <input
     type="image"
+    alt="cell"
     src={src}
     onClick={props.onClick}
     style={{width:20, height:20, backgroundColor:rainbow(props.userID), border:border}}>
@@ -248,16 +249,16 @@ class UserPicker extends Component {
 
     return (<div><br></br><h2>Pick your player</h2><br></br><br></br><br></br><table width="100%">
       <tr className = "textcenter">
-        <td width = "75" onClick={() => this.handleClick(1)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(1)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(2)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(2)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(3)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(3)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(4)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(4)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(5)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(5)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(6)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(6)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(7)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(7)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(8)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(8)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(9)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(9)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(10)}><img src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(10)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(1)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(1)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(2)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(2)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(3)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(3)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(4)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(4)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(5)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(5)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(6)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(6)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(7)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(7)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(8)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(8)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(9)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(9)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(10)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(10)}}></img></td>    
       </tr>
     </table></div>);
 
