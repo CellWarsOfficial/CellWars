@@ -163,6 +163,7 @@ function ImgSquare(props) {
   var src = null;
 
   var border = '1px solid #ddd';
+
   if (props.inHomeArea) {
     border = '1px solid #200' //Home area cells get a border
   }
@@ -172,6 +173,10 @@ function ImgSquare(props) {
   } else if (props.displayMode === DISPLAYMODE.EMOJIS.value) {
     var hexRet = addHexColor("1f638", (props.userID).toString());
     src = "//cdn.jsdelivr.net/emojione/assets/png/".concat(hexRet).concat(".png");
+  }
+
+  if (props.userID == 0) {
+    src = pac_thing;
   }
 
   return (
