@@ -24,6 +24,16 @@ class App extends Component {
     }
   }
 
+  get() {
+    // TODO
+    window.alert("Not yet implemented.");
+  }
+
+  submit() {
+    // TODO
+    window.alert("Not yet implemented.");
+  }
+
   toggleColourBlind() {
     this.setState({
       isColourBlind: !this.state.isColourBlind
@@ -40,8 +50,17 @@ class App extends Component {
         <div className="App-grid">
           <Grid isColourBlind = {this.state.isColourBlind}/>
         </div>
+        <p></p>
         <div className="Colour-blind-toggler">
           <ColourBlindToggler onClick={() => this.toggleColourBlind()}/>
+        </div>
+        <p></p>
+        <div>
+          <GetButton onClick={() => this.get()}/>
+        </div>
+        <p></p>
+        <div>
+          <SubmitButton onClick={() => this.submit()}/>
         </div>
       </div>
     );
@@ -49,6 +68,26 @@ class App extends Component {
 }
 
 
+
+class SubmitButton extends Component {
+  render() {
+  return (
+      <button onClick = {this.props.onClick}>
+      Submit
+      </button>
+    );
+  }
+}
+
+class GetButton extends Component {
+  render() {
+  return (
+      <button onClick = {this.props.onClick}>
+      Get
+      </button>
+    );
+  }
+}
 
 
 class ColourBlindToggler extends Component {
