@@ -248,6 +248,11 @@ void Block::sync_with(Block *other, int region)
   }
 }
 
+int valid_coordonate(int x, int y)
+{
+  return 0 <= x && x < BLOCK_FULL && 0 <= y && y < BLOCK_FULL;
+}
+
 uint64_t compress_xy(int x, int y)
 {
   return (((uint64_t)((uint32_t) x)) << 32) | (uint64_t)((uint32_t) y);

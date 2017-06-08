@@ -7,7 +7,7 @@ int fails = 0;
 void correct_valid_coordonates(Block *b, Action *a, int x, int y, int expected)
 {
   tests++;
-  int output = a->valid_coordonate(x, y);
+  int output = valid_coordonate(x, y);
   if(output != expected)
   {
     fails++;
@@ -112,11 +112,6 @@ int main(void)
   test1->map[91][90] = 77;
   test1->map[90][89] = 3;
   correct_revive_cell(test1, action, 90, 90, 77);
-  test1->map[60][61] = 22;
-  test1->map[61][60] = 22;
-  test1->map[61][61] = 22;
-  test1->map[60][59] = 3;
-  correct_revive_cell(test1, action, 60, 60, DEAD_CELL);
   //TEST: crank cell
   test1->map[100][101] = LIVE_CELL;
   correct_crank_cell(test1, action, 100, 101, DEAD_CELL);
