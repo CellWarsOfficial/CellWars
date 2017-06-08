@@ -29,6 +29,17 @@ class App extends Component {
     }
   }
 
+
+  get() {
+    // TODO
+    window.alert("Not yet implemented.");
+  }
+
+  submit() {
+    // TODO
+    window.alert("Not yet implemented.");
+  }
+
   advanceDisplayMode() {
     this.setState({
       displayMode: (this.state.displayMode + 1) % 2
@@ -42,18 +53,40 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h2>Cell Wars</h2>
         </div>
+        <p></p>
         <div className="App-grid">
           <Grid displayMode = {this.state.displayMode}/>
         </div>
-        <div className="Display-mode-advancer">
-          <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()}/>
-        </div>
+        <p></p>
+          <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()}/> &nbsp;
+          <GetButton onClick={() => this.get()}/> &nbsp;
+          <SubmitButton onClick={() => this.submit()}/> &nbsp;
       </div>
     );
   }
 }
 
 
+
+class SubmitButton extends Component {
+  render() {
+  return (
+      <button onClick = {this.props.onClick}>
+      Submit
+      </button>
+    );
+  }
+}
+
+class GetButton extends Component {
+  render() {
+  return (
+      <button onClick = {this.props.onClick}>
+      Get
+      </button>
+    );
+  }
+}
 
 
 class DisplayModeAdvancer extends Component {
@@ -75,6 +108,7 @@ function rainbow(n) {
   return 'hsl(' + n + ',100%,50%)';
 }
 
+/*
 function Square(props) {
   var label = '';
   if (props.isColourBlind) {
@@ -94,6 +128,7 @@ function Square(props) {
     </button>
   );
 }
+*/
 
 
 
@@ -110,15 +145,11 @@ function addHexColor(c1, c2) {
 function ImgSquare(props) {
   var src = null;
 
-  if (props.displayMode == DISPLAYMODE.COLOURS.value) {
+  if (props.displayMode === DISPLAYMODE.COLOURS.value) {
     src = pac_thing;
-  } else if (props.displayMode == DISPLAYMODE.EMOJIS.value) {
-
+  } else if (props.displayMode === DISPLAYMODE.EMOJIS.value) {
     var hexRet = addHexColor("1f638", (props.userID).toString());
-    var src = "//cdn.jsdelivr.net/emojione/assets/png/".concat(hexRet).concat(".png");
-
-
-
+    src = "//cdn.jsdelivr.net/emojione/assets/png/".concat(hexRet).concat(".png");
   }
 
   return (
