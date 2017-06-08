@@ -41,19 +41,17 @@ bssb makes nice dresses >.>
     aux = scratch;
     scratch = pseudo_block;
     pseudo_block = aux;
+    if(k == generations)
+    {
+      delete pseudo_block;
+      pseudo_block = block;
+    }
     for(i = k; i < BLOCK_FULL - k; i++)
     {
       for(j = k; j < BLOCK_FULL - k; j++)
       {
         pseudo_block->set(i, j, crank_cell(scratch, i, j));
       }
-    }
-  }
-  for(i = generations; i < BLOCK_FULL - generations; i++)
-  {
-    for(j = generations; j < BLOCK_FULL - generations; j++)
-    {
-      block->set(i, j, pseudo_block -> map[i][j]);
     }
   }
 }
