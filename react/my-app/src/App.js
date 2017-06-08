@@ -6,6 +6,7 @@ const width = 20;
 const height = 20; //dimensions of the board
 
 const players = 10; //determines how colours are split between userID's
+const yourUserID = 1;
 
 const x1Home = width/2 - 2;
 const x2Home = width/2 + 2;
@@ -47,7 +48,7 @@ class App extends Component {
   }
 }
 
-//<ColourBlindToggler onClick={() => this.toggleColourBlind()}/>
+
 
 
 class ColourBlindToggler extends Component {
@@ -70,20 +71,20 @@ function rainbow(n) {
 }
 
 function Square(props) {
-  var label = null;
+  var label = '';
   if (props.isColourBlind) {
     label = props.userID; //Write the userIDs on squares when colourblind mode is on
   }
-  var borderz = '1px solid #999'
+  var border = '';
   if (props.inHomeArea) {
-    borderz = '1px solid #200'
+    border = '1px solid #200' //Home area cells get a border
   }
 
   return (
     <button
       className="square"
       onClick={props.onClick}
-      style={{backgroundColor:rainbow(props.userID), border:borderz}}>
+      style={{backgroundColor:rainbow(props.userID), border:border}}>
       {label}
     </button>
   );
@@ -91,27 +92,30 @@ function Square(props) {
 
 
 
+function outsideHomeArea(row, col) {
+  return (row < y1Home || row >= y2Home ||
+          col < x1Home || col >= x2Home);
+}
 
 class Row extends Component {
-  renderSquare(userIDturtle, r, c) {
-    const inHomeArea = !outsideHomeArea(r, c);
+  renderSquare(userIDturtle, row, col) {
     return (
       <Square
       userID={userIDturtle}
-      onClick={() => this.props.onClick(r, c)}
+      onClick={() => this.props.onClick(row, col)}
       isColourBlind={this.props.isColourBlind}
-      inHomeArea={inHomeArea}
+      inHomeArea={!outsideHomeArea(row, col)}
       />
     );
   }
 
   render() {
-    var formatSquares = [];
+    var renderedSquares = [];
     for (var i = 0; i < width; i++) {
-      formatSquares.push(this.renderSquare(this.props.squares[i], this.props.theRow, i));
+      renderedSquares.push(this.renderSquare(this.props.squares[i], this.props.row, i));
     }
     return (
-      <div>{formatSquares}</div>
+      <div>{renderedSquares}</div>
     );
   }
 }
@@ -119,7 +123,7 @@ class Row extends Component {
 
 
 
-function fittedExample() {
+function fittedExample() { // Generates an example board fitting to the width and height global variables
   var ret = [];
   for (var i = 0; i < height; i++) {
     var row = [];
@@ -138,10 +142,8 @@ function fittedExample() {
   return ret;
 }
 
-function outsideHomeArea(row, col) {
-  return (row < y1Home || row >= y2Home ||
-          col < x1Home || col >= x2Home);
-}
+
+
 
 class Grid extends Component {
   constructor() {
@@ -151,31 +153,25 @@ class Grid extends Component {
     }
   }
 
-  handleClick(clickedRow, clickedCol) {
-    const board = this.state.board.slice();
-    if (outsideHomeArea(clickedRow, clickedCol)) {
+  handleClick(row, col) {
+    const board = this.state.board.slice(); //Clones the board
+    if (outsideHomeArea(row, col)) {
       window.alert("You may only toggle cells in your home area.");
       return;
     }
 
-    var clickedCell = board[clickedRow][clickedCol];
-    if (clickedCell === 0) {
-      clickedCell = 1;
-    } else {
-      clickedCell = 0;
-    }
-    board[clickedRow][clickedCol] = clickedCell;
+    board[row][col] = (board[row][col] === 0) ? yourUserID : 0;
     this.setState({
       board: board
     });
   }
 
-  renderRow(r) {
+  renderRow(row) {
     return (
       <div>
         <Row
-          squares={this.state.board[r]}
-          theRow={r}
+          squares={this.state.board[row]}
+          row={row}
           onClick={(r, c) => this.handleClick(r, c)}
           isColourBlind={this.props.isColourBlind}
         />
@@ -191,7 +187,6 @@ class Grid extends Component {
     return <div>{rows}</div>;
   }
 }
-
 
 
 
