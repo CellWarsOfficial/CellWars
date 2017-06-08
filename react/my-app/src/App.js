@@ -145,6 +145,11 @@ function addHexColor(c1, c2) {
 function ImgSquare(props) {
   var src = null;
 
+  var border = '';
+  if (props.inHomeArea) {
+    border = '1px solid #200' //Home area cells get a border
+  }
+
   if (props.displayMode === DISPLAYMODE.COLOURS.value) {
     src = pac_thing;
   } else if (props.displayMode === DISPLAYMODE.EMOJIS.value) {
@@ -157,7 +162,7 @@ function ImgSquare(props) {
     type="image"
     src={src}
     onClick={props.onClick}
-    style={{width:20, height:20, backgroundColor:rainbow(props.userID)}}>
+    style={{width:20, height:20, backgroundColor:rainbow(props.userID), border:border}}>
     </input>
     );
 
