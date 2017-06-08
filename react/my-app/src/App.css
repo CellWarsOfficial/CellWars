@@ -14,37 +14,6 @@
   color: white;
 }
 
-.App-intro {
-  font-size: large;
-}
-
-.clickerbase {
-  background-color: #4CAF50;
-  border: none;
-  color: white;
-  padding: 160px 320px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  -webkit-transition-duration: 0.4s;
-
-  transition-duration: 0.4s;
-  cursor: pointer;
-}
-
-.clicker {
-    background-color: white; 
-    color: black; 
-    border: 2px solid #4CAF50;
-}
-
-.clicker:hover {
-    background-color: #4CAF50;
-    color: white;
-}
-
 .cell {
   margin-left: 3px;
   margin-right: 3px;
