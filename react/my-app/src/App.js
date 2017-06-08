@@ -185,7 +185,8 @@ function ImgSquare(props) {
     alt="cell"
     src={src}
     onClick={props.onClick}
-    style={{width:20, height:20, backgroundColor:rainbow(props.userID), border:border}}>
+    style={{width:20, height:20, backgroundColor:rainbow(props.userID), border:border}}
+    className='cell'>
     </input>
     );
 
