@@ -53,7 +53,7 @@ class App extends Component {
         <p></p>
           <ColourBlindToggler onClick={() => this.toggleColourBlind()}/> &nbsp;
           <GetButton onClick={() => this.get()}/> &nbsp;
-          <SubmitButton onClick={() => this.submit()}/>
+          <SubmitButton onClick={() => this.submit()}/> &nbsp;
       </div>
     );
   }
