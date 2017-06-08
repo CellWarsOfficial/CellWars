@@ -81,7 +81,9 @@ void Server::act(int s)
   FILE *f = fopen(file_path.c_str(), "r");
   if(f)
   {
+    log -> record(ME, "file found");
     write(s, SV_HTTP_OK, 17);
+write_now:
     while((n = fread(comm_buf, 1, SV_MAX_BUF - 1, f)) > 0)
     {
       write(s, comm_buf, n);
@@ -91,8 +93,11 @@ void Server::act(int s)
   }
   else
   {
+    log -> record(ME, "file not found");
     write(s, SV_HTTP_NOT_FOUND, 24);
-    write(s, SV_HTTP_END, 2);
+    file_path = (string)SV_HTML_PATH + "/not_found.html";
+    f = fopen(file_path.c_str(), "r");
+    goto write_now;
   }
   delete comm_buf;
   close(s);
