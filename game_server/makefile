@@ -13,9 +13,9 @@ IGNORE = >/dev/null 2>&1
 KILLCOM = /bin/kill -9
 OS := $(shell uname)
 ifeq ($(OS), Darwin)
-	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -I $(ASIOD)/ -std=c++11
+	CFLAGS = -Wall -I $(SRCDIR)/ -I $(ASIOD)/ -std=c++11
 else
-	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -I $(ASIOD)/ -std=c++11 -pthread
+	CFLAGS = -Wall -I $(SRCDIR)/ -I $(ASIOD)/ -std=c++11 -pthread
 endif
 TFLAGS = 
 OBJECT = $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o $(BINDIR)/game.o $(BINDIR)/server_ui.o $(BINDIR)/log.o $(BINDIR)/crank.o

@@ -8,7 +8,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h> 
-#include <all.hpp> 
+
+using asio::ip:tcp;
 
 // TODO figure out how to access the database
 
@@ -27,6 +28,7 @@ class DB_conn
   int socketid;
   struct hostent *server;
   struct sockaddr_in server_address;
+
 };
 
 struct answer

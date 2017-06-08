@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <chrono>
 #include <ctime>
+#include <all.hpp> 
 
 // TODO all functions in here.
 
