@@ -227,10 +227,10 @@ function fittedExample(width, height) { // Generates an example board fitting to
     for (var j = 0; j < width; j++) {
       var temp = 0;
       if (i < height/2) {
-        temp++;
+        temp+=3;
       }
       if (j < width/2) {
-        temp++;
+        temp+=5;
       }
       row.push(temp);
     }
