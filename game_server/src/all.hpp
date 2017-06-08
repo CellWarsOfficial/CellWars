@@ -10,5 +10,8 @@
 #include <log.hpp>
 #include <crank.hpp>
 #include <action.hpp>
+#include <../../asio-1.10.6/include/asio.hpp>
+#include <../../asio-1.10.6/include/asio/detail/config.hpp>
+#include <../../asio-1.10.6/include/asio/async_result.hpp>
 
 #endif

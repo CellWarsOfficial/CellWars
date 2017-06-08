@@ -43,6 +43,12 @@ int main(int argc, char **argv)
 {
 /* Initialising default information
  */
+#ifdef ASIO_HPP
+  printf("INSTALLED\n");
+#else
+  printf("NOT INSTALLED\n");
+#endif
+ 
   DB_conn *db_info = NULL;
   thread *game_thread = NULL;
   FLAG_TYPE flags = 0;
