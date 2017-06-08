@@ -13,3 +13,5 @@ bin/
 *.log
 # exclude nohup accidental files
 nohup.out
+# exclude asio folder
+asio-*/
