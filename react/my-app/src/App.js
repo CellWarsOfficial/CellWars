@@ -162,7 +162,7 @@ function addHexColor(c1, c2) {
 function ImgSquare(props) {
   var src = null;
 
-  var border = '';
+  var border = '1px solid #ddd';
   if (props.inHomeArea) {
     border = '1px solid #200' //Home area cells get a border
   }
