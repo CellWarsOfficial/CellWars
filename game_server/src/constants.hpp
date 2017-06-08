@@ -63,4 +63,8 @@
 #define NO_READ 0
 #define DB_MAX_BUF 2000
 
+/* Math related constants
+ */
+
+#define FIXED_STRING 258EAFA5-E914-47DA-95CA-C5AB0DC85B11
 #endif
