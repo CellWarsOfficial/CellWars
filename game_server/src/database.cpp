@@ -19,12 +19,13 @@ DB_conn::DB_conn(const char *a, Logger *l)
   safe = 1;
   address = a;
   log = l;
-  sio::client c;
-  log -> record(ME, string(a) + ":" + DB_PORT);
-  c.connect(string(a) + ":" +DB_PORT);
-  c.socket()->emit("login");
-  return;
-/*  socketid = socket(AF_INET, SOCK_STREAM, 0);
+  socketid = socket(AF_INET, SOCK_STREAM, 0);
+  //sio::client c;
+  //log -> record(ME, string(a) + ":" + DB_PORT);
+  //c.connect(string(a) + ":" +DB_PORT);
+  //c.socket()->emit("login");
+  //return;
+  socketid = socket(AF_INET, SOCK_STREAM, 0);
   if(socketid < 0)
   {
     safe = 0;
@@ -55,7 +56,7 @@ DB_conn::DB_conn(const char *a, Logger *l)
     log -> record(ME, "Failed to connect to database");
     return;
   }
-  log -> record(ME, "Connection successful");*/
+  log -> record(ME, "Connection successful");
 }
 
 void *DB_conn::run_query(int expectation, string s)
