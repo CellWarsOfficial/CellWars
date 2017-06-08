@@ -8,6 +8,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h> 
+#include <spp.hpp>
+
 
 // TODO figure out how to access the database
 

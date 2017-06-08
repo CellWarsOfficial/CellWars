@@ -1,0 +1,2 @@
+/usr/bin/ar qc libsioclient_tls.a  CMakeFiles/sioclient_tls.dir/src/sio_socket.cpp.o CMakeFiles/sioclient_tls.dir/src/sio_client.cpp.o CMakeFiles/sioclient_tls.dir/src/internal/sio_packet.cpp.o CMakeFiles/sioclient_tls.dir/src/internal/sio_client_impl.cpp.o
+/usr/bin/ranlib libsioclient_tls.a
