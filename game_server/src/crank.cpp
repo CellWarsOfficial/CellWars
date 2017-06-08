@@ -13,46 +13,49 @@ void Crank::crank_for(Block *block, int generations)
   // if k is not less than BLOCK_PADDING, sync problems may appear.
   // For single block, any k is fine.
   int i, j, k;
-  Block *scratch, *aux;
+  Block *scratch, *aux, *pseudo_block;
 /* Hot potato with scratch
 input - B
 output - B
-block disguised as scratch - s
-block - b
+pseudo_block disguised as scratch - s
+pseudo_block - b
+"->" - crank
+"=" - copy from left to right 
 1:    B
-      s -> B
+      s -> b = B
 2:    B
-      b -> s -> B
+      b -> s -> b = B
 3:    B
-      s -> b -> s -> B
+      s -> b -> s -> b = B
 2x:   B
-      s -> b -> s -> b -> ... -> s -> B
+      b -> s -> b -> s -> ... -> s -> b = B
 2x+1: B
-      b -> s -> b -> s -> ... -> s -> B
+      s -> b -> s -> b -> ... -> s -> b = B
+
+bssb makes nice dresses >.>
  */
-  if(generations % 2)
-  {
-    scratch = block;
-    block = new Block(scratch);
-  }
-  else
-  {
-    scratch = new Block(block);
-  }
+  pseudo_block = new Block(block);
+  scratch = new Block(block);
   for(k = 1; k <= generations; k++)
   {
     aux = scratch;
-    scratch = block;
-    block = aux;
+    scratch = pseudo_block;
+    pseudo_block = aux;
     for(i = k; i < BLOCK_FULL - k; i++)
     {
       for(j = k; j < BLOCK_FULL - k; j++)
       {
-        block->set(i, j, crank_cell(scratch, i, j));
+        pseudo_block->set(i, j, crank_cell(scratch, i, j));
       }
     }
   }
-  delete scratch;
+  for(i = generations; i < BLOCK_FULL - generations; i++)
+  {
+    for(j = generations; j < BLOCK_FULL - generations; j++)
+    {
+      block->set(i, j, pseudo_block -> map[i][j]);
+    }
+  }
 }
 
 int Crank::count_cell_neighbours(Block *block, int x, int y)
