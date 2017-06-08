@@ -51,17 +51,9 @@ class App extends Component {
           <Grid isColourBlind = {this.state.isColourBlind}/>
         </div>
         <p></p>
-        <div className="Colour-blind-toggler">
-          <ColourBlindToggler onClick={() => this.toggleColourBlind()}/>
-        </div>
-        <p></p>
-        <div>
-          <GetButton onClick={() => this.get()}/>
-        </div>
-        <p></p>
-        <div>
+          <ColourBlindToggler onClick={() => this.toggleColourBlind()}/> &nbsp;
+          <GetButton onClick={() => this.get()}/> &nbsp;
           <SubmitButton onClick={() => this.submit()}/>
-        </div>
       </div>
     );
   }
