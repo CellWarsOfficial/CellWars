@@ -6,19 +6,20 @@ int fails = 0;
 
 int equals(Block *current, Block *other, int x1, int y1, int x2, int y2)
 {
-  for (int i = x1; i <= x2; i++)
+  int result = 1, i, j;
+  for (i = x1; i <= x2; i++)
   {
-    for (int j = y1; j <= y2; j++)
+    for (j = y1; j <= y2; j++)
     {
       if(current->map[i][j] != other->map[i][j])
       {
         fprintf(stderr, "%i\t%i\tEXPECTED: %i\tRESULT: %i", i, j
                , other->map[i][j], current->map[i][j]);
-        return 0;
+        result = 0;
       }
     }
   }
-  return 1;
+  return result;
 }
 
 void correct_valid_coordonates(Block *b, Action *a, int x, int y, int expected)
@@ -69,17 +70,6 @@ void correct_crank_cell(Block *b, Action *a, int x, int y, CELL_TYPE expected)
   }
 }
 
-void correct_crank(Block *b, Block *expected, Action *a)
-{
-  tests++;
-  a->crank(b);
-  if(!equals(b, expected, 1, 1, BLOCK_FULL - 2, BLOCK_FULL - 2))
-  {
-    fails++;
-    fprintf(stderr, "FAILED TEST: crank\n");
-  }
-}
-
 void correct_crank_for(Block *b, Block *expected, Action *a, int gens)
 {
   tests++;
@@ -89,6 +79,11 @@ void correct_crank_for(Block *b, Block *expected, Action *a, int gens)
     fails++;
     fprintf(stderr, "FAILED TEST: crank\n");
   }
+}
+
+void correct_crank(Block *b, Block *expected, Action *a)
+{
+  correct_crank_for(b, expected, a, 1);
 }
 
 int main(void)
