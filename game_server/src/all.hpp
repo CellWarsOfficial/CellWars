@@ -10,5 +10,6 @@
 #include <log.hpp>
 #include <crank.hpp>
 #include <action.hpp>
+#include <server.hpp>
 
 #endif

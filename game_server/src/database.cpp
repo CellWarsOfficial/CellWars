@@ -19,6 +19,8 @@ DB_conn::DB_conn(const char *a, Logger *l)
   address = a;
   log = l;
   socketid = socket(AF_INET, SOCK_STREAM, 0);
+  struct hostent *server;
+  struct sockaddr_in server_address;
   if(socketid < 0)
   {
     safe = 0;

@@ -17,7 +17,7 @@ else
 	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11 -pthread
 endif
 TFLAGS = 
-OBJECT = $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o $(BINDIR)/game.o $(BINDIR)/server_ui.o $(BINDIR)/log.o $(BINDIR)/crank.o
+OBJECT = $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o $(BINDIR)/game.o $(BINDIR)/server_ui.o $(BINDIR)/log.o $(BINDIR)/crank.o $(BINDIR)/server.o
 TESTS  = $(BINDIR)/log_test $(BINDIR)/crank_test $(BINDIR)/block_test
 
 .phony: all
@@ -54,6 +54,9 @@ $(BINDIR)/log.o: $(SRCDIR)/log.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BINDIR)/crank.o: $(SRCDIR)/crank.cpp $(HEADER)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BINDIR)/server.o: $(SRCDIR)/server.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BINDIR)/log_test: $(TSTDIR)/log_test.cpp $(BINDIR)/log.o $(TSTDIR)/log_test.hpp $(HEADER)

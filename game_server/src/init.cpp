@@ -45,6 +45,7 @@ int main(int argc, char **argv)
  */
   DB_conn *db_info = NULL;
   thread *game_thread = NULL;
+  Server *server;
   FLAG_TYPE flags = 0;
   int gtc = DEFAULT_GTC;
   int wait_time = DEFAULT_WAIT_TIME;
@@ -137,7 +138,9 @@ int main(int argc, char **argv)
     fprintf(stderr, "Initialisation failure, missing database.\n");
     exit(EXIT_FAILURE);
   }
+  server = new Server(SV_PORT, log);
   game = new Game(db_info, log);
+  server -> start(game);
   init_server_ui(log);
   game_thread = new thread(&Game::start, game, flags, gtc, wait_time);
 
