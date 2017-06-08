@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
-import pac_thing from './pac_thing.png';
+import pac_thing from './images/pac_thing.png';
 import './App.css';
 
 const width = 20;
@@ -150,15 +150,6 @@ function Square(props) {
 
 
 
-function addHexColor(c1, c2) {
-  var hexStr = (parseInt(c1, 16) + parseInt(c2, 16)).toString(16);
-  while (hexStr.length < 5) { hexStr = '0' + hexStr; } // Zero pad.
-  return hexStr;
-}
-
-
-
-
 function ImgSquare(props) {
   var src = null;
 
@@ -171,11 +162,10 @@ function ImgSquare(props) {
   if (props.displayMode === DISPLAYMODE.COLOURS.value) {
     src = pac_thing;
   } else if (props.displayMode === DISPLAYMODE.EMOJIS.value) {
-    var hexRet = addHexColor("1f638", (props.userID).toString());
-    src = "//cdn.jsdelivr.net/emojione/assets/png/".concat(hexRet).concat(".png");
+    src = 'https://www.doc.ic.ac.uk/project/2016/271/g1627123/images/emojis/'.concat((props.userID).toString()).concat('.png');
   }
 
-  if (props.userID == 0) {
+  if (props.userID === 0) {
     src = pac_thing;
   }
 
