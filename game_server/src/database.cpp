@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <chrono>
 #include <ctime>
+#include <all.hpp> 
 
 // TODO all functions in here.
 
@@ -18,7 +19,12 @@ DB_conn::DB_conn(const char *a, Logger *l)
   safe = 1;
   address = a;
   log = l;
-  socketid = socket(AF_INET, SOCK_STREAM, 0);
+  sio::client c;
+  log -> record(ME, string(a) + ":" + DB_PORT);
+  c.connect(string(a) + ":" +DB_PORT);
+  c.socket()->emit("login");
+  return;
+/*  socketid = socket(AF_INET, SOCK_STREAM, 0);
   if(socketid < 0)
   {
     safe = 0;
@@ -49,7 +55,7 @@ DB_conn::DB_conn(const char *a, Logger *l)
     log -> record(ME, "Failed to connect to database");
     return;
   }
-  log -> record(ME, "Connection successful");
+  log -> record(ME, "Connection successful");*/
 }
 
 void *DB_conn::run_query(int expectation, string s)
@@ -66,16 +72,22 @@ void *DB_conn::run_query(int expectation, string s)
   const char *c = wrapper.c_str();
   char answer_buf[DB_MAX_BUF];
   log -> record(ME, (string)"Running query " + wrapper);
+  //
   write(socketid, c, strlen(c));
+
+  //c.socket()->emit("benis");
+  //
   if(expectation)
   {
     struct answer *result = 0;
+    //
     bzero(answer_buf, DB_MAX_BUF);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     while(read(socketid, answer_buf, DB_MAX_BUF - 1) == 0)
     {
       std::this_thread::sleep_for(std::chrono::milliseconds(5000));
     }
+    //
     int ni = 0;
     int number[3] = {0, 0, 0};
     int neg = 1;
