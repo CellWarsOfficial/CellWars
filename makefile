@@ -20,8 +20,8 @@ $(ASIOD)/Makefile:
 	#$(UNTAR_BZ2) asio-1.10.6.tar.bz2
 	#$(RM) asio-1.10.6.tar.bz2
 	#cd $(ASIOD) && ./configure --without-boost
-	mkdir $(ASIOD)
-	touch $(ASIOD)/Makefile
+	-mkdir $(ASIOD)
+	-touch $(ASIOD)/Makefile
 
 .phony: pings
 pings:
