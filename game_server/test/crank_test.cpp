@@ -4,10 +4,28 @@
 int tests = 0;
 int fails = 0;
 
+int equals(Block *current, Block *other, int x1, int y1, int x2, int y2)
+{
+  int result = 1, i, j;
+  for (i = x1; i <= x2; i++)
+  {
+    for (j = y1; j <= y2; j++)
+    {
+      if(current->map[i][j] != other->map[i][j])
+      {
+        fprintf(stderr, "%i\t%i\tEXPECTED: %i\tRESULT: %i", i, j
+               , other->map[i][j], current->map[i][j]);
+        result = 0;
+      }
+    }
+  }
+  return result;
+}
+
 void correct_valid_coordonates(Block *b, Action *a, int x, int y, int expected)
 {
   tests++;
-  int output = a->valid_coordonate(x, y);
+  int output = valid_coordonate(x, y);
   if(output != expected)
   {
     fails++;
@@ -52,15 +70,20 @@ void correct_crank_cell(Block *b, Action *a, int x, int y, CELL_TYPE expected)
   }
 }
 
-void correct_crank(Block *b, Block *expected, Action *a)
+void correct_crank_for(Block *b, Block *expected, Action *a, int gens)
 {
   tests++;
-  a->crank(b);
-  if(!a->equals(b, expected))
+  a->crank_for(b, gens);
+  if(!equals(b, expected, gens, gens, BLOCK_FULL - gens - 1, BLOCK_FULL - gens - 1))
   {
     fails++;
     fprintf(stderr, "FAILED TEST: crank\n");
   }
+}
+
+void correct_crank(Block *b, Block *expected, Action *a)
+{
+  correct_crank_for(b, expected, a, 1);
 }
 
 int main(void)
@@ -69,26 +92,32 @@ int main(void)
   Action *action = new Crank();
   //TEST: valid coordonates
   correct_valid_coordonates(test1, action, 0, 0, 1);
-  correct_valid_coordonates(test1, action, 999, 999, 1);
-  correct_valid_coordonates(test1, action, 0, 999, 1);
-  correct_valid_coordonates(test1, action, 999, 0, 1);
+  correct_valid_coordonates(test1, action, BLOCK_FULL - 1, BLOCK_FULL - 1, 1);
+  correct_valid_coordonates(test1, action, 0, BLOCK_FULL - 1, 1);
+  correct_valid_coordonates(test1, action, BLOCK_FULL - 1, 0, 1);
   correct_valid_coordonates(test1, action, 0, 14, 1);
   correct_valid_coordonates(test1, action, 12, 0, 1);
-  correct_valid_coordonates(test1, action, 20, 999, 1);
-  correct_valid_coordonates(test1, action, 999, 30, 1);
+  correct_valid_coordonates(test1, action, 20, BLOCK_FULL - 1, 1);
+  correct_valid_coordonates(test1, action, BLOCK_FULL - 1, 30, 1);
+  correct_valid_coordonates(test1, action, -1, 0, 0);
+  correct_valid_coordonates(test1, action, 0, -5, 0);
+  correct_valid_coordonates(test1, action, -2, -3, 0);
+  correct_valid_coordonates(test1, action, 2 * BLOCK_FULL, 0, 0);
+  correct_valid_coordonates(test1, action, 0, BLOCK_FULL, 0);
+  correct_valid_coordonates(test1, action, -(BLOCK_FULL - 1), BLOCK_FULL - 1, 0);
   //TEST: count cell neighbours
   test1->map[10][10] = LIVE_CELL;
   test1->map[10][11] = LIVE_CELL;
   correct_count_cell_neighbours(test1, action, 10, 10, 1);
   test1->map[15][15] = LIVE_CELL;
   correct_count_cell_neighbours(test1, action, 15, 15, 0);
-  test1->map[0][0] = LIVE_CELL;
-  test1->map[0][1] = LIVE_CELL;
-  test1->map[1][0] = LIVE_CELL;
   test1->map[1][1] = LIVE_CELL;
-  correct_count_cell_neighbours(test1, action, 0, 0, 3);
-  test1->map[1][0] = DEAD_CELL;
-  correct_count_cell_neighbours(test1, action, 0, 0, 2);
+  test1->map[1][2] = LIVE_CELL;
+  test1->map[2][1] = LIVE_CELL;
+  test1->map[2][2] = LIVE_CELL;
+  correct_count_cell_neighbours(test1, action, 1, 1, 3);
+  test1->map[2][1] = DEAD_CELL;
+  correct_count_cell_neighbours(test1, action, 1, 1, 2);
   test1->map[50][50] = 2;
   test1->map[50][51] = 67;
   test1->map[51][50] = 47;
@@ -112,11 +141,6 @@ int main(void)
   test1->map[91][90] = 77;
   test1->map[90][89] = 3;
   correct_revive_cell(test1, action, 90, 90, 77);
-  test1->map[60][61] = 22;
-  test1->map[61][60] = 22;
-  test1->map[61][61] = 22;
-  test1->map[60][59] = 3;
-  correct_revive_cell(test1, action, 60, 60, DEAD_CELL);
   //TEST: crank cell
   test1->map[100][101] = LIVE_CELL;
   correct_crank_cell(test1, action, 100, 101, DEAD_CELL);
@@ -250,6 +274,73 @@ int main(void)
   delete test2;
   delete expected;
 
+  Block *test5 = new Block(0, 0);
+  test5 -> map[21][27] = 1;
+  test5 -> map[21][28] = 1;
+  test5 -> map[22][27] = 1;
+  test5 -> map[22][28] = 1;
+
+  test5 -> map[25][21] = 1;
+  test5 -> map[25][22] = 1;
+  test5 -> map[26][21] = 1;
+  test5 -> map[26][22] = 1;
+
+  test5 -> map[31][25] = 1;
+  test5 -> map[31][26] = 1;
+  test5 -> map[32][25] = 1;
+  test5 -> map[32][26] = 1;
+
+  test5 -> map[27][31] = 1;
+  test5 -> map[27][32] = 1;
+  test5 -> map[28][31] = 1;
+  test5 -> map[28][32] = 1;
+
+  test5 -> map[24][25] = 2;
+  test5 -> map[24][26] = 2;
+  test5 -> map[24][27] = 2;
+  test5 -> map[24][28] = 2;
+
+  test5 -> map[25][24] = 2;
+  test5 -> map[26][24] = 2;
+  test5 -> map[27][24] = 2;
+  test5 -> map[28][24] = 2;
+
+  test5 -> map[25][29] = 2;
+  test5 -> map[26][29] = 2;
+  test5 -> map[27][29] = 2;
+  test5 -> map[28][29] = 2;
+
+  test5 -> map[29][25] = 2;
+  test5 -> map[29][26] = 2;
+  test5 -> map[29][27] = 2;
+  test5 -> map[29][28] = 2;
+
+  test5 -> map[25][27] = 2;
+  test5 -> map[26][26] = 3;
+  test5 -> map[27][26] = 3;
+
+  Block *test6 = new Block(test5);
+
+  correct_crank_for(test5, test6, action, 0);
+  correct_crank_for(test5, test6, action, 4);
+  correct_crank_for(test5, test6, action, 8);
+
+  Block *test7 = new Block(test6);
+
+  test7 -> map[25][27] = 0;
+  test7 -> map[26][26] = 0;
+  test7 -> map[27][26] = 0;
+  test7 -> map[26][27] = 3;
+  test7 -> map[27][27] = 3;
+  test7 -> map[28][26] = 2;
+
+  correct_crank_for(test5, test7, action, 2);
+  correct_crank_for(test5, test6, action, 2);
+  correct_crank_for(test5, test7, action, 6);
+  delete test5;
+  delete test6;
+  delete test7;
+  delete action;
 
   fprintf(stderr, "%d/%d tests passed\n", tests - fails, tests);
   return fails;

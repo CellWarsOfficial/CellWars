@@ -118,14 +118,14 @@ void Block::set(int x, int y, CELL_TYPE cell)
     return;
   }
   map[x][y] = cell;
-  bool w = (x >= BLOCK_PADDING) && (x < 2 * BLOCK_PADDING);
-  bool n = (y >= BLOCK_PADDING) && (y < 2 * BLOCK_PADDING);
+  bool n = (x >= BLOCK_PADDING) && (x < 2 * BLOCK_PADDING);
+  bool w = (y >= BLOCK_PADDING) && (y < 2 * BLOCK_PADDING);
 /* BLOCK_SIZE and BLOCK_SIZE + BLOCK_PADDING are notation abuse, they should be
  * BLOCK_FULL - 2 * BLOCK_PADDING and BLOCK_FULL - BLOCK_PADDING, notation
  * similar to w and n. Notation abuse is a result of BLOCK_FULL's definition.
  */ 
-  bool e = (x >= BLOCK_SIZE) && (x < BLOCK_SIZE + BLOCK_PADDING);
-  bool s = (y >= BLOCK_SIZE) && (y < BLOCK_SIZE + BLOCK_PADDING);
+  bool s = (x >= BLOCK_SIZE) && (x < BLOCK_SIZE + BLOCK_PADDING);
+  bool e = (y >= BLOCK_SIZE) && (y < BLOCK_SIZE + BLOCK_PADDING);
   if(n)
   {
     border_changes[P_REGION_N] = 1;
@@ -168,9 +168,9 @@ void Block::sync_with(Block *other, int region)
   int i, j;
   if(region == P_REGION_NW)
   {
-    for(i = 0; i < BLOCK_PADDING; i++)
+    for(i = BLOCK_PADDING; i < 2 * BLOCK_PADDING; i++)
     {
-      for(j = 0; j < BLOCK_PADDING; j++)
+      for(j = BLOCK_PADDING; j < 2 * BLOCK_PADDING; j++)
       {
         this -> map[BLOCK_SIZE + i][BLOCK_SIZE + j] = other -> map[i][j];
       }
@@ -178,7 +178,7 @@ void Block::sync_with(Block *other, int region)
   }
   if(region == P_REGION_N)
   {
-    for(i = 0; i < BLOCK_PADDING; i++)
+    for(i = BLOCK_PADDING; i < 2 * BLOCK_PADDING; i++)
     {
       for(j = BLOCK_PADDING; j < BLOCK_SIZE + BLOCK_PADDING; j++)
       {
@@ -188,11 +188,11 @@ void Block::sync_with(Block *other, int region)
   }
   if(region == P_REGION_NE)
   {
-    for(i = 0; i < BLOCK_PADDING; i++)
+    for(i = BLOCK_PADDING; i < 2 * BLOCK_PADDING; i++)
     {
-      for(j = BLOCK_SIZE + BLOCK_PADDING; j < BLOCK_FULL; j++)
+      for(j = BLOCK_SIZE; j < BLOCK_SIZE + BLOCK_PADDING; j++)
       {
-        this -> map[BLOCK_SIZE + i][j - BLOCK_SIZE - BLOCK_PADDING] = other -> map[i][j];
+        this -> map[BLOCK_SIZE + i][j - BLOCK_SIZE] = other -> map[i][j];
       }
     }
   }
@@ -200,7 +200,7 @@ void Block::sync_with(Block *other, int region)
   {
     for(i = BLOCK_PADDING; i < BLOCK_SIZE + BLOCK_PADDING; i++)
     {
-      for(j = 0; j < BLOCK_PADDING; j++)
+      for(j = BLOCK_PADDING; j < 2 * BLOCK_PADDING; j++)
       {
         this -> map[i][BLOCK_SIZE + j] = other -> map[i][j];
       }
@@ -210,42 +210,47 @@ void Block::sync_with(Block *other, int region)
   {
     for(i = BLOCK_PADDING; i < BLOCK_SIZE + BLOCK_PADDING; i++)
     {
-      for(j = BLOCK_SIZE + BLOCK_PADDING; j < BLOCK_FULL; j++)
+      for(j = BLOCK_SIZE; j < BLOCK_SIZE + BLOCK_PADDING; j++)
       {
-        this -> map[i][j - BLOCK_SIZE - BLOCK_PADDING] = other -> map[i][j];
+        this -> map[i][j - BLOCK_SIZE] = other -> map[i][j];
       }
     }
   }
   if(region == P_REGION_SW)
   {
-    for(i = BLOCK_SIZE + BLOCK_PADDING; i < BLOCK_FULL; i++)
+    for(i = BLOCK_SIZE; i < BLOCK_SIZE + BLOCK_PADDING; i++)
     {
-      for(j = 0; j < BLOCK_PADDING; j++)
+      for(j = BLOCK_PADDING; j < 2 * BLOCK_PADDING; j++)
       {
-        this -> map[i - BLOCK_SIZE - BLOCK_PADDING][BLOCK_SIZE + j] = other -> map[i][j];
+        this -> map[i - BLOCK_SIZE][BLOCK_SIZE + j] = other -> map[i][j];
       }
     }
   }
   if(region == P_REGION_S)
   {
-    for(i = BLOCK_SIZE + BLOCK_PADDING; i < BLOCK_FULL; i++)
+    for(i = BLOCK_SIZE; i < BLOCK_SIZE + BLOCK_PADDING; i++)
     {
       for(j = BLOCK_PADDING; j < BLOCK_SIZE + BLOCK_PADDING; j++)
       {
-        this -> map[i - BLOCK_SIZE - BLOCK_PADDING][j] = other -> map[i][j];
+        this -> map[i - BLOCK_SIZE][j] = other -> map[i][j];
       }
     }
   }
-  if(region == P_REGION_E)
+  if(region == P_REGION_SE)
   {
-    for(i = BLOCK_SIZE + BLOCK_PADDING; i < BLOCK_FULL; i++)
+    for(i = BLOCK_SIZE; i < BLOCK_SIZE + BLOCK_PADDING; i++)
     {
-      for(j = BLOCK_SIZE + BLOCK_PADDING; j < BLOCK_FULL; j++)
+      for(j = BLOCK_SIZE; j < BLOCK_SIZE + BLOCK_PADDING; j++)
       {
-        this -> map[i - BLOCK_SIZE - BLOCK_PADDING][j - BLOCK_SIZE - BLOCK_PADDING] = other -> map[i][j];
+        this -> map[i - BLOCK_SIZE][j - BLOCK_SIZE] = other -> map[i][j];
       }
     }
   }
+}
+
+int valid_coordonate(int x, int y)
+{
+  return 0 <= x && x < BLOCK_FULL && 0 <= y && y < BLOCK_FULL;
 }
 
 uint64_t compress_xy(int x, int y)

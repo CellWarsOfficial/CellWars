@@ -3,6 +3,7 @@ NEWDIR = mkdir
 SRCDIR = src
 TSTDIR = test
 BINDIR = bin
+SKDIR  = ../socket.io-client-cpp/build/lib/Release
 RM     = rm -rf
 TARGET = $(BINDIR)/gameserver
 HEADER = $(wildcard $(SRCDIR)/*.hpp)
@@ -17,8 +18,9 @@ else
 	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11 -pthread
 endif
 TFLAGS = 
-OBJECT = $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o $(BINDIR)/game.o $(BINDIR)/server_ui.o $(BINDIR)/log.o $(BINDIR)/crank.o
-TESTS  = $(BINDIR)/log_test $(BINDIR)/crank_test
+OBJECT = $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o $(BINDIR)/game.o $(BINDIR)/server_ui.o $(BINDIR)/log.o $(BINDIR)/crank.o $(BINDIR)/server.o
+TESTS  = $(BINDIR)/log_test $(BINDIR)/crank_test $(BINDIR)/block_test
+LIBS = $(wildcard $(SKDIR)/*.a)
 
 .phony: all
 all: installdirs $(TARGET) $(TESTS)
@@ -30,7 +32,7 @@ $(BINDIR):
 	$(NEWDIR) $@
 
 $(TARGET): $(OBJECT)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
 
 $(BINDIR)/init.o: $(SRCDIR)/init.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -56,17 +58,24 @@ $(BINDIR)/log.o: $(SRCDIR)/log.cpp $(HEADER)
 $(BINDIR)/crank.o: $(SRCDIR)/crank.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(BINDIR)/server.o: $(SRCDIR)/server.cpp $(HEADER)
+	$(CC) $(CFLAGS) -c $< -o $@
+
 $(BINDIR)/log_test: $(TSTDIR)/log_test.cpp $(BINDIR)/log.o $(TSTDIR)/log_test.hpp $(HEADER)
 	$(CC) $(CFLAGS) $(TFLAGS) $< $(BINDIR)/log.o -o $@
 
 $(BINDIR)/crank_test: $(TSTDIR)/crank_test.cpp $(BINDIR)/block.o $(BINDIR)/crank.o $(BINDIR)/malloc_safety.o $(TSTDIR)/crank_test.hpp $(HEADER)
 	$(CC) $(CFLAGS) $(TFLAGS) $<  $(BINDIR)/block.o $(BINDIR)/crank.o $(BINDIR)/malloc_safety.o -o $@
 
+$(BINDIR)/block_test: $(TSTDIR)/block_test.cpp $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(TSTDIR)/block_test.hpp $(HEADER)
+	$(CC) $(CFLAGS) $(TFLAGS) $< $(BINDIR)/block.o $(BINDIR)/malloc_safety.o -o $@
+
 .phony: check
 check: all
 	./$(BINDIR)/log_test
 	./$(BINDIR)/crank_test
-
+	./$(BINDIR)/block_test
+  
 .phony: install
 install: all uninstall
 	nohup ./$(TARGET) $(RUNFLG) $(IGNORE) &

@@ -8,6 +8,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h> 
+#include <spp.hpp>
+
 
 // TODO figure out how to access the database
 
@@ -24,8 +26,6 @@ class DB_conn
   Logger *log;
   const char *address;
   int socketid;
-  struct hostent *server;
-  struct sockaddr_in server_address;
 };
 
 struct answer
