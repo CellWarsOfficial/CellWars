@@ -7,12 +7,12 @@ RM = rm -rf
 DL = wget -q
 UNTAR_BZ2 = tar xfj
 
-.phony: $(STDTAR) $(SPCTAR)
-$(SPCTAR): all
-	for dir in $(SUBDIR); do $(MAKE) -C $$dir $@; done
-
 $(STDTAR): $(ASIOD)/Makefile
 	#$(MAKE) -C $(ASIOD) $@
+	for dir in $(SUBDIR); do $(MAKE) -C $$dir $@; done
+
+.phony: $(STDTAR) $(SPCTAR)
+$(SPCTAR):
 	for dir in $(SUBDIR); do $(MAKE) -C $$dir $@; done
 
 $(ASIOD)/Makefile:
