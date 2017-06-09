@@ -84,10 +84,11 @@ int buffer_parse_detector(const char *b, string pattern)
 
 void Server::act(int s, int id)
 {
-  int n, i, m, key;
-  string file_path, token;
+  int n, i, m, key, up_p, co_p, new_prot_p;
+  string file_path, token, up_m, co_m, new_prot_m;
   string this_con = ME + to_string(id);
   char *comm_buf = new char[SV_MAX_BUF];
+  FILE *f;
   bzero(comm_buf, SV_MAX_BUF);
   m = read(s, comm_buf, SV_MAX_BUF - 1);
   log -> record(this_con, "new connection");
@@ -116,11 +117,28 @@ void Server::act(int s, int id)
     if(key >= 0)
     {
       token = get_next_token(comm_buf, key);
+      up_p = buffer_parse_detector(comm_buf, "Upgrade:");
+      if(up_p >= 0)
+      {
+        up_m = get_next_token(comm_buf, up_p);
+      }
+      co_p = buffer_parse_detector(comm_buf, "Connection:");
+      if(co_p >= 0)
+      {
+        co_m = get_next_token(comm_buf, co_p);
+      }
+      new_prot_p = buffer_parse_detector(comm_buf, "Sec-WebSocket-Protocol:");
+      if(new_prot_p >= 0)
+      {
+        new_prot_m = get_next_token(comm_buf, new_prot_p);
+      }
+      goto up_ws;
     }
+
 // finished parsing
     bzero(comm_buf, m);
 // deliverr the file
-    FILE *f = fopen(file_path.c_str(), "r");
+    f = fopen(file_path.c_str(), "r");
     if(f)
     {
       log -> record(this_con, "file found");
@@ -142,12 +160,31 @@ write_now:
     }
   }
 // update to ws if required
+up_ws:
   if(key >= 0)
   {
+    // Solve handshake
     bzero(comm_buf, SV_MAX_BUF);
     log -> record(this_con, "Executing websocket handshakira");
     log -> record(this_con, "token is: " + token);
-    // Solve handshake
+    string response = (string)SV_HTTP_SWITCH + '\n';
+    string magic = "????";
+    if(up_p >= 0)
+    {
+      response = response + "Upgrade: " + up_m + '\n';
+    }
+    if(co_p >= 0)
+    {
+      response = response + "Connection: " + co_m + '\n';
+    }
+    response = response + "Sec-WebSocket-Accept: " + magic + '\n';
+    if(new_prot_p >= 0)
+    {
+      response = response + "Sec-WebSocket-Protocol: " + new_prot_m + '\n';
+    }
+    response = response + SV_HTTP_END;
+    // Send handshake
+    write(s, response.c_str(), strlen(response.c_str()));
   }
 // be done with it
   write(s, SV_HTTP_END, 2);
