@@ -55,7 +55,7 @@ void Server::start(Game *game)
   }
 }
 
-int buffer_parse_detector(char *b, const char *pattern)
+int buffer_parse_detector(const char *b, const char *pattern)
 {
   int i = 0, j = 0;
   while(b[i])
@@ -77,7 +77,7 @@ int buffer_parse_detector(char *b, const char *pattern)
   return -1;
 }
 
-int buffer_parse_detector(char *b, string pattern)
+int buffer_parse_detector(const char *b, string pattern)
 {
   return buffer_parse_detector(b, pattern.c_str());
 }
@@ -104,6 +104,11 @@ void Server::act(int s, int id)
     else
     {
       log -> record(this_con, "client asking for file " + file_path);
+      if(buffer_parse_detector(file_path.c_str(), "..") != -1)
+      {
+        log -> record(this_con, "client hacking, managing");
+        file_path = "/not_found.html";
+      }
       file_path = (string)SV_HTML_PATH + file_path;
     }
 // does he want to upgrade to ws?

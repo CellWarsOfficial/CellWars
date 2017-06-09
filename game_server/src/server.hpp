@@ -22,9 +22,9 @@ class Server
   Logger *log;
 };
 
-int buffer_parse_detector(char *b, string pattern);
+int buffer_parse_detector(const char *b, string pattern);
 
-int buffer_parse_detector(char *b, char *pattern);
+int buffer_parse_detector(const char *b, char *pattern);
 
 string get_next_token(char *b, int i);
 
