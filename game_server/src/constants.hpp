@@ -78,6 +78,7 @@
 #define SV_HTML_PATH "../client"
 #define SV_HTTP_OK "HTTP/1.1 200 OK\n\n"
 #define SV_HTTP_NOT_FOUND "HTTP/1.1 404 Not Found\n\n"
+#define SV_HTTP_SWITCH "HTTP/1.1 101 Switching Protocols"
 #define SV_HTTP_END "\r\n"
 
 #endif
