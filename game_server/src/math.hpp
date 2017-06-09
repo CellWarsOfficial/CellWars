@@ -12,7 +12,8 @@ string encode(string input);
 string num_to_str(unsigned long input);
 string str_to_binary(string input);
 string num_to_binary(unsigned long input);
-string encode_six_bits(string input, int index);
+int encode_six_bits(string input, int index);
 int binary_to_num(string input);
+int str_to_num(string input);
 
 #endif

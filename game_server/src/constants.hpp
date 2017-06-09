@@ -67,6 +67,8 @@
  */
 
 #define FIXED_STRING "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+#define BASE_64_TABLE "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+
 /* Server related constants
  */
 #define SV_DEF_PORT 7777
