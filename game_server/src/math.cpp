@@ -13,7 +13,10 @@ string encode(string input)
      long_binary = long_binary + num_to_binary(hash_string[i]);
      i++;
   }
-  long_binary = "10011010110000101101110";
+  //long_binary = "10011010110000101101110";
+  for(int i = 0; i < long_binary.length(); i++)
+  {
+  }
   string encoded = "";
   string buff;
   int idx = 0;
@@ -21,11 +24,9 @@ string encode(string input)
   while(j < long_binary.length())
   {
     idx = encode_six_bits(long_binary, j);
-    printf("%i\n", idx);
     buff = buff + BASE_64_TABLE[idx];
     j = j + 6;
   }
-  printf("%s\n", long_binary.c_str());
   return buff;
 }
 
@@ -76,9 +77,8 @@ int binary_to_num(string input)
 {
   int result;
   int i = 0;
-  for (result = 0; i <= input.length(); i++)
+  for (result = 0; i < input.length(); i++)
   {
-    printf("HERE\n");
     if (input[i] == '1')
       result = (result << 1) | 1;
     else if (input[i] == '0' )
