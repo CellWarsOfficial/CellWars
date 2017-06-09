@@ -83,7 +83,7 @@ install: all uninstall
 .phony: uninstall
 uninstall:
 	-ps -A | grep gameserver | awk '{print "echo " $$1 ";pgrep -P " $$1}' | sh | sed -e 's#^#/bin/kill -2 #' | sh
-  -while pgrep gameserver > /dev/null; do sleep 1; done
+	-while pgrep gameserver > /dev/null; do sleep 1; done
 
 .phony: clean
 clean:
