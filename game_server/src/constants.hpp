@@ -75,7 +75,7 @@
 #define SV_MAX_PORT 65535
 #define SV_MAX_LISTEN 5
 #define SV_MAX_BUF 2000
-#define SV_HTML_PATH "../client"
+#define SV_HTML_PATH "../client/html_js"
 #define SV_HTTP_OK "HTTP/1.1 200 OK\n\n"
 #define SV_HTTP_NOT_FOUND "HTTP/1.1 404 Not Found\n\n"
 #define SV_HTTP_SWITCH "HTTP/1.1 101 Switching Protocols"
