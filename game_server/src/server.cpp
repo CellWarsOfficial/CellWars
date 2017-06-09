@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <cctype>
 #include <thread>
+#include <math.hpp>
 
 #define ME "server"
 
@@ -84,7 +85,7 @@ int buffer_parse_detector(const char *b, string pattern)
 
 void Server::act(int s, int id)
 {
-  int n, i, m, key, up_p, new_prot_p;
+  int n, i, m, key, up_p, new_prot_p, argpos, u, px = 0, py = 0, col = 0;
   string file_path, token, up_m, new_prot_m;
   string this_con = ME + to_string(id);
   char *comm_buf = new char[SV_MAX_BUF];
@@ -97,6 +98,28 @@ void Server::act(int s, int id)
   {
 // what's the client looking for
     file_path = get_next_token(comm_buf, i);
+    argpos = buffer_parse_detector(file_path.c_str(), "?");
+    if(argpos >= 0)
+    {
+      for(u = argpos; file_path[u] != '='; u++)
+      while(isdigit((int)file_path[u]))
+      {
+        px = px * 10 + (int)(file_path[u] - '0');
+      }
+      for(; file_path[u] != '='; u++)
+      while(isdigit((int)file_path[u]))
+      {
+        py = py * 10 + (int)(file_path[u] - '0');
+      }
+      for(; file_path[u] != '='; u++)
+      while(isdigit((int)file_path[u]))
+      {
+        col = col * 10 + (int)(file_path[u] - '0');
+      }
+      game -> user_say(px, py, (CELL_TYPE)col);
+      log -> record(this_con, "user_move");
+      file_path = "/";
+    }
     if(file_path.compare("/") == 0)
     {
       log -> record(this_con, "client asking for index");
@@ -163,7 +186,7 @@ up_ws:
     log -> record(this_con, "Executing websocket handshakira");
     log -> record(this_con, "token is: " + token);
     string response = (string)SV_HTTP_SWITCH + '\n';
-    string magic = "????";
+    string magic = encode(token);
     response = response + "Connection: Upgrade\n";
     if(up_p >= 0)
     {
@@ -175,8 +198,10 @@ up_ws:
       response = response + "Sec-WebSocket-Protocol: " + new_prot_m + '\n';
     }
     response = response + SV_HTTP_END;
+    log -> record(this_con, response  );
     // Send handshake
     write(s, response.c_str(), strlen(response.c_str()));
+    while(1);
   }
 // be done with it
   write(s, SV_HTTP_END, 2);

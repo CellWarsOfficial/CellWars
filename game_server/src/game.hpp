@@ -9,6 +9,7 @@
 #include <map>
 #include <mutex>
 #include <cstdlib>
+#include <string>
 
 #define GFLAG_running flags&JUST_31_MASK
 #define GFLAG_stepped_tick flags&JUST_30_MASK
@@ -24,6 +25,8 @@ class Game
   Game(DB_conn* db, Logger *log);
   void *start(FLAG_TYPE f, int gtc, int w);
   int get_status();
+  void user_say(int px, int py, CELL_TYPE t);
+  string user_want(int px1, int py1, int px2, int py2);
   void resume_running();
   void stop_running();
   void slow_termination();

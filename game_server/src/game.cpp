@@ -214,6 +214,22 @@ void Game::up_db()
   log -> record(ME, "Database updated");
 }
 
+void Game::user_say(int px, int py, CELL_TYPE col)
+{
+  if(!valid_coordonate(px, py))
+  {
+    return;
+  }
+  std::map<uint64_t,Block*>::iterator find_res;
+  find_res = super_node.find(0);
+  find_res -> second -> map[px][py] = col;
+}
+
+string Game::user_want(int px1, int py1, int px2, int py2)
+{
+  return "";
+}
+
 /* clean_up assumes FR and database are in sync, as it is normally called
  * after a crank has finished.
  */

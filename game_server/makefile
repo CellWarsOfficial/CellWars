@@ -13,14 +13,14 @@ IGNORE = >/dev/null 2>&1
 KILLCOM = /bin/kill -9
 OS := $(shell uname)
 ifeq ($(OS), Darwin)
-	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11
+	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -lssl -lcrypto -std=c++11
 else
-	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11 -pthread
+	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -lssl -lcrypto -std=c++11 -pthread
 endif
 TFLAGS = 
-OBJECT = $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o $(BINDIR)/game.o $(BINDIR)/server_ui.o $(BINDIR)/log.o $(BINDIR)/crank.o $(BINDIR)/server.o
+OBJECT = $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o $(BINDIR)/game.o $(BINDIR)/server_ui.o $(BINDIR)/log.o $(BINDIR)/crank.o $(BINDIR)/server.o $(BINDIR)/math.o
 TESTS  = $(BINDIR)/log_test $(BINDIR)/crank_test $(BINDIR)/block_test
-LIBS = $(wildcard $(SKDIR)/*.a)
+LIBS = $(wildcard $(SKDIR)/*.a) /usr/lib/x86_64-linux-gnu/libcrypto.a
 
 .phony: all
 all: installdirs $(TARGET) $(TESTS)
@@ -59,6 +59,9 @@ $(BINDIR)/crank.o: $(SRCDIR)/crank.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BINDIR)/server.o: $(SRCDIR)/server.cpp $(HEADER)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BINDIR)/math.o: $(SRCDIR)/math.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BINDIR)/log_test: $(TSTDIR)/log_test.cpp $(BINDIR)/log.o $(TSTDIR)/log_test.hpp $(HEADER)

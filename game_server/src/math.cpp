@@ -1,38 +1,10 @@
 #include <math.hpp>
+#include <openssl/sha.h>
 
-string encode(string input)
-{
-  input = input + FIXED_STRING;
-  std::hash<std::string> str_hash;
-  unsigned long hash = str_hash(input);
-  string hash_string = num_to_str(hash);
-  int i = 0;
-  string long_binary = "";
-  while(i < hash_string.length())
-  {
-     long_binary = long_binary + num_to_binary(hash_string[i]);
-     i++;
-  }
-  //long_binary = "10011010110000101101110";
-  for(int i = 0; i < long_binary.length(); i++)
-  {
-  }
-  string encoded = "";
-  string buff;
-  int idx = 0;
-  int j = 0;
-  while(j < long_binary.length())
-  {
-    idx = encode_six_bits(long_binary, j);
-    buff = buff + BASE_64_TABLE[idx];
-    j = j + 6;
-  }
-  return buff;
-}
-
+/*
 string num_to_str(unsigned long input)
 {
-  std::string output;
+  std::string output = "";
   char q;
   while(input > 0)
   {
@@ -42,14 +14,31 @@ string num_to_str(unsigned long input)
   }
   return output;
 }
+*/
 
-string str_to_binary(string input)
+string sha1_to_binary(unsigned char* input)
 {
-
-
-  return 0;
+  string output = "";
+  int i;
+  unsigned char mask;
+  for(i = 0; i < SHA_DIGEST_LENGTH; i++)
+  {
+    for(mask = 128; mask; mask = mask >> 1)
+    {
+      if(input[i] & mask)
+      {
+        output += '1';
+      }
+      else
+      {
+        output += '0';
+      }
+    }
+  }
+  return output;
 }
 
+/*
 string num_to_binary(unsigned long input)
 {
   string output = "";
@@ -59,6 +48,21 @@ string num_to_binary(unsigned long input)
     input = input / 2;
   }
   return output;
+}
+*/
+
+int binary_to_num(string input)
+{
+  int result;
+  unsigned int i = 0;
+  for (result = 0; i < input.length(); i++)
+  {
+    if (input[i] == '1')
+      result = (result << 1) | 1;
+    else if (input[i] == '0' )
+      result <<= 1;
+  }
+  return result;
 }
 
 int encode_six_bits(string input, int index)
@@ -73,20 +77,7 @@ int encode_six_bits(string input, int index)
   return binary_to_num(buff);
 }
 
-int binary_to_num(string input)
-{
-  int result;
-  int i = 0;
-  for (result = 0; i < input.length(); i++)
-  {
-    if (input[i] == '1')
-      result = (result << 1) | 1;
-    else if (input[i] == '0' )
-      result <<= 1;
-  }
-  return result;
-}
-
+/*
 int str_to_num(string input)
 {
   int result = 0;
@@ -95,4 +86,37 @@ int str_to_num(string input)
     result = result + ((int) input[input.length() - i - 1]) * std::pow(10, i);
   }
   return result;
+}
+*/
+
+string encode(string input)
+{
+  input = input + FIXED_STRING;
+//  std::hash<std::string> str_hash;
+  printf("%s\n", input.c_str());
+//  unsigned long hash = str_hash(input);
+  unsigned char true_hash[SHA_DIGEST_LENGTH];
+  SHA1((const unsigned char*)input.c_str(), sizeof(input) - 1, true_hash);
+  printf("%s\n", true_hash);
+//  string hash_string = num_to_str(hash);
+//  unsigned int i = 0;
+  string long_binary = sha1_to_binary(true_hash);
+/*
+  while(i < hash_string.length())
+  {
+     long_binary = long_binary + num_to_binary(hash_string[i]);
+     i++;
+  }
+*/
+  string encoded = "";
+  string buff;
+  int idx = 0;
+  unsigned int j = 0;
+  while(j < long_binary.length())
+  {
+    idx = encode_six_bits(long_binary, j);
+    buff = buff + BASE_64_TABLE[idx];
+    j = j + 6;
+  }
+  return buff;
 }
