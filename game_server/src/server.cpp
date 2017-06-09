@@ -84,8 +84,8 @@ int buffer_parse_detector(const char *b, string pattern)
 
 void Server::act(int s, int id)
 {
-  int n, i, m, key, up_p, co_p, new_prot_p;
-  string file_path, token, up_m, co_m, new_prot_m;
+  int n, i, m, key, up_p, new_prot_p;
+  string file_path, token, up_m, new_prot_m;
   string this_con = ME + to_string(id);
   char *comm_buf = new char[SV_MAX_BUF];
   FILE *f;
@@ -121,11 +121,6 @@ void Server::act(int s, int id)
       if(up_p >= 0)
       {
         up_m = get_next_token(comm_buf, up_p);
-      }
-      co_p = buffer_parse_detector(comm_buf, "Connection:");
-      if(co_p >= 0)
-      {
-        co_m = get_next_token(comm_buf, co_p);
       }
       new_prot_p = buffer_parse_detector(comm_buf, "Sec-WebSocket-Protocol:");
       if(new_prot_p >= 0)
@@ -169,13 +164,10 @@ up_ws:
     log -> record(this_con, "token is: " + token);
     string response = (string)SV_HTTP_SWITCH + '\n';
     string magic = "????";
+    response = response + "Connection: Upgrade\n";
     if(up_p >= 0)
     {
       response = response + "Upgrade: " + up_m + '\n';
-    }
-    if(co_p >= 0)
-    {
-      response = response + "Connection: " + co_m + '\n';
     }
     response = response + "Sec-WebSocket-Accept: " + magic + '\n';
     if(new_prot_p >= 0)
