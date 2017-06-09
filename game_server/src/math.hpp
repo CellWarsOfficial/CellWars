@@ -6,8 +6,13 @@
 #include<cstring>
 #include<constants.hpp>
 #include<all.hpp>
+#include <cmath>
 
 string encode(string input);
-string get_bin(unsigned long input);
+string num_to_str(unsigned long input);
+string str_to_binary(string input);
+string num_to_binary(unsigned long input);
+string encode_six_bits(string input, int index);
+int binary_to_num(string input);
 
 #endif
