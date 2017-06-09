@@ -12,14 +12,16 @@ $(SPCTAR): all
 	for dir in $(SUBDIR); do $(MAKE) -C $$dir $@; done
 
 $(STDTAR): $(ASIOD)/Makefile
-	$(MAKE) -C $(ASIOD) $@
+	#$(MAKE) -C $(ASIOD) $@
 	for dir in $(SUBDIR); do $(MAKE) -C $$dir $@; done
 
 $(ASIOD)/Makefile:
-	$(DL) $(ASIOLOC)
-	$(UNTAR_BZ2) asio-1.10.6.tar.bz2
-	$(RM) asio-1.10.6.tar.bz2
-	cd $(ASIOD) && ./configure --without-boost
+	#$(DL) $(ASIOLOC)
+	#$(UNTAR_BZ2) asio-1.10.6.tar.bz2
+	#$(RM) asio-1.10.6.tar.bz2
+	#cd $(ASIOD) && ./configure --without-boost
+	mkdir $(ASIOD)
+	touch $(ASIOD)/Makefile
 
 .phony: pings
 pings:
