@@ -16,5 +16,7 @@ int encode_six_bits(string input, int index);
 int binary_to_num(string input);
 int str_to_num(string input);
 string add_padding(string input);
+string encode(string input);
+unsigned char* convert_type(string input);
 
 #endif

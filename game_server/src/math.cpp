@@ -1,11 +1,31 @@
 #include <math.hpp>
+#include <openssl/sha.h>
+#include <sstream>
+#include <iostream>
+
+string encode(string input)
+{
+  input = "Mihai";
+  input = input + FIXED_STRING;
+  size_t len = input.length();
+  SHA1(reinterpret_cast<unsigned char*>(&input), len, hash);
+  stringstream s;
+  s << hash;
+  string hashed_out = s.str();
+  string output = encode_base64(hashed_out);
+  return output;
+}
+
+unsigned char* convert_type(string input)
+{
+  size_t len = input.length();
+  unsigned char* output = (unsigned char*) malloc(len * sizeof(char)); 
+  check_malloc(output);
+  return output;
+}
 
 string encode_base64(string input)
 {
-  //input = input + FIXED_STRING;
-  //std::hash<std::string> str_hash;
-  //unsigned long hash = str_hash(input);
-  //string hash_string = num_to_str(hash);
   int i = 0;
   string long_binary = "";
   while(i < (int) input.length())
