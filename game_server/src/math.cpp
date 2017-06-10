@@ -5,9 +5,9 @@
 
 string encode(string input)
 {
-  input = "Mihai";
   input = input + FIXED_STRING;
   size_t len = input.length();
+  unsigned char hash[20];
   SHA1(reinterpret_cast<unsigned char*>(&input), len, hash);
   stringstream s;
   s << hash;
