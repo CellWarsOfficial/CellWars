@@ -1,5 +1,7 @@
 #!/bin/bash
 
+
+apt-get update
 echo "installing NPM and nodeJS, required for reactJS."
 apt-get install nodejs 
 apt-get install npm

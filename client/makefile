@@ -3,7 +3,7 @@ RM     = rm -rf
 CDIR   = html
 NPMBLD = npm run build
 CD     = cd
-CP     = cp
+CP     = cp -r
 NFHTML = not_found.html
 FILE404 = $(CDIR)/$(NFHTML)
 
@@ -18,7 +18,7 @@ $(CDIR):
 
 .phony: reactf
 reactf:
-	$(CD) ../react/my-app/ && $(NPMBLD) && $(CP) build/* ../../client/$(CDIR)/
+	-$(CD) ../react/my-app/ && $(NPMBLD) && $(CP) build/* ../../client/$(CDIR)/
 
 $(FILE404):
 	$(CP) not_found.html $(CDIR)/
