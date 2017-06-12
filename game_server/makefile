@@ -11,16 +11,17 @@ IP     = 146.169.45.167
 RUNFLG = -db $(IP) -w 10 -log log.l -q
 IGNORE = >/dev/null 2>&1
 KILLCOM = /bin/kill -9
+EFLAGS = -lssl -lcrypto
 OS := $(shell uname)
 ifeq ($(OS), Darwin)
-	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -lssl -lcrypto -std=c++11
+	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11
 else
-	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -lssl -lcrypto -std=c++11 -pthread
+	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11 -pthread
 endif
 TFLAGS = 
 OBJECT = $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o $(BINDIR)/game.o $(BINDIR)/server_ui.o $(BINDIR)/log.o $(BINDIR)/crank.o $(BINDIR)/server.o $(BINDIR)/math.o
 TESTS  = $(BINDIR)/log_test $(BINDIR)/crank_test $(BINDIR)/block_test
-LIBS = $(wildcard $(SKDIR)/*.a) /usr/lib/x86_64-linux-gnu/libcrypto.a
+LIBS = $(wildcard $(SKDIR)/*.a) # /usr/lib/x86_64-linux-gnu/libcrypto.a
 
 .phony: all
 all: installdirs $(TARGET) $(TESTS)
@@ -32,10 +33,10 @@ $(BINDIR):
 	$(NEWDIR) $@
 
 $(TARGET): $(OBJECT)
-	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+	$(CC) $(CFLAGS) $^ $(LIBS) -o $@ $(EFLAGS)
 
 $(BINDIR)/init.o: $(SRCDIR)/init.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
 
 $(BINDIR)/block.o: $(SRCDIR)/block.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -62,7 +63,7 @@ $(BINDIR)/server.o: $(SRCDIR)/server.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BINDIR)/math.o: $(SRCDIR)/math.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
 
 $(BINDIR)/log_test: $(TSTDIR)/log_test.cpp $(BINDIR)/log.o $(TSTDIR)/log_test.hpp $(HEADER)
 	$(CC) $(CFLAGS) $(TFLAGS) $< $(BINDIR)/log.o -o $@

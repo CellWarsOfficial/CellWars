@@ -375,7 +375,7 @@ void check_compression()
           if(unique_map.find(compressed) != unique_map.end())
           {
             fails++;
-            fprintf(stderr, "value %ld obtained from %d and %d not unique", compressed, i, j);
+            fprintf(stderr, "value %llu obtained from %d and %d not unique", compressed, i, j);
           }
           else
           {
