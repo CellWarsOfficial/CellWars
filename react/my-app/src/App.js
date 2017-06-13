@@ -3,8 +3,8 @@ import logo from './logo.svg';
 import pac_thing from './images/pac_thing.png';
 import './App.css';
 
-const width = 20;
-const height = 20; //dimensions of the board
+var width = 20;
+var height = 20; //dimensions of the board
 
 const players = 10; //determines how colours are split between userID's
 var yourUserID = 1;
@@ -24,6 +24,7 @@ var DISPLAYMODE = {
 class App extends Component {
   constructor() {
     super();
+    this.updateDimensions();
     this.state = {
       displayMode: 0,
       isVisible: false,
@@ -49,6 +50,15 @@ class App extends Component {
 
   handleClick() {
     this.setState({isVisible: true});
+  }
+
+  componentDidMount() {
+    window.addEventListener("resize", () => {this.updateDimensions(); this.forceUpdate()});
+  }
+
+  updateDimensions() {
+    width = Math.floor(window.innerWidth / 50);
+    height = Math.floor(window.innerHeight / 50);
   }
 
   render() {
