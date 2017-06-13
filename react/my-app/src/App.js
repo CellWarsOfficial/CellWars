@@ -5,6 +5,7 @@ import './App.css';
 
 var width = 20;
 var height = 20; //dimensions of the board
+const headerHeight = 230;
 
 const players = 10; //determines how colours are split between userID's
 var yourUserID = 1;
@@ -24,7 +25,6 @@ var DISPLAYMODE = {
 class App extends Component {
   constructor() {
     super();
-    this.updateDimensions();
     this.state = {
       displayMode: 0,
       isVisible: false,
@@ -50,15 +50,6 @@ class App extends Component {
 
   handleClick() {
     this.setState({isVisible: true});
-  }
-
-  componentDidMount() {
-    window.addEventListener("resize", () => {this.updateDimensions(); this.forceUpdate()});
-  }
-
-  updateDimensions() {
-    width = Math.floor(window.innerWidth / 50);
-    height = Math.floor(window.innerHeight / 50);
   }
 
   render() {
@@ -280,6 +271,7 @@ class UserPicker extends Component {
 class Grid extends Component {
   constructor() {
     super();
+    this.updateDimensions();
     this.state = {
       board: fittedExample(width, height)
     }
@@ -321,6 +313,23 @@ class Grid extends Component {
     }
     return <div>{rows}</div>;
   }
+
+  componentDidMount() {
+    window.addEventListener("resize", () => {this.updateDimensions(); this.updateBoard(); this.forceUpdate()});
+  }
+
+  updateDimensions() {
+    width = Math.floor(window.innerWidth / 50);
+    height = Math.floor((window.innerHeight - headerHeight) / 50);
+  }
+
+  updateBoard() {
+    this.setState({
+      board: fittedExample(width, height)
+    });
+  }
+
+
 }
 
 
