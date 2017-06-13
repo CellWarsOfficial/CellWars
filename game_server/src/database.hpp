@@ -21,8 +21,8 @@ class DB_conn
   void update_db(Block* block);
   void rewrite_db(const char *f);
   int safe;
-  private:
   void* run_query(int expectation, string s);
+  private:
   Logger *log;
   const char *address;
   int socketid;
