@@ -66,7 +66,6 @@ void Server::act(int s, int id)
   memset(comm_buf, 0, SV_MAX_BUF * sizeof(char));
 
   len = read(s, comm_buf, SV_MAX_BUF - 1);
-  printf("%s\n", comm_buf);
   log -> record(this_con, "new connection");
   point = string_seek(comm_buf, "GET");
 
@@ -80,6 +79,7 @@ void Server::act(int s, int id)
       log -> record(this_con, "requesting WS with token: " + token);
       string answer = encode(token);
       log -> record(this_con, "responding with:" + answer);
+
       string response = (string)SV_HTTP_SWITCH + '\n';
       response = response + "Connection: Upgrade\n";
       point = string_seek(comm_buf, "Upgrade:");
@@ -100,12 +100,15 @@ void Server::act(int s, int id)
                  + '\n';
       }
       response = response + SV_HTTP_END;
+
       point = response.c_str();
       write(s, point, strlen(point));
       memset(comm_buf, 0, len);
       hijack_ws(this_con, s, comm_buf);
       return;
     }
+
+    log -> record(this_con, (string)"standard connection");
     string file_path = string_get_next_token(point, STR_WHITE);
     log -> record(this_con, (string)"client asking for " + file_path);
     FILE *f = get_file(file_path);
@@ -153,30 +156,24 @@ FILE *get_404()
 
 FILE *get_file(string file)
 {
-  printf("%s\n", file.c_str());
   // detect illegal access
-  if(file.find("..") != file.npos)
+  if(file.find("..") != string::npos)
   {
-    printf("hack detected\n");
     return NULL;
   }
   // remove GET arguments
-  unsigned int qmark = file.find('?');
-  if(qmark != file.npos)
+  size_t qmark = file.find("?");
+  if(qmark != string::npos)
   {
-    printf("qmark detected\n");
     file.erase(qmark, SV_MAX_BUF);
   }
   // add index.html default
   if(file.back() == '/')
   {
-    printf("index detected\n");
-    file = file + "index.html";
-    printf("%s\n", file.c_str());
+    file = file + "index.html"; 
   }
   // use path to file
   file = (string)SV_HTML_PATH + file;
-  printf("%s\n", file.c_str());
   // attempt to open
   FILE *f = fopen(file.c_str(), "r");
   return f;
