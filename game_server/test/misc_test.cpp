@@ -95,9 +95,42 @@ int strings_tests()
   if((tok = string_get_next_token("", "")).compare("")){fails++; fprintf(stderr, "mismatch token empty insanity\n got \"%s\" expected nothing\n", tok.c_str());}
   // combination tests
   if((tok = string_get_next_token(string_seek("HTTP1/1 GET /\nws_key:    asdqwemihai", "ws_key:"), STR_WHITE)).compare("asdqwemihai")){fails++; fprintf(stderr, "failed key detection\n");}
-  if((tok = string_get_next_token(string_seek(string_seek("HTTP1/1 GET /index.html?x=1&y=2&t=3\nws_key:    ????????", "?"), "x="), " \n\t\f\r\v&")).compare("1")){fails++; fprintf(stderr, "failed argument parsing for x(first)\n");}
-  if((tok = string_get_next_token(string_seek(string_seek("HTTP1/1 GET /index.html?x=1&y=2&t=3\nws_key:    ????????", "?"), "y="), " \n\t\f\r\v&")).compare("2")){fails++; fprintf(stderr, "failed argument parsing for y(first)\n");}
-  if((tok = string_get_next_token(string_seek(string_seek("HTTP1/1 GET /index.html?x=1&y=2&t=3\nws_key:    ????????", "?"), "z="), " \n\t\f\r\v&")).compare("3")){fails++; fprintf(stderr, "failed argument parsing for z(first)\n");}
+  if(string_get_next_token
+              (string_seek
+                (string_seek
+                  ("HTTP1/1 GET /index.html?x=1&y=2&t=3\nws_key:    ????????"
+                  , "?")
+                , "x=")
+              , " \n\t\f\r\v&")
+     .compare("1"))
+  {fails++; fprintf(stderr, "failed argument parsing for x(first)\n");}
+  if(string_get_next_token
+              (string_seek
+                (string_seek
+                  ("HTTP1/1 GET /index.html?x=1&y=2&t=3\nws_key:    ????????"
+                  , "?")
+                , "y=")
+              , " \n\t\f\r\v&")
+     .compare("2"))
+  {fails++; fprintf(stderr, "failed argument parsing for y(second)\n");}
+  if(string_get_next_token
+              (string_seek
+                (string_seek
+                  ("HTTP1/1 GET /index.html?x=1&y=2&t=3\nws_key:    ????????"
+                  , "?")
+                , "t=")
+              , " \n\t\f\r\v&")
+     .compare("3"))
+  {fails++; fprintf(stderr, "failed argument parsing for t(third)\n");}
+  if(string_get_next_token
+              (string_seek
+                (string_seek
+                  ("HTTP1/1 GET /index.html?x=1&y=2&t=3\nws_key:    ????????"
+                  , "?")
+                , "k=")
+              , " \n\t\f\r\v&")
+     .compare(""))
+  {fails++; fprintf(stderr, "failed argument parsing for t(third)\n");}
   // results and finish
   fprintf(stderr, "%d/%d tests passed - strings\n", tests - fails, tests);
   return fails;

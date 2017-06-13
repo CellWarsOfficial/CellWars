@@ -51,9 +51,13 @@ const char *string_seek(const char *origin, string target)
 
 string string_get_next_token(const char *origin, const char *seps)
 {
-  int i;
+  int i = 0;
   string result = "";
-  for(i = 0; (origin[i] && !in(origin[i], seps)); i++)
+  if(origin == NULL)
+  {
+    return "";
+  }
+  for(; (origin[i] && !in(origin[i], seps)); i++)
   {
     result = result + origin[i];
   }
