@@ -201,7 +201,38 @@ up_ws:
     log -> record(this_con, response  );
     // Send handshake
     write(s, response.c_str(), strlen(response.c_str()));
-    while(1);
+    while(1)
+    {
+      uint8_t mask[4];
+      bzero(comm_buf, SV_MAX_BUF);
+      m = read(s, comm_buf, SV_MAX_BUF - 1);
+      log -> record("WS", (string)"" + comm_buf);
+      for(int i = 0; i <= m; i++)
+      {
+        uint8_t actual_v = (uint8_t)comm_buf[i];
+        if((i > 5) && (i < m))
+        {
+          printf("decoding %u to ", actual_v);
+          actual_v = actual_v ^ mask[(i - 6) % 4];
+          printf("%u using mask %u.\n", actual_v, mask[(i - 6) % 4]);
+        }
+        printf("byte %u : %u", i, actual_v);
+        if(i == 0)
+        {
+          printf(" type byte");
+        }
+        if(i == 1)
+        {
+          printf(" length(or length or length) byte");
+        }
+        if((i >= 2) && (i <= 5))
+        {
+          printf(" length or mask byte #%d", i - 1);
+          mask[i - 2] = (uint8_t)comm_buf[i];
+        }
+        printf("\n");
+      }
+    }
   }
 // be done with it
   write(s, SV_HTTP_END, 2);
