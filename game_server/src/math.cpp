@@ -8,11 +8,11 @@ string encode(string input)
   input = input + FIXED_STRING;
   size_t len = input.length();
   unsigned char hash[20];
-  SHA1(reinterpret_cast<unsigned char*>(&input), len, hash);
-  stringstream s;
-  s << hash;
-  string hashed_out = s.str();
-  string output = encode_base64(hashed_out);
+  SHA1((unsigned char*)(input.c_str()), len, hash);
+//  stringstream s;
+//  s << hash;
+//  string hashed_out = s.str();
+  string output = encode_base64(hash);
   return output;
 }
 
@@ -24,11 +24,11 @@ unsigned char* convert_type(string input)
   return output;
 }
 
-string encode_base64(string input)
+string encode_base64(unsigned char *input)
 {
   int i = 0;
   string long_binary = "";
-  while(i < (int) input.length())
+  while(i < 20)
   {
      long_binary = long_binary + num_to_binary(((int) input[i]));
      i++;
