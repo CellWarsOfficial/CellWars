@@ -4,7 +4,7 @@
 const char *skip_ws(const char *origin)
 {
   int i = 0;
-  for(; in(origin[i], STR_WHITE); i++);
+  for(; in(origin[i], STR_WHITE) && origin[i]; i++);
   return origin + i;
 }
 
@@ -27,7 +27,7 @@ const char *string_seek(const char *origin, const char *target)
   {
     for(j = i; origin[j];)
     {
-      if(target[j] == origin[j])
+      if(target[j - i] == origin[j])
       {
         j++;
       }
@@ -35,7 +35,7 @@ const char *string_seek(const char *origin, const char *target)
       {
         break;
       }
-      if(target[j] == 0)
+      if(target[j - i] == 0)
       {
         return skip_ws(origin + j);
       }
