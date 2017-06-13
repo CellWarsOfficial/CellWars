@@ -46,19 +46,6 @@ string encode_base64(unsigned char *input)
   return buff;
 }
 
-//string num_to_str(unsigned long input)
-//{
-//  std::string output;
-//  char q;
-//  while(input > 0)
-//  {
-//    q = (char) (input % 10 + 48);
-//    output = q + output;
-//    input = input / 10;
-//  }
-//  return output;
-//}
-
 string num_to_binary(unsigned long input)
 {
   string output = "";
