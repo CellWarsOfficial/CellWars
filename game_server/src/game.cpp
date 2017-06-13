@@ -88,18 +88,21 @@ void *Game::start(FLAG_TYPE f, int gtc, int w)
   gen_to_run = gtc;
   plan_time = w;
   action = new Crank();
-  Block **blocks = db_info -> load_from_db(
-    compress_xy(MINX, MINY), 
-    compress_xy(MAXX, MAXY)
-    );
-  for(int i = 0; blocks[i]; i++)
+  if(!GFLAG_nodb)
   {
-    super_node[
-      compress_xy((blocks[i]) -> originx, (blocks[i]) -> originy)
-      ] = blocks[i];
+    Block **blocks = db_info -> load_from_db(
+      compress_xy(MINX, MINY), 
+      compress_xy(MAXX, MAXY)
+      );
+    for(int i = 0; blocks[i]; i++)
+    {
+      super_node[
+        compress_xy((blocks[i]) -> originx, (blocks[i]) -> originy)
+        ] = blocks[i];
+    }
+    delete[] blocks;
+    log -> record(ME, "Imported data from database for startup/resume.");
   }
-  delete[] blocks;
-  log -> record(ME, "Imported data from database for startup/resume.");
   flags = flags | JUST_29_MASK; // set continue flag
   flag_protection.unlock();
 
@@ -135,7 +138,10 @@ void Game::plan_stage(int wait_time)
   log -> record(ME, "Planning time - timeout ");
   
   // TODO instruct network manager to ignore changes from users
-  up_db();
+  if(!GFLAG_nodb)
+  {
+    up_db();
+  }
 }
 
 void Game::crank_stage(int generations)
@@ -147,7 +153,10 @@ void Game::crank_stage(int generations)
     action->crank_for(i -> second, gen_to_run);
   }
   sync_padding();
-  up_db();
+  if(!GFLAG_nodb)
+  {
+    up_db();
+  }
   log -> record(ME, "Crank - finish");
 }
 
