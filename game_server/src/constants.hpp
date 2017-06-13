@@ -60,6 +60,7 @@
  */
 #define DB_PORT 7778
 #define EXPECT_READ 1
+#define EXPECT_CLIENT 2
 #define NO_READ 0
 #define DB_MAX_BUF 2000
 
