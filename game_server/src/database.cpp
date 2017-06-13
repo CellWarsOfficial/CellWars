@@ -88,12 +88,13 @@ void *DB_conn::run_query(int expectation, string s)
     read(socketid, answer_buf, DB_MAX_BUF - 1);
     if(expectation == EXPECT_CLIENT)
     {
-      string ans = "";
+      //TODO: free ans string
+      string *ans = (string *) malloc(DB_MAX_BUF * sizeof(char));
       for(int i = 0; i < DB_MAX_BUF; i++)
       {
-        ans = ans + answer_buf[i];
+        *ans = *ans + answer_buf[i];
       }
-      return (void*) ans.c_str();
+      return (void*) ans;
     }
     int ni = 0;
     int number[3] = {0, 0, 0};
