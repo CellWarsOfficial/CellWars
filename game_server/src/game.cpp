@@ -236,10 +236,29 @@ void Game::user_say(int px, int py, CELL_TYPE col)
 
 string Game::user_want(int px1, int py1, int px2, int py2)
 {
-//make query for all squares between (x1, y1) and (x2, y2)
-// resutl = run_query ()
-  return "";
-  //return result of run query
+  if(px1 > px2)
+  {
+    px1 = px1 + px2;
+    px2 = px1 - px2;
+    px1 = px1 - px2;
+  }
+  if(py1 > py2)
+  {
+    py1 = py1 + py2;
+    py2 = py1 - py2;
+    py1 = py1 - py2;
+  }
+  string query = "SELECT * FROM agents.grid WHERE x>= " + 
+                  std::to_string(px1) + " AND x<= " + std::to_string(px2) + 
+                  " AND y>= " + std::to_string(py1) + " AND y <= " + 
+                  std::to_string(py2) + ";"; 
+  char *result = (char *) db_info->run_query(EXPECT_READ, query);  
+  string output = "";
+  for(int i = 0; (char) result[i] != '\0'; i++)
+  {
+    output = output + result[i];
+  }
+  return output;
 }
 
 /* clean_up assumes FR and database are in sync, as it is normally called
