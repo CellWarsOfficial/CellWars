@@ -81,17 +81,15 @@ void *DB_conn::run_query(int expectation, string s)
 
   //c.socket()->emit("benis");
   //
-  if(expectation)
+  if(expectation == EXPECT_READ)
   {
     struct answer *result = 0;
-    //
     bzero(answer_buf, DB_MAX_BUF);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    while(read(socketid, answer_buf, DB_MAX_BUF - 1) == 0)
+    read(socketid, answer_buf, DB_MAX_BUF - 1);
+    if(expectation == EXPECT_CLIENT)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+      return answer_buf;
     }
-    //
     int ni = 0;
     int number[3] = {0, 0, 0};
     int neg = 1;
