@@ -144,6 +144,11 @@ int main(int argc, char **argv)
       log -> add_file(argv[i]);
       continue;
     }
+    if(equ(argv[i], "-fast_kill", "-fk"))
+    {
+      flags = flags | JUST_27_MASK; // set no database flag
+      continue;
+    }
     fprintf(stderr, "Unrecognised argument \"%s\"\nIgnoring.\n", argv[i]);
   }
   if(db_info == NULL)

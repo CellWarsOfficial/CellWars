@@ -11,10 +11,11 @@
 #include <cstdlib>
 #include <string>
 
-#define GFLAG_running flags&JUST_31_MASK
-#define GFLAG_stepped_tick flags&JUST_30_MASK
-#define GFLAG_continue flags&JUST_29_MASK
-#define GFLAG_started flags&JUST_28_MASK
+#define GFLAG_running (flags&JUST_31_MASK)
+#define GFLAG_stepped_tick (flags&JUST_30_MASK)
+#define GFLAG_continue (flags&JUST_29_MASK)
+#define GFLAG_started (flags&JUST_28_MASK)
+#define GFLAG_nodb (flags&JUST_27_MASK)
 
 /* Object Game is self contained as a process, and is started using start()
  */

@@ -8,7 +8,7 @@ const char *skip_ws(const char *origin)
     return NULL;
   }
   int i = 0;
-  for(; in(origin[i], STR_WHITE) && origin[i]; i++);
+  for(; in(origin[i], STR_WHITE); i++);
   return origin + i;
 }
 
