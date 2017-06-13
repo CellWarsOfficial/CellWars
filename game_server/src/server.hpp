@@ -17,15 +17,16 @@ class Server
   void start(Game *game);
   private:
   void act(int s, int id);
+  void hijack_ws(string this_con, int s, char *comm_buf);
   int socketid;
   Game *game;
   Logger *log;
 };
 
-int buffer_parse_detector(const char *b, string pattern);
+FILE *get_404();
 
-int buffer_parse_detector(const char *b, char *pattern);
+FILE *get_file(string file);
 
-string get_next_token(char *b, int i);
+void catfile(FILE *f, int s, char *buf);
 
 #endif

@@ -5,6 +5,7 @@
 #include <cctype>
 #include <thread>
 #include <math.hpp>
+#include <strings.hpp>
 
 #define ME "server"
 
@@ -56,166 +57,129 @@ void Server::start(Game *game)
   }
 }
 
-int buffer_parse_detector(const char *b, const char *pattern)
-{
-  int i = 0, j = 0;
-  while(b[i])
-  {
-    if(b[i] == pattern[j])
-    {
-      j++;
-      if(pattern[j] == 0)
-      {
-        return i + 1;
-      }
-    }
-    else
-    {
-      j = 0;
-    }
-    i++;
-  }
-  return -1;
-}
-
-int buffer_parse_detector(const char *b, string pattern)
-{
-  return buffer_parse_detector(b, pattern.c_str());
-}
-
 void Server::act(int s, int id)
 {
-  int n, i, m, key, up_p, new_prot_p, argpos, u, px = 0, py = 0, col = 0;
-  string file_path, token, up_m, new_prot_m;
+  int len;
   string this_con = ME + to_string(id);
   char *comm_buf = new char[SV_MAX_BUF];
-  FILE *f;
-  bzero(comm_buf, SV_MAX_BUF);
-  m = read(s, comm_buf, SV_MAX_BUF - 1);
+  const char *point, *key;
+  memset(comm_buf, 0, SV_MAX_BUF * sizeof(char));
+
+  len = read(s, comm_buf, SV_MAX_BUF - 1);
   log -> record(this_con, "new connection");
-  i = buffer_parse_detector(comm_buf, "GET");
-  if(i >= 0) // no get = ignore straight away
+  point = string_seek(comm_buf, "GET");
+
+  if(point) // Expect HTTP protocol
   {
-// what's the client looking for
-    file_path = get_next_token(comm_buf, i);
-    argpos = buffer_parse_detector(file_path.c_str(), "?");
-    if(argpos >= 0)
+    key = string_seek(comm_buf, "Sec-WebSocket-Key:");
+    if(key)
     {
-      for(u = argpos; file_path[u] != '='; u++)
-      while(isdigit((int)file_path[u]))
+      log -> record(this_con, "Executing websocket handshakira");
+      string token = string_get_next_token(key, STR_WHITE);
+      log -> record(this_con, "requesting WS with token: " + token);
+      string answer = encode(token);
+      log -> record(this_con, "responding with:" + answer);
+      string response = (string)SV_HTTP_SWITCH + '\n';
+      response = response + "Connection: Upgrade\n";
+      point = string_seek(comm_buf, "Upgrade:");
+      if(point)
       {
-        px = px * 10 + (int)(file_path[u] - '0');
+        response = response
+                 + "Upgrade: "
+                 + string_get_next_token(point, STR_WHITE)
+                 + '\n';
       }
-      for(; file_path[u] != '='; u++)
-      while(isdigit((int)file_path[u]))
+      response = response + "Sec-WebSocket-Accept: " + answer + '\n';
+      point = string_seek(comm_buf, "Sec-WebSocket-Protocol:");
+      if(point)
       {
-        py = py * 10 + (int)(file_path[u] - '0');
+        response = response
+                 + "Sec-WebSocket-Protocol: "
+                 + string_get_next_token(point, STR_WHITE)
+                 + '\n';
       }
-      for(; file_path[u] != '='; u++)
-      while(isdigit((int)file_path[u]))
-      {
-        col = col * 10 + (int)(file_path[u] - '0');
-      }
-      game -> user_say(px, py, (CELL_TYPE)col);
-      log -> record(this_con, "user_move");
-      file_path = "/";
+      response = response + SV_HTTP_END;
+      point = response.c_str();
+      write(s, point, strlen(point));
+      memset(comm_buf, 0, len);
+      hijack_ws(this_con, s, comm_buf);
+      return;
     }
-    if(file_path.compare("/") == 0)
+    string file_path = string_get_next_token(point, STR_WHITE);
+    log -> record(this_con, (string)"client asking for " + file_path);
+    FILE *f = get_file(file_path);
+    int expect = 200;
+    if(f == NULL)
     {
-      log -> record(this_con, "client asking for index");
-      file_path = (string)SV_HTML_PATH + "/index.html";
-    }
-    else
-    {
-      log -> record(this_con, "client asking for file " + file_path);
-      if(buffer_parse_detector(file_path.c_str(), "..") != -1)
-      {
-        log -> record(this_con, "client hacking, managing");
-        file_path = "/not_found.html";
-      }
-      file_path = (string)SV_HTML_PATH + file_path;
-    }
-// does he want to upgrade to ws?
-    key = buffer_parse_detector(comm_buf, "Sec-WebSocket-Key:");
-    if(key >= 0)
-    {
-      token = get_next_token(comm_buf, key);
-      up_p = buffer_parse_detector(comm_buf, "Upgrade:");
-      if(up_p >= 0)
-      {
-        up_m = get_next_token(comm_buf, up_p);
-      }
-      new_prot_p = buffer_parse_detector(comm_buf, "Sec-WebSocket-Protocol:");
-      if(new_prot_p >= 0)
-      {
-        new_prot_m = get_next_token(comm_buf, new_prot_p);
-      }
-      goto up_ws;
+      f = get_404();
+      expect = 404;
     }
 
-// finished parsing
-    bzero(comm_buf, m);
-// deliverr the file
-    f = fopen(file_path.c_str(), "r");
-    if(f)
+    if(expect == 200)
     {
-      log -> record(this_con, "file found");
+      log -> record(this_con, "200 HIT");
       write(s, SV_HTTP_OK, strlen(SV_HTTP_OK));
-write_now:
-      while((n = fread(comm_buf, 1, SV_MAX_BUF - 1, f)) > 0)
-      {
-        write(s, comm_buf, n);
-      }
-      fclose(f);
+      catfile(f, s, comm_buf);
     }
-    else
+    if(expect == 404)
     {
-      log -> record(this_con, "file not found");
+      log -> record(this_con, "404 MISS");
       write(s, SV_HTTP_NOT_FOUND, strlen(SV_HTTP_NOT_FOUND));
-      file_path = (string)SV_HTML_PATH + "/not_found.html";
-      f = fopen(file_path.c_str(), "r");
-      goto write_now;
+      catfile(f, s, comm_buf);
     }
   }
-// update to ws if required
-up_ws:
-  if(key >= 0)
-  {
-    // Solve handshake
-    bzero(comm_buf, SV_MAX_BUF);
-    log -> record(this_con, "Executing websocket handshakira");
-    log -> record(this_con, "token is: " + token);
-    string response = (string)SV_HTTP_SWITCH + '\n';
-    string magic = encode(token);
-    response = response + "Connection: Upgrade\n";
-    if(up_p >= 0)
-    {
-      response = response + "Upgrade: " + up_m + '\n';
-    }
-    response = response + "Sec-WebSocket-Accept: " + magic + '\n';
-    if(new_prot_p >= 0)
-    {
-      response = response + "Sec-WebSocket-Protocol: " + new_prot_m + '\n';
-    }
-    response = response + SV_HTTP_END;
-    log -> record(this_con, response  );
-    // Send handshake
-    write(s, response.c_str(), strlen(response.c_str()));
-    while(1);
-  }
-// be done with it
+
   write(s, SV_HTTP_END, 2);
   delete comm_buf;
   close(s);
+  return;
 }
 
-string get_next_token(char *b, int i)
+void Server::hijack_ws(string this_con, int s, char *comm_buf)
 {
-  string result = "";
-  for(; (isspace(b[i]) && (b[i])); i++);
-  for(; (!isspace(b[i]) && (b[i])); i++)
+  log -> record(this_con, "Websocket started");
+  while(1);
+}
+
+FILE *get_404()
+{
+  // Deliver file 404
+  FILE *f;
+  f = fopen(SV_HTML_MISSING, "r");
+  check_malloc(f);
+  return f;
+}
+
+FILE *get_file(string file)
+{
+  // detect illegal access
+  if(file.find(".."))
   {
-    result = result + b[i];
+    return NULL;
   }
-  return result;
+  // remove GET arguments
+  int qmark = file.find('?');
+  if(qmark)
+  {
+    file.erase(qmark, SV_MAX_BUF);
+  }
+  // add index.html default
+  if(file.back() == '/')
+  {
+    file = file + "index.html";
+  }
+  // use path to file
+  file = (string)SV_HTML_PATH + file;
+  // attempt to open
+  FILE *f = fopen(file.c_str(), "r");
+  return f;
+}
+
+void catfile(FILE *f, int s, char *buf)
+{
+  int n;
+  while((n = fread(buf, 1, SV_MAX_BUF - 1, f)) > 0)
+  {
+    write(s, buf, n);
+  }
 }
