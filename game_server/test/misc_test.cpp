@@ -94,7 +94,9 @@ int strings_tests()
   tests++;
   if((tok = string_get_next_token("", "")).compare("")){fails++; fprintf(stderr, "mismatch token empty insanity\n got \"%s\" expected nothing\n", tok.c_str());}
   // combination tests
+  tests++;
   if((tok = string_get_next_token(string_seek("HTTP1/1 GET /\nws_key:    asdqwemihai", "ws_key:"), STR_WHITE)).compare("asdqwemihai")){fails++; fprintf(stderr, "failed key detection\n");}
+  tests++;
   if(string_get_next_token
               (string_seek
                 (string_seek
@@ -104,6 +106,7 @@ int strings_tests()
               , " \n\t\f\r\v&")
      .compare("1"))
   {fails++; fprintf(stderr, "failed argument parsing for x(first)\n");}
+  tests++;
   if(string_get_next_token
               (string_seek
                 (string_seek
@@ -113,6 +116,7 @@ int strings_tests()
               , " \n\t\f\r\v&")
      .compare("2"))
   {fails++; fprintf(stderr, "failed argument parsing for y(second)\n");}
+  tests++;
   if(string_get_next_token
               (string_seek
                 (string_seek
@@ -122,6 +126,7 @@ int strings_tests()
               , " \n\t\f\r\v&")
      .compare("3"))
   {fails++; fprintf(stderr, "failed argument parsing for t(third)\n");}
+  tests++;
   if(string_get_next_token
               (string_seek
                 (string_seek
@@ -131,6 +136,21 @@ int strings_tests()
               , " \n\t\f\r\v&")
      .compare(""))
   {fails++; fprintf(stderr, "failed argument parsing for t(third)\n");}
+  // null propagation testing
+  tests++;
+  if(in('U', NULL)){fails++; fprintf(stderr, "Null propagation failing for in\n");}
+  tests++;
+  if(skip_ws(NULL)){fails++; fprintf(stderr, "Null propagation failing for skip_ws\n");}
+  tests++;
+  if(string_seek(NULL, "qwe")){fails++; fprintf(stderr, "Null propagation failing for seek(origin)\n");}
+  tests++;
+  if(string_seek("qwe", NULL)){fails++; fprintf(stderr, "Null propagation failing for seek(target)\n");}
+  tests++;
+  if(string_seek(NULL, NULL)){fails++; fprintf(stderr, "Null propagation failing for seek(both)\n");}
+  tests++;
+  if(string_get_next_token(FIXED_STRING, NULL).compare(FIXED_STRING)){fails++; fprintf(stderr, "Null propagation failing for tokenizer when it should work\n");}
+  tests++;
+  if(string_get_next_token(NULL, FIXED_STRING).compare("")){fails++; fprintf(stderr, "Null propagation failing for tokenizer when it should fail\n");}
   // results and finish
   fprintf(stderr, "%d/%d tests passed - strings\n", tests - fails, tests);
   return fails;

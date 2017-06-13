@@ -3,6 +3,10 @@
 
 const char *skip_ws(const char *origin)
 {
+  if(origin == NULL)
+  {
+    return NULL;
+  }
   int i = 0;
   for(; in(origin[i], STR_WHITE) && origin[i]; i++);
   return origin + i;
@@ -10,6 +14,10 @@ const char *skip_ws(const char *origin)
 
 bool in(char value, const char *list)
 {
+  if(list == NULL)
+  {
+    return false;
+  }
   for(int i = 0; list[i]; i++)
   {
     if(value == list[i])
@@ -22,6 +30,10 @@ bool in(char value, const char *list)
 
 const char *string_seek(const char *origin, const char *target)
 {
+  if((origin == NULL) || (target == NULL))
+  {
+    return NULL;
+  }
   int i = 0, j;
   for(; origin[i]; i++)
   {

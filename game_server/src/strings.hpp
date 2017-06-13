@@ -12,7 +12,7 @@ const char *skip_ws(const char *origin);
 
 const char *string_seek(const char *origin, const char *target);
 
-const char *string_seek(const char *origin, string *target);
+const char *string_seek(const char *origin, string target);
 
 string string_get_next_token(const char *origin, const char *seps);
 
