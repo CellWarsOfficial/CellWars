@@ -238,15 +238,15 @@ string Game::user_want(int px1, int py1, int px2, int py2)
 {
   if(px1 > px2)
   {
-    px1 = px1 + px2;
-    px2 = px1 - px2;
-    px1 = px1 - px2;
+    int temp = px1;
+    px1 = px2;
+    px2 = temp;
   }
   if(py1 > py2)
   {
-    py1 = py1 + py2;
-    py2 = py1 - py2;
-    py1 = py1 - py2;
+    int temp = px1;
+    px1 = px2;
+    px2 = temp;
   }
   string query = "SELECT * FROM agents.grid WHERE x>= " + 
                   std::to_string(px1) + " AND x<= " + std::to_string(px2) + 
@@ -263,9 +263,10 @@ string Game::user_want(int px1, int py1, int px2, int py2)
 
 void Game::user_does(int x, int y, CELL_TYPE t)
 {
-
-
-
+  string query = "UPDATE agents.grid SET CELL_TYPE = '" + std::to_string(t) +
+                 "' WHERE x = " + std::to_string(x) + " AND y = " + 
+                 std::to_string(y) + ";";
+  db_info->run_query(EXPECT_CLIENT, query);  
 }
 
 /* clean_up assumes FR and database are in sync, as it is normally called
