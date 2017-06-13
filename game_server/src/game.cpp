@@ -227,7 +227,10 @@ void Game::user_say(int px, int py, CELL_TYPE col)
 
 string Game::user_want(int px1, int py1, int px2, int py2)
 {
+//make query for all squares between (x1, y1) and (x2, y2)
+// resutl = run_query ()
   return "";
+  //return result of run query
 }
 
 /* clean_up assumes FR and database are in sync, as it is normally called
