@@ -238,15 +238,15 @@ string Game::user_want(int px1, int py1, int px2, int py2)
 {
   if(px1 > px2)
   {
-    px1 = px1 + px2;
-    px2 = px1 - px2;
-    px1 = px1 - px2;
+    int temp = px1;
+    px1 = px2;
+    px2 = temp;
   }
   if(py1 > py2)
   {
-    py1 = py1 + py2;
-    py2 = py1 - py2;
-    py1 = py1 - py2;
+    int temp = px1;
+    px1 = px2;
+    px2 = temp;
   }
   string query = "SELECT * FROM agents.grid WHERE x>= " + 
                   std::to_string(px1) + " AND x<= " + std::to_string(px2) + 
