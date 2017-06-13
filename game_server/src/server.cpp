@@ -60,15 +60,15 @@ void Server::start(Game *game)
 void Server::act(int s, int id)
 {
   int len;
-  string this_con = ME + to_string(id);
+  string this_con = (string)"conn " + to_string(id);
   char *comm_buf = new char[SV_MAX_BUF];
   const char *point, *key;
   memset(comm_buf, 0, SV_MAX_BUF * sizeof(char));
 
   len = read(s, comm_buf, SV_MAX_BUF - 1);
+  printf("%s\n", comm_buf);
   log -> record(this_con, "new connection");
   point = string_seek(comm_buf, "GET");
-  log -> record(this_con, (string)"asd");
 
   if(point) // Expect HTTP protocol
   {
@@ -106,7 +106,6 @@ void Server::act(int s, int id)
       hijack_ws(this_con, s, comm_buf);
       return;
     }
-    log -> record(this_con, (string)"asd");
     string file_path = string_get_next_token(point, STR_WHITE);
     log -> record(this_con, (string)"client asking for " + file_path);
     FILE *f = get_file(file_path);
@@ -154,24 +153,30 @@ FILE *get_404()
 
 FILE *get_file(string file)
 {
+  printf("%s\n", file.c_str());
   // detect illegal access
   if(file.find(".."))
   {
+    printf("hack detected\n");
     return NULL;
   }
   // remove GET arguments
   int qmark = file.find('?');
   if(qmark)
   {
+    printf("qmark detected\n");
     file.erase(qmark, SV_MAX_BUF);
   }
   // add index.html default
   if(file.back() == '/')
   {
+    printf("index detected\n");
     file = file + "index.html";
+    printf("%s\n", file.c_str());
   }
   // use path to file
   file = (string)SV_HTML_PATH + file;
+  printf("%s\n", file.c_str());
   // attempt to open
   FILE *f = fopen(file.c_str(), "r");
   return f;
