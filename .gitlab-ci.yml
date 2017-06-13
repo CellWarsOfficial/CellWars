@@ -1,3 +1,11 @@
+image: node:8.0.0
+
+cache:
+    untracked: true
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+        - react/my-app/node_modules/
+
 stages:
     - build
     - test
@@ -27,7 +35,6 @@ deploy_job:
     stage: deploy
     only:
         - master
-        - ci
     script:
-        - apt-get update && apt-get install -y netcat
+        - apt-get update && apt-get install -y netcat   # either this or make a seperate depend.sh for deploy
         - make pings
