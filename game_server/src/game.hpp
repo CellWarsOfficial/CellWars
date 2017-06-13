@@ -27,6 +27,7 @@ class Game
   int get_status();
   void user_say(int px, int py, CELL_TYPE t);
   string user_want(int px1, int py1, int px2, int py2);
+  void user_does(int x, int y, CELL_TYPE t);
   void resume_running();
   void stop_running();
   void slow_termination();

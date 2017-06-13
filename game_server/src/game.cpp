@@ -252,6 +252,13 @@ string Game::user_want(int px1, int py1, int px2, int py2)
   return output;
 }
 
+void Game::user_does(int x, int y, CELL_TYPE t)
+{
+
+
+
+}
+
 /* clean_up assumes FR and database are in sync, as it is normally called
  * after a crank has finished.
  */
