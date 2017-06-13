@@ -142,7 +142,8 @@ void Server::act(int s, int id)
 
 void Server::hijack_ws(string this_con, int s, char *comm_buf)
 {
-  const char *point, *virtual_buf;
+  const char *point;
+  char *virtual_buf;
   int len, delta;
   uint32_t mask;
   uint8_t size_desc;
@@ -179,9 +180,49 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
       px2 = stoi(string_get_next_token(point, STR_WHITE));
       point = string_seek(virtual_buf, "py2=");
       py2 = stoi(string_get_next_token(point, STR_WHITE));
-      printf("will query region %d %d %d %d\n", px1, py1, px2, py2);
-      continue;
+      log -> record(this_con, "will query " 
+                              + to_string(px1) + " " 
+                              + to_string(py1) + " " 
+                              + to_string(px2) + " " 
+                              + to_string(py2)
+                              );
       string to_send = game -> user_want(px1, py1, px2, py2);
+      memset(comm_buf, 0, len * sizeof(char));
+      len = to_send.length();
+      delta = 0;
+      comm_buf[delta] = 129; // text frame
+      delta += 1; // skip type
+      if(len < 126)
+      {
+        log -> record(this_con, "Answer is petite");
+        comm_buf[delta] = (char)len; // size fits
+        delta += 1; // skip size
+      }
+      if((len >= 126) && (len <= 65535))
+      {
+        log -> record(this_con, "Answer is eh");
+        comm_buf[delta] = 126; // 2 extra bytes
+        comm_buf[delta + 1] = (char)((len >> 8) % 256);
+        comm_buf[delta + 2] = (char)(len % 256);
+        delta += 3; // skip size
+      }
+      if(len > 65535)
+      {
+        log -> record(this_con, "Answer is fat");
+        comm_buf[delta] = 127; // 8 extra bytes, God help us!
+        int auxl = len;
+        for(int i = 8; i; i--)
+        {
+          comm_buf[delta + i] = (char)(auxl % 256);
+          auxl = auxl >> 8;
+        }
+        delta += 9; // skip size
+      }
+      // Heck, mask can be added here!
+      virtual_buf = comm_buf + delta;
+      to_send.copy(virtual_buf, len, 0);
+      len += delta;
+      write(s, comm_buf, len);
     }
     point = string_seek(virtual_buf, "UPDATE");
     if(point)
@@ -195,8 +236,11 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
       py = stoi(string_get_next_token(point, STR_WHITE));
       point = string_seek(virtual_buf, "t=");
       t = (CELL_TYPE)stoi(string_get_next_token(point, STR_WHITE));
-      printf("will update %d %d %d\n", px, py, (int)t);
-      continue;
+      log -> record(this_con, "will update " 
+                              + to_string(px) + " " 
+                              + to_string(py) + " " 
+                              + to_string(t)
+                              );
       game -> user_does(px, py, t);
     }
     memset(comm_buf, 0, len * sizeof(char));
