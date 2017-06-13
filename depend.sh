@@ -8,14 +8,16 @@ apt-get --assume-yes install npm
 ln -s /usr/bin/nodejs /urs/bin/node
 echo "updating nodeJS to latest version using n."
 cd react/my-app/
-npm install n -g
-npm install npm@latest -g
+npm install $1 n
+npm install $1 npm@latest
 n stable
 echo "updating npm to latest version."
 npm update
 npm cache clean --force
 echo "downloading reactJS."
-npm install -g react
-npm install -g react-dom
-npm install -g create-react-app
-npm install -g react-scripts
+npm install $1 react
+npm install $1 react-dom
+npm install $1 create-react-app
+npm install $1 react-scripts
+echo "updating again to make sure"
+npm update
