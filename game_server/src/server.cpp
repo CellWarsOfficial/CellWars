@@ -142,6 +142,7 @@ void Server::act(int s, int id)
 
 void Server::hijack_ws(string this_con, int s, char *comm_buf)
 {
+  const char *point, *virtual_buf;
   int len, delta;
   uint32_t mask;
   uint8_t size_desc;
@@ -161,9 +162,43 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
     }
     mask = *((uint32_t *)(comm_buf + delta));
     delta += sizeof(uint32_t); // skip mask
-    xormask((uint32_t *)(comm_buf + delta), mask);
+    virtual_buf = comm_buf + delta;
+    xormask((uint32_t *)virtual_buf, mask);
     memset(comm_buf + len, 0, SV_PROCESS_ERROR);
-    printf("%s", comm_buf + delta);
+    virtual_buf = comm_buf + delta;
+    point = string_seek(virtual_buf, "QUERY");
+    if(point)
+    {
+      log -> record(this_con, "Query received");
+      int px1, py1, px2, py2;
+      point = string_seek(virtual_buf, "px1=");
+      px1 = stoi(string_get_next_token(point, STR_WHITE));
+      point = string_seek(virtual_buf, "py1=");
+      py1 = stoi(string_get_next_token(point, STR_WHITE));
+      point = string_seek(virtual_buf, "px2=");
+      px2 = stoi(string_get_next_token(point, STR_WHITE));
+      point = string_seek(virtual_buf, "py2=");
+      py2 = stoi(string_get_next_token(point, STR_WHITE));
+      printf("will query region %d %d %d %d\n", px1, py1, px2, py2);
+      continue;
+      string to_send = game -> user_want(px1, py1, px2, py2);
+    }
+    point = string_seek(virtual_buf, "UPDATE");
+    if(point)
+    {
+      log -> record(this_con, "Update received");
+      int px, py;
+      CELL_TYPE t;
+      point = string_seek(virtual_buf, "px=");
+      px = stoi(string_get_next_token(point, STR_WHITE));
+      point = string_seek(virtual_buf, "py=");
+      py = stoi(string_get_next_token(point, STR_WHITE));
+      point = string_seek(virtual_buf, "t=");
+      t = (CELL_TYPE)stoi(string_get_next_token(point, STR_WHITE));
+      printf("will update %d %d %d\n", px, py, (int)t);
+      continue;
+      game -> user_does(px, py, t);
+    }
     memset(comm_buf, 0, len * sizeof(char));
   }
 }
