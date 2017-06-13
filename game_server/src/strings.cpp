@@ -75,3 +75,30 @@ string string_get_next_token(const char *origin, const char *seps)
   }
   return result;
 }
+
+void unmask(uint32_t *buf, uint32_t mask)
+{
+  int i = 0;
+  for(; buf[i]; i++)
+  {
+    buf[i] = buf[i] & mask;
+  }
+}
+
+void xormask(uint32_t *buf, uint32_t mask)
+{
+  int i = 0;
+  for(; buf[i]; i++)
+  {
+    buf[i] = buf[i] ^ mask;
+  }
+}
+
+void print_bytes(uint8_t *buf, int len)
+{
+  int i = 0;
+  for(; i < len; i++)
+  {
+    printf("buf[%d] = %u\n", i, buf[i]);
+  }
+}

@@ -26,6 +26,7 @@ Server::Server(int port, Logger *l)
   if(bind(socketid, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
   {
     log -> record(ME, "Failed to bind socket.");
+    exit(0);
     return;
   }
   listen(socketid, SV_MAX_LISTEN);
@@ -141,8 +142,30 @@ void Server::act(int s, int id)
 
 void Server::hijack_ws(string this_con, int s, char *comm_buf)
 {
+  int len, delta;
+  uint32_t mask;
+  uint8_t size_desc;
   log -> record(this_con, "Websocket started");
-  while(1);
+  while((len = read(s, comm_buf, SV_MAX_BUF - SV_PROCESS_ERROR)))
+  {
+    delta = 1; // skip type
+    size_desc = ((uint8_t *)comm_buf)[delta];
+    delta += 1; // default 1 byte length
+    if(size_desc == 254)
+    {
+      delta += 2; // 2 more bytes for size
+    }
+    if(size_desc == 255)
+    {
+      delta += 8; // 8 more bytes for size
+    }
+    mask = *((uint32_t *)(comm_buf + delta));
+    delta += sizeof(uint32_t); // skip mask
+    xormask((uint32_t *)(comm_buf + delta), mask);
+    memset(comm_buf + len, 0, SV_PROCESS_ERROR);
+    printf("%s", comm_buf + delta);
+    memset(comm_buf, 0, len * sizeof(char));
+  }
 }
 
 FILE *get_404()

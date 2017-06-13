@@ -44,6 +44,7 @@
 #define JUST_28_MASK 8
 #define JUST_27_MASK 16
 #define FULL_MASK 0xffffffff
+#define NO_MSB_X4_MASK 0x7f7f7f7f
 
 /* Game limit related constants
  */
@@ -75,7 +76,8 @@
 #define SV_DEF_PORT 7777
 #define SV_MAX_PORT 65535
 #define SV_MAX_LISTEN 5
-#define SV_MAX_BUF 2000
+#define SV_MAX_BUF 5000
+#define SV_PROCESS_ERROR 10
 #define SV_HTML_PATH "../client/html"
 #define SV_HTML_MISSING "../client/html/not_found.html"
 #define SV_HTTP_OK "HTTP/1.1 200 OK\n\n"
