@@ -15,3 +15,5 @@ bin/
 nohup.out
 # exclude asio folder
 asio-*/
+# exclude html output folder
+html/

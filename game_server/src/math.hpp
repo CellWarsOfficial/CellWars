@@ -8,7 +8,7 @@
 #include<all.hpp>
 #include <cmath>
 
-string encode_base64(string input);
+string encode_base64(unsigned char *input);
 string num_to_str(unsigned long input);
 string str_to_binary(string input);
 string num_to_binary(unsigned long input);

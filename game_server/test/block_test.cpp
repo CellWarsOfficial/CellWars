@@ -1,6 +1,7 @@
 #include "block_test.hpp"
 #include <cstring>
 #include <cstdio>
+#include <cinttypes>
 #include <set>
 
 using namespace std;
@@ -375,7 +376,7 @@ void check_compression()
           if(unique_map.find(compressed) != unique_map.end())
           {
             fails++;
-            fprintf(stderr, "value %ld obtained from %d and %d not unique", compressed, i, j);
+            fprintf(stderr, "value %" PRIu64 " obtained from %d and %d not unique", compressed, i, j);
           }
           else
           {

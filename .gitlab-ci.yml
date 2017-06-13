@@ -15,7 +15,6 @@ test_job:
     only:
         - master
     script:
-        - ./depend.sh
         - make check
 
 cleanup_job:
@@ -30,6 +29,5 @@ deploy_job:
         - master
         - ci
     script:
-        - ./depend.sh
         - apt-get update && apt-get install -y netcat
         - make pings
