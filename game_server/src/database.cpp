@@ -85,7 +85,10 @@ void *DB_conn::run_query(int expectation, string s)
   {
     struct answer *result = 0;
     bzero(answer_buf, DB_MAX_BUF);
-    read(socketid, answer_buf, DB_MAX_BUF - 1);
+    while(read(socketid, answer_buf, DB_MAX_BUF - 1) == 0)
+    {
+      read(socketid, answer_buf, DB_MAX_BUF - 1);
+    }
     if(expectation == EXPECT_CLIENT)
     {
       //TODO: free ans string
