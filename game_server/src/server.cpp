@@ -68,6 +68,7 @@ void Server::act(int s, int id)
   len = read(s, comm_buf, SV_MAX_BUF - 1);
   log -> record(this_con, "new connection");
   point = string_seek(comm_buf, "GET");
+  log -> record(this_con, (string)"asd");
 
   if(point) // Expect HTTP protocol
   {
@@ -105,6 +106,7 @@ void Server::act(int s, int id)
       hijack_ws(this_con, s, comm_buf);
       return;
     }
+    log -> record(this_con, (string)"asd");
     string file_path = string_get_next_token(point, STR_WHITE);
     log -> record(this_con, (string)"client asking for " + file_path);
     FILE *f = get_file(file_path);

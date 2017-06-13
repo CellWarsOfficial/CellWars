@@ -31,6 +31,10 @@ const char *string_seek(const char *origin, const char *target)
       {
         j++;
       }
+      else
+      {
+        break;
+      }
       if(target[j] == 0)
       {
         return skip_ws(origin + j);
