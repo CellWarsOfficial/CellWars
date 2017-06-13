@@ -9,20 +9,17 @@ string encode(string input)
   size_t len = input.length();
   unsigned char hash[20];
   SHA1((unsigned char*)(input.c_str()), len, hash);
-//  stringstream s;
-//  s << hash;
-//  string hashed_out = s.str();
   string output = encode_base64(hash);
   return output;
 }
 
-unsigned char* convert_type(string input)
-{
-  size_t len = input.length();
-  unsigned char* output = (unsigned char*) malloc(len * sizeof(char)); 
-  check_malloc(output);
-  return output;
-}
+//unsigned char* convert_type(string input)
+//{
+//  size_t len = input.length();
+//  unsigned char* output = (unsigned char*) malloc(len * sizeof(char)); 
+//  check_malloc(output);
+//  return output;
+//}
 
 string encode_base64(unsigned char *input)
 {
@@ -57,11 +54,11 @@ string encode_base64(unsigned char *input)
   return buff;
 }
 
-string add_padding(string input)
-{
-  
-  return 0;
-}
+//string add_padding(string input)
+//{
+//  
+//  return 0;
+//}
 
 string num_to_str(unsigned long input)
 {
@@ -76,12 +73,12 @@ string num_to_str(unsigned long input)
   return output;
 }
 
-string str_to_binary(string input)
-{
-
-
-  return 0;
-}
+//string str_to_binary(string input)
+//{
+//
+//
+//  return 0;
+//}
 
 string num_to_binary(unsigned long input)
 {
