@@ -155,14 +155,14 @@ FILE *get_file(string file)
 {
   printf("%s\n", file.c_str());
   // detect illegal access
-  if(file.find(".."))
+  if(file.find("..") != file.npos)
   {
     printf("hack detected\n");
     return NULL;
   }
   // remove GET arguments
-  int qmark = file.find('?');
-  if(qmark)
+  unsigned int qmark = file.find('?');
+  if(qmark != file.npos)
   {
     printf("qmark detected\n");
     file.erase(qmark, SV_MAX_BUF);
