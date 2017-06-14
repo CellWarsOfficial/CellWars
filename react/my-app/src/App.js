@@ -20,7 +20,7 @@ var DISPLAYMODE = {
   EMOJIS: {value: 1, name: "emojis"}
 };
 
-
+var lastPage = 0;
 const INTRO_PAGE = 0;
 const GAME_PAGE = 1;
 const RULE_PAGE_0 = 2
@@ -57,6 +57,12 @@ class App extends Component {
   }
 
   setPageTo(page) {
+    if (this.state.currentPage < RULE_PAGE_0) {
+      lastPage = this.state.currentPage;
+    }
+    if (page === RULE_PAGE_0 && lastPage === GAME_PAGE) {
+      page = RULE_PAGE_1;
+    }
     this.setState({currentPage: page});
   }
 
@@ -73,6 +79,11 @@ class App extends Component {
         <br></br>
         <br></br>
         <div className="App-grid">
+          <RulePage0 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_1)}/>
+          <RulePage1 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_2)}/>
+          <RulePage2 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_3)}/>
+          <RulePage3 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_4)}/>
+          <RulePage4 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(lastPage)}/>
           <UserPicker currentPage = {this.state.currentPage} onClick={() => this.setPageTo(GAME_PAGE)}/>
           <Grid displayMode = {this.state.displayMode} currentPage = {this.state.currentPage}/>
         </div>
@@ -131,7 +142,7 @@ class DisplayModeAdvancer extends Component {
     return null;
   }
     return (
-      <button className="display-mode-button" onClick={this.props.onClick} className={'roundButton'}>
+      <button onClick={this.props.onClick} className={'roundButton'}>
       Advance Display
       </button>
     );
@@ -260,14 +271,14 @@ function fittedExample(width, height) { // Generates an example board fitting to
 
 class UserPicker extends Component {
   render() {
-    if (this.props.currentPage !== INTRO_PAGE)
+    if (this.props.currentPage !== INTRO_PAGE && this.props.currentPage !== RULE_PAGE_0)
     {
      return null;
     }
 
     return (<div><h2>Pick your colour</h2><br></br><table width="100%">
       <tr className = "textcenter">
-        <td width = "75" onClick={() => this.handleClick(1)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(1), cursor:'pointer', cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(1)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(1), cursor:'pointer'}}></img></td>    
         <td width = "75" onClick={() => this.handleClick(2)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(2), cursor:'pointer'}}></img></td>    
         <td width = "75" onClick={() => this.handleClick(3)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(3), cursor:'pointer'}}></img></td>    
         <td width = "75" onClick={() => this.handleClick(4)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(4), cursor:'pointer'}}></img></td>    
@@ -350,9 +361,63 @@ class Grid extends Component {
     });
   }
 
-
 }
 
+class RulePage0 extends Component {
+  render() {
+    if (this.props.currentPage !== RULE_PAGE_0) {
+      return null;
+    }
+    return (
+    <div onClick={this.props.onClick}>
+    <h1>To play the game you must first pick your colour which your cells will be representing!</h1>
+    </div>
+    );
+  }
+}
 
+class RulePage1 extends Component {
+  render() {
+    if (this.props.currentPage !== RULE_PAGE_1) {
+      return null;
+    }
+    return (
+    <div onClick={this.props.onClick}>nmeme2</div>
+    );
+  }
+}
+
+class RulePage2 extends Component {
+  render() {
+    if (this.props.currentPage !== RULE_PAGE_2) {
+      return null;
+    }
+    return (
+    <div onClick={this.props.onClick}>nmeme3</div>
+    );
+  }
+}
+
+class RulePage3 extends Component {
+  render() {
+    if (this.props.currentPage !== RULE_PAGE_3) {
+      return null;
+    }
+    return (
+    <div onClick={this.props.onClick}>nmeme4</div>
+    );
+  }
+}
+
+class RulePage4 extends Component {
+  render() {
+    if (this.props.currentPage !== RULE_PAGE_4) {
+      return null;
+    }
+    return (
+    <div onClick={this.props.onClick}>nmeme5</div>
+    );
+  }
+}
 
 export default App;
