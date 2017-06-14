@@ -261,19 +261,13 @@ class Grid extends Component {
     ws.onmessage = function (evt)
     {
       var received_msg = evt.data;
-      const board = this.state.board;
+      var board = emptyGrid(width, height);
       console.log("web socket message received: ".concat(received_msg));
 
       
       var lines = received_msg.split('\n');
 
       if (Number(lines[0]) === lines.length - 1) {        // if the received message is valid
-
-        for (let i = 0; i < width; i++) {
-          for (let j = 0; j < height; j++) {
-            board[i][j] = 0;                  // clearing grid
-          }
-        }
 
         for (let i = 1; i <= lines[0]; i++) { // filling grid with received information
           var data = lines[i].split(',');
@@ -286,6 +280,9 @@ class Grid extends Component {
           var uid = data[2];
 
           board[row][col] = uid;
+          this.state = {
+            board: board
+          }
         }
       } else {
         console.log("parse error size");
