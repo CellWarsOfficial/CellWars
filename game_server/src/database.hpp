@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 #include <netdb.h> 
 #include <spp.hpp>
+#include <mutex>
 
 
 // TODO figure out how to access the database
@@ -23,6 +24,7 @@ class DB_conn
   int safe;
   void* run_query(int expectation, string s);
   private:
+  std::mutex db_lock;
   Logger *log;
   const char *address;
   int socketid;
@@ -34,5 +36,12 @@ struct answer
   int col;
   CELL_TYPE t;
   struct answer *next;
+};
+
+class String_container
+{
+  public:
+  String_container(string v);
+  string s;
 };
 #endif

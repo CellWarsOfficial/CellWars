@@ -253,13 +253,15 @@ string Game::user_want(int px1, int py1, int px2, int py2)
                   " AND y>=" + std::to_string(py1) + " AND y<=" +
                   std::to_string(py2);
   log -> record(ME, query);
-  string *result = (string *) db_info->run_query(EXPECT_CLIENT, query);
+  String_container *c = (String_container *) db_info->run_query(EXPECT_CLIENT, query);
+  string result = c -> s;
+  free(c);
   //string output = "";
   //for(int i = 0; result[i]; i++)
   //{
   //  output = output + result[i];
   //}
-  return *result;
+  return result;
 }
 
 void Game::user_does(int x, int y, CELL_TYPE t)

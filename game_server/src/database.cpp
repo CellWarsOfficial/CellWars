@@ -82,25 +82,27 @@ void *DB_conn::run_query(int expectation, string s)
   log -> record(ME, (string)"Running query " + wrapper);
   //
   write(socketid, c, strlen(c));
-  bzero(answer_buf, DB_MAX_BUF);
+  memset(answer_buf, 0, sizeof(char) * DB_MAX_BUF);
+  db_lock.lock();
   std::this_thread::sleep_for(std::chrono::milliseconds(500));
   while(read(socketid, answer_buf, DB_MAX_BUF - 1) == 0)
   {
     std::this_thread::sleep_for(std::chrono::milliseconds(5000));
   }
+  db_lock.unlock();
   if(expectation)
   {
     struct answer *result = NULL;
     if(expectation == EXPECT_CLIENT)
     {
       //TODO: free ans string
-      string *ans = new string();
+      string ans = "";
       for(int i = 0; answer_buf[i]; i++)
       {
         printf("add %c | %d\n", answer_buf[i], i);
-        *ans = *ans + answer_buf[i];
+        ans = ans + answer_buf[i];
       }
-      return (void*) ans;
+      return (void*) new String_container(ans);
     }
     const char *point = answer_buf;
     int n = stoi(string_get_next_token(point, STR_WHITE)), i;
@@ -234,4 +236,9 @@ void DB_conn::rewrite_db(const char *f)
       );
   }
   fclose(file);
+}
+
+String_container::String_container(string v)
+{
+  s = v;
 }
