@@ -12,10 +12,10 @@ const headerHeight = 230;
 const players = 10; //determines how colours are split between userID's
 var yourUserID = 1;
 
-const x1Home = width/2 - 2;
-const x2Home = width/2 + 2;
-const y1Home = height/2 - 2;
-const y2Home = height/2 + 2; //location of the editable home region
+// const x1Home = width/2 - 2;
+// const x2Home = width/2 + 2;
+// const y1Home = height/2 - 2;
+// const y2Home = height/2 + 2; //location of the editable home region
 
 var DISPLAYMODE = {
   COLOURS: {value: 0, name: "colours"},
@@ -40,24 +40,6 @@ class App extends Component {
     this.state = {
       displayMode: 0,
       currentPage: INTRO_PAGE,
-    }
-  }
-
-
-  get() {
-    if (ws.readyState === WS_READY) {
-      var px1 = 0;
-      var py1 = 0;
-      var queryRequest = "QUERY px1="
-                  .concat(px1.toString())
-                  .concat(" py1=")
-                  .concat(py1.toString())
-                  .concat(" px2=")
-                  .concat(width)
-                  .concat(" py2=")
-                  .concat(height)
-      console.log("Sending query : ".concat(queryRequest));
-      ws.send(queryRequest);
     }
   }
 
@@ -104,7 +86,7 @@ class App extends Component {
         </div>
         <p></p>
           <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()} currentPage = {this.state.currentPage}/> &nbsp;
-          <GetButton onClick={() => this.get()} currentPage = {this.state.currentPage}/> &nbsp;
+          <GetButton onClick={() => get()} currentPage = {this.state.currentPage}/> &nbsp;
       </div>
     );
   }
@@ -173,28 +155,6 @@ function rainbow(n) {
   return 'hsl(' + n + ',100%,50%)';
 }
 
-/*
-function Square(props) {
-  var label = '';
-  if (props.isColourBlind) {
-    label = props.userID; //Write the userIDs on squares when colourblind mode is on
-  }
-  var border = '';
-  if (props.inHomeArea) {
-    border = '1px solid #200' //Home area cells get a border
-  }
-
-  return (
-    <button
-      className="square"
-      onClick={props.onClick}
-      style={{backgroundColor:rainbow(props.userID), border:border}}>
-      {label}
-    </button>
-  );
-}
-*/
-
 
 
 
@@ -212,9 +172,9 @@ function ImgSquare(props) {
     src = pac_thing;
   }
   var style = {display: 'inline-block'};
-  if (props.inHomeArea) {
-    style = {backgroundColor: 'red', display: 'inline-block'};
-  }
+  // if (props.inHomeArea) {
+  //   style = {backgroundColor: 'red', display: 'inline-block'};
+  // }
 
   return (
     <div style={style}>
@@ -234,10 +194,10 @@ function ImgSquare(props) {
 
 
 
-function outsideHomeArea(row, col) {
-  return (row < y1Home || row >= y2Home ||
-          col < x1Home || col >= x2Home);
-}
+// function outsideHomeArea(row, col) {
+//   return (row < y1Home || row >= y2Home ||
+//           col < x1Home || col >= x2Home);
+// }
 
 class Row extends Component {
   renderSquare(userIDturtle, row, col) {
@@ -246,7 +206,7 @@ class Row extends Component {
       userID={userIDturtle}
       onClick={() => this.props.onClick(row, col)}
       displayMode={this.props.displayMode}
-      inHomeArea={!outsideHomeArea(row, col)}
+      // inHomeArea={!outsideHomeArea(row, col)}
       />
     );
   }
@@ -265,19 +225,12 @@ class Row extends Component {
 
 
 
-function fittedExample(width, height) { // Generates an example board fitting to the width and height global variables
+function emptyGrid(width, height) { // Generates an example board fitting to the width and height global variables
   var ret = [];
   for (var i = 0; i < height; i++) {
     var row = [];
     for (var j = 0; j < width; j++) {
-      var temp = 0;
-      if (i < height/2) {
-        temp+=3;
-      }
-      if (j < width/2) {
-        temp+=5;
-      }
-      row.push(temp);
+      row.push(0);
     }
     ret.push(row);
   }
@@ -321,13 +274,14 @@ class Grid extends Component {
     super();
     this.updateDimensions();
     this.state = {
-      board: fittedExample(width, height)
+      board: emptyGrid(width, height)
     }
     var url = "ws".concat(window.location.toString().substring(4));
-    // url = "ws://129.31.208.229:7777/" // temp url used for local debugging
+    url = "ws://146.169.45.167:7777/" // temp url used for local debugging
     ws = new WebSocket(url);
     ws.onopen = function() {
       console.log("web socket opened : ".concat(url));
+      get();
     }
     ws.onclose = function() {
       console.log("web socket closed : ".concat(url));
@@ -352,13 +306,19 @@ class Grid extends Component {
         }
 
         for (let i = 1; i <= lines[0]; i++) { // filling grid with received information
-          var data = lines[i].split(',');   
+          var data = lines[i].split(',');
+          if (lines[i].length() !== 3) {
+            console.log("parse error");
+            break;
+          }
           var row = data[0];
           var col = data[1];
           var uid = data[2];
 
           board[row][col] = uid;
         }
+      } else {
+        console.log("parse error");
       }
     }
   }
@@ -366,10 +326,10 @@ class Grid extends Component {
 
 
   handleClick(row, col) {
-    if (outsideHomeArea(row, col)) {
-      window.alert("You may only toggle cells in your home area.");
-      return;
-    }
+    // if (outsideHomeArea(row, col)) {
+    //   window.alert("You may only toggle cells in your home area.");
+    //   return;
+    // }
 
     const board = this.state.board.slice(); //Clones the board
 
@@ -387,6 +347,8 @@ class Grid extends Component {
                   .concat(board[row][col]);
       console.log("Sending query : ".concat(updateRequest));
       ws.send(updateRequest);
+    } else {
+      console.log("Websocket is not ready!");
     }
   }
 
@@ -425,10 +387,30 @@ class Grid extends Component {
 
   updateBoard() {
     this.setState({
-      board: fittedExample(width, height)
+      board: emptyGrid(width, height)
     });
+    get();
   }
 
+}
+
+function get() {
+  if (ws.readyState === WS_READY) {
+    var px1 = 0;
+    var py1 = 0;
+    var queryRequest = "QUERY px1="
+                .concat(px1.toString())
+                .concat(" py1=")
+                .concat(py1.toString())
+                .concat(" px2=")
+                .concat(width)
+                .concat(" py2=")
+                .concat(height)
+    console.log("Sending query : ".concat(queryRequest));
+    ws.send(queryRequest);
+  } else {
+    console.log("Websocket is not ready!");
+  }
 }
 
 class RulePage0 extends Component {
