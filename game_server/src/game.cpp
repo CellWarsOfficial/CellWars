@@ -11,7 +11,7 @@
 
 Game::Game(DB_conn* db, Logger *log)
 {
-  this -> log = log; 
+  this -> log = log;
   db_info = db;
   execution_lock.lock();
   flags = 0; // Important because it unsets running flag
@@ -81,7 +81,7 @@ void *Game::start(FLAG_TYPE f, int gtc, int w)
 /* Initialise the game
  */
   flag_protection.lock();
-  log -> record(ME, 
+  log -> record(ME,
       "Creating new game with gtc " + to_string(gtc) + " and w" + to_string(w)
       );
   flags = (f & NO_LAST_MASK) | JUST_28_MASK; // unset running and set started.
@@ -91,7 +91,7 @@ void *Game::start(FLAG_TYPE f, int gtc, int w)
   if(!GFLAG_nodb)
   {
     Block **blocks = db_info -> load_from_db(
-      compress_xy(MINX, MINY), 
+      compress_xy(MINX, MINY),
       compress_xy(MAXX, MAXY)
       );
     for(int i = 0; blocks[i]; i++)
@@ -136,7 +136,7 @@ void Game::plan_stage(int wait_time)
     std::this_thread::sleep_for(std::chrono::seconds(wait_time));
   }
   log -> record(ME, "Planning time - timeout ");
-  
+
   // TODO instruct network manager to ignore changes from users
   if(!GFLAG_nodb)
   {
@@ -248,12 +248,12 @@ string Game::user_want(int px1, int py1, int px2, int py2)
     px1 = px2;
     px2 = temp;
   }
-  string query = "SELECT * FROM agents.grid WHERE x>= " + 
-                  std::to_string(px1) + " AND x<= " + std::to_string(px2) + 
-                  " AND y>= " + std::to_string(py1) + " AND y <= " + 
-                  std::to_string(py2); 
+  string query = "SELECT * FROM agents.grid WHERE x>=" +
+                  std::to_string(px1) + " AND x<=" + std::to_string(px2) +
+                  " AND y>=" + std::to_string(py1) + " AND y<=" +
+                  std::to_string(py2);
   log -> record(ME, query);
-  string *result = (string *) db_info->run_query(EXPECT_CLIENT, query);  
+  string *result = (string *) db_info->run_query(EXPECT_CLIENT, query);
   //string output = "";
   //for(int i = 0; result[i]; i++)
   //{
@@ -264,10 +264,16 @@ string Game::user_want(int px1, int py1, int px2, int py2)
 
 void Game::user_does(int x, int y, CELL_TYPE t)
 {
-  string query = "UPDATE agents.grid SET CELL_TYPE = '" + std::to_string(t) +
-                 "' WHERE x = " + std::to_string(x) + " AND y = " + 
-                 std::to_string(y);
-  db_info->run_query(EXPECT_CLIENT, query);  
+  string query = "DELETE FROM agents.grid WHERE x=" +
+                 std::to_string(x) + " AND y=" + std::to_string(y);
+  db_info->run_query(NO_READ, query);
+  if(t)
+  {
+    query = "INSERT INTO agents.grid(user_id, x, y) VALUES (" +
+            std::to_string(t) + ", " + std::to_string(x) + ", " +
+            std::to_string(y) + ")";
+    db_info->run_query(NO_READ, query);
+  }
 }
 
 /* clean_up assumes FR and database are in sync, as it is normally called
