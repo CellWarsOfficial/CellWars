@@ -3,6 +3,8 @@ import logo from './logo.svg';
 import pac_thing from './images/pac_thing.png';
 import './App.css';
 
+var ws;
+
 var width = 20;
 var height = 20; //dimensions of the board
 const headerHeight = 230;
@@ -29,6 +31,8 @@ const RULE_PAGE_2 = 4
 const RULE_PAGE_3 = 5
 const RULE_PAGE_4 = 6
 
+const WS_READY = 1;
+
 
 class App extends Component {
   constructor() {
@@ -41,13 +45,24 @@ class App extends Component {
 
 
   get() {
-    // TODO
-    window.alert("Not yet implemented.");
+    if (ws.readyState === WS_READY) {
+      var px1 = 0;
+      var py1 = 0;
+      var queryRequest = "QUERY px1="
+                  .concat(px1.toString())
+                  .concat(" py1=")
+                  .concat(py1.toString())
+                  .concat(" px2=")
+                  .concat(width)
+                  .concat(" py2=")
+                  .concat(height)
+      console.log("Sending query : ".concat(queryRequest));
+      ws.send(queryRequest);
+    }
   }
 
   submit() {
-    // TODO
-    window.alert("Not yet implemented.");
+    window.alert("This button won't be used for now.. Updating a cell submits");
   }
 
   advanceDisplayMode() {
@@ -90,11 +105,11 @@ class App extends Component {
         <p></p>
           <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()} currentPage = {this.state.currentPage}/> &nbsp;
           <GetButton onClick={() => this.get()} currentPage = {this.state.currentPage}/> &nbsp;
-          <SubmitButton onClick={() => this.submit()} currentPage = {this.state.currentPage}/> &nbsp;
       </div>
     );
   }
 }
+// <SubmitButton onClick={() => this.submit()} currentPage = {this.state.currentPage}/> &nbsp;
 
 class HelpButton extends Component {
   render() {
@@ -186,11 +201,6 @@ function Square(props) {
 function ImgSquare(props) {
   var src = null;
 
-  var border = '1px solid #ddd';
-
-  if (props.inHomeArea) {
-    border = '1px solid #200' //Home area cells get a border
-  }
 
   if (props.displayMode === DISPLAYMODE.COLOURS.value) {
     src = pac_thing;
@@ -201,16 +211,22 @@ function ImgSquare(props) {
   if (props.userID === 0) {
     src = pac_thing;
   }
+  var style = {display: 'inline-block'};
+  if (props.inHomeArea) {
+    style = {backgroundColor: 'red', display: 'inline-block'};
+  }
 
   return (
+    <div style={style}>
     <input
     type="image"
     alt="cell"
     src={src}
     onClick={props.onClick}
-    style={{width:20, height:20, backgroundColor:rainbow(props.userID), border:border}}
+    style={{width:20, height:20, backgroundColor:rainbow(props.userID), border:'1px solid #ddd'}}
     className='cell'>
     </input>
+    </div>
     );
 
 }
@@ -307,19 +323,71 @@ class Grid extends Component {
     this.state = {
       board: fittedExample(width, height)
     }
+    var url = "ws".concat(window.location.toString().substring(4));
+    // url = "ws://129.31.208.229:7777/" // temp url used for local debugging
+    ws = new WebSocket(url);
+    ws.onopen = function() {
+      console.log("web socket opened : ".concat(url));
+    }
+    ws.onclose = function() {
+      console.log("web socket closed : ".concat(url));
+    }
+    ws.onerror = function() {
+      console.log("web socket error");
+    }
+    const board = this.state.board.slice();
+    ws.onmessage = function (evt)
+    {
+      var received_msg = evt.data;
+      console.log("web socket message received: ".concat(received_msg));
+      
+      var lines = received_msg.split('\n');
+
+      if (lines[0] === lines.length) {        // if the received message is valid
+
+        for (let i = 0; i < width; i++) {
+          for (let j = 0; j < height; j++) {
+            board[i][j] = 0;                  // clearing grid
+          }
+        }
+
+        for (let i = 1; i <= lines[0]; i++) { // filling grid with received information
+          var data = lines[i].split(',');   
+          var row = data[0];
+          var col = data[1];
+          var uid = data[2];
+
+          board[row][col] = uid;
+        }
+      }
+    }
   }
 
+
+
   handleClick(row, col) {
-    const board = this.state.board.slice(); //Clones the board
     if (outsideHomeArea(row, col)) {
       window.alert("You may only toggle cells in your home area.");
       return;
     }
 
+    const board = this.state.board.slice(); //Clones the board
+
     board[row][col] = (board[row][col] === 0) ? yourUserID : 0;
     this.setState({
       board: board
     });
+
+    if (ws.readyState === WS_READY) {
+      var updateRequest = "UPDATE px="
+                  .concat(row)
+                  .concat(" py=")
+                  .concat(col)
+                  .concat(" t=")
+                  .concat(board[row][col]);
+      console.log("Sending query : ".concat(updateRequest));
+      ws.send(updateRequest);
+    }
   }
 
   renderRow(row) {
