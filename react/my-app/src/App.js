@@ -138,7 +138,6 @@ function rainbow(n) {
 function ImgSquare(props) {
   var src = null;
 
-
   if (props.displayMode === DISPLAYMODE.COLOURS.value) {
     src = pac_thing;
   } else if (props.displayMode === DISPLAYMODE.EMOJIS.value) {
@@ -194,9 +193,9 @@ class Row extends Component {
 
 function emptyGrid(width, height) { // Generates an example board fitting to the width and height global variables
   var ret = [];
-  for (var i = 0; i < width; i++) {
+  for (var i = 0; i < height; i++) {
     var row = [];
-    for (var j = 0; j < height; j++) {
+    for (var j = 0; j < width; j++) {
       row.push(0);
     }
     ret.push(row);
@@ -246,7 +245,7 @@ class Grid extends Component {
       board: emptyGrid(width, height)
     }
     var url = "ws".concat(window.location.toString().substring(4));
-    // url = "ws://146.169.45.167:7777/" // temp url used for local debugging
+    url = "ws://146.169.45.167:7777/" // temp url used for local debugging
     ws = new WebSocket(url);
     ws.onopen = function() {
       console.log("web socket opened : ".concat(url));
@@ -264,10 +263,7 @@ class Grid extends Component {
       var board = emptyGrid(width, height);
       console.log("web socket message received: ".concat(received_msg));
 
-      
       var lines = received_msg.split('\n');
-
-      if (Number(lines[0]) === lines.length - 1) {        // if the received message is valid
 
         for (let i = 1; i <= lines[0]; i++) { // filling grid with received information
           var data = lines[i].split(',');
@@ -280,14 +276,9 @@ class Grid extends Component {
           var uid = data[2];
 
           board[row][col] = uid;
-          this.state = {
-            board: board
-          }
         }
-      } else {
-        console.log("parse error size");
-      }
-    }
+        this.state.board = board;
+    }.bind(this);
   }
 
 
@@ -339,19 +330,12 @@ class Grid extends Component {
   }
 
   componentDidMount() {
-    window.addEventListener("resize", () => {this.updateDimensions(); this.updateBoard(); this.forceUpdate()});
+    window.addEventListener("resize", () => {this.updateDimensions(); get(); this.forceUpdate()});
   }
 
   updateDimensions() {
     width = Math.floor(window.innerWidth / 50);
     height = Math.floor((window.innerHeight - headerHeight) / 50);
-  }
-
-  updateBoard() {
-    this.setState({
-      board: emptyGrid(width, height)
-    });
-    get();
   }
 
 }
@@ -365,9 +349,9 @@ function get() {
                 .concat(" py1=")
                 .concat(py1.toString())
                 .concat(" px2=")
-                .concat(width)
+                .concat(width-1)
                 .concat(" py2=")
-                .concat(height)
+                .concat(height-1)
     console.log("Sending query : ".concat(queryRequest));
     ws.send(queryRequest);
   } else {
