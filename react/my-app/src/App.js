@@ -71,7 +71,7 @@ class App extends Component {
       <div className="App">
         <div className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h2>Cell Wars</h2>
+          <h1>Cell Wars</h1>
         </div>
         <div style={{position: 'absolute', right:'10px'}}>
           <HelpButton onClick={() => this.setPageTo(RULE_PAGE_0)} currentPage = {this.state.currentPage}/>
@@ -79,7 +79,7 @@ class App extends Component {
         <br></br>
         <br></br>
         <div className="App-grid">
-          <RulePage0 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_1)}/>
+          <RulePage0 currentPage = {this.state.currentPage}/>
           <RulePage1 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_2)}/>
           <RulePage2 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_3)}/>
           <RulePage3 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_4)}/>
@@ -369,7 +369,7 @@ class RulePage0 extends Component {
       return null;
     }
     return (
-    <div onClick={this.props.onClick}>
+    <div>
     <h1>To play the game you must first pick your colour which your cells will be representing!</h1>
     </div>
     );
@@ -382,7 +382,10 @@ class RulePage1 extends Component {
       return null;
     }
     return (
-    <div onClick={this.props.onClick}>nmeme2</div>
+    <div onClick={this.props.onClick}>
+    <h1>Cell Law I</h1>
+    <h2>Any live cell with fewer than two live neighbours will die, as if caused by underpopulation.</h2>
+    </div>
     );
   }
 }
@@ -393,7 +396,10 @@ class RulePage2 extends Component {
       return null;
     }
     return (
-    <div onClick={this.props.onClick}>nmeme3</div>
+    <div onClick={this.props.onClick}>
+    <h1>Cell Law II</h1>
+    <h2>Any live cell with two or three live neighbours lives on to the next generation.</h2>
+    </div>
     );
   }
 }
@@ -404,7 +410,11 @@ class RulePage3 extends Component {
       return null;
     }
     return (
-    <div onClick={this.props.onClick}>nmeme4</div>
+    <div onClick={this.props.onClick}>
+    <h1>Cell Law III</h1>
+    <h2>Any dead cell with exactly 3 live neighbours and a majority cell type can be identified
+        among them, the cell will be reborn as the same type as the majority.</h2>
+    </div>
     );
   }
 }
@@ -415,7 +425,10 @@ class RulePage4 extends Component {
       return null;
     }
     return (
-    <div onClick={this.props.onClick}>nmeme5</div>
+    <div onClick={this.props.onClick}>
+    <h1>Cell Law IV</h1>
+    <h2>Any live cell with greater than three live neighbours dies, as if caused by overpopulation.</h2>
+    </div>
     );
   }
 }
