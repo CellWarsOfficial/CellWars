@@ -3,6 +3,8 @@ import logo from './logo.svg';
 import pac_thing from './images/pac_thing.png';
 import './App.css';
 
+var ws;
+
 var width = 20;
 var height = 20; //dimensions of the board
 const headerHeight = 230;
@@ -42,7 +44,7 @@ class App extends Component {
 
   get() {
     // TODO
-    window.alert("Not yet implemented.");
+    window.alert("not yet implemented");
   }
 
   submit() {
@@ -186,11 +188,6 @@ function Square(props) {
 function ImgSquare(props) {
   var src = null;
 
-  var border = '1px solid #ddd';
-
-  if (props.inHomeArea) {
-    border = '1px solid #200' //Home area cells get a border
-  }
 
   if (props.displayMode === DISPLAYMODE.COLOURS.value) {
     src = pac_thing;
@@ -201,16 +198,22 @@ function ImgSquare(props) {
   if (props.userID === 0) {
     src = pac_thing;
   }
+  var style = {display: 'inline-block'};
+  if (props.inHomeArea) {
+    style = {backgroundColor: 'red', display: 'inline-block'};
+  }
 
   return (
+    <div style={style}>
     <input
     type="image"
     alt="cell"
     src={src}
     onClick={props.onClick}
-    style={{width:20, height:20, backgroundColor:rainbow(props.userID), border:border}}
+    style={{width:20, height:20, backgroundColor:rainbow(props.userID), border:'1px solid #ddd'}}
     className='cell'>
     </input>
+    </div>
     );
 
 }
@@ -307,19 +310,46 @@ class Grid extends Component {
     this.state = {
       board: fittedExample(width, height)
     }
+
+    var url = "ws".concat(window.location.toString().substring(4));
+    ws = new WebSocket(url);
+    ws.onopen = function() {
+      console.log("web socket opened : ".concate(url));
+    }
+    ws.onclose = function() {
+      console.log("web socket closed : ".concat(url));
+    }
+    ws.onerror = function() {
+      console.log("web socket error");
+    }
+    ws.onmessage = function (evt)
+    {
+      // TODO: update board here, this should be triggered upon sending a query
+      var received_msg = evt.data;
+      console.log("web socket message received: ".concat(received_msg));
+    }
+
   }
 
   handleClick(row, col) {
-    const board = this.state.board.slice(); //Clones the board
     if (outsideHomeArea(row, col)) {
       window.alert("You may only toggle cells in your home area.");
       return;
     }
 
+    const board = this.state.board.slice(); //Clones the board
+
     board[row][col] = (board[row][col] === 0) ? yourUserID : 0;
     this.setState({
       board: board
     });
+
+    ws.send("UPDATE px=".concat(row.toString())
+      .concat(" py=")
+      .concat(col.toString())
+      .concat(" t=")
+      .concat(board[row][col].toString()));
+    ws.close();
   }
 
   renderRow(row) {
