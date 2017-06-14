@@ -374,8 +374,9 @@ class RulePage1 extends Component {
     if (this.props.currentPage !== RULE_PAGE_1) {
       return null;
     }
+    var divHeight = ((window.innerHeight - headerHeight)*.8).toString().concat('px');
     return (
-    <div onClick={this.props.onClick}>
+    <div onClick={this.props.onClick} style={{height: divHeight}}>
     <h1>Cell Law I</h1>
     <h2>Any live cell with fewer than two live neighbours will die, as if caused by underpopulation.</h2>
     </div>
@@ -388,8 +389,9 @@ class RulePage2 extends Component {
     if (this.props.currentPage !== RULE_PAGE_2) {
       return null;
     }
+    var divHeight = ((window.innerHeight - headerHeight)*.8).toString().concat('px');
     return (
-    <div onClick={this.props.onClick}>
+    <div onClick={this.props.onClick} style={{height: divHeight}}>
     <h1>Cell Law II</h1>
     <h2>Any live cell with two or three live neighbours lives on to the next generation.</h2>
     </div>
@@ -402,8 +404,9 @@ class RulePage3 extends Component {
     if (this.props.currentPage !== RULE_PAGE_3) {
       return null;
     }
+    var divHeight = ((window.innerHeight - headerHeight)*.8).toString().concat('px');
     return (
-    <div onClick={this.props.onClick}>
+    <div onClick={this.props.onClick} style={{height: divHeight}}>
     <h1>Cell Law III</h1>
     <h2>Any dead cell with exactly 3 live neighbours and a majority cell type can be identified
         among them, the cell will be reborn as the same type as the majority.</h2>
@@ -417,8 +420,9 @@ class RulePage4 extends Component {
     if (this.props.currentPage !== RULE_PAGE_4) {
       return null;
     }
+    var divHeight = ((window.innerHeight - headerHeight)*.8).toString().concat('px');
     return (
-    <div onClick={this.props.onClick}>
+    <div onClick={this.props.onClick} style={{height: divHeight}}>
     <h1>Cell Law IV</h1>
     <h2>Any live cell with greater than three live neighbours dies, as if caused by overpopulation.</h2>
     </div>
