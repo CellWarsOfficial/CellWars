@@ -214,16 +214,16 @@ class UserPicker extends Component {
     return (<div><h2>Pick your colour</h2><br></br><table width="100%">
       <tbody>
       <tr className = "textcenter">
-        <td width = "75" onClick={() => this.handleClick(1)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(1), cursor:'pointer'}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(2)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(2), cursor:'pointer'}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(3)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(3), cursor:'pointer'}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(4)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(4), cursor:'pointer'}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(5)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(5), cursor:'pointer'}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(6)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(6), cursor:'pointer'}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(7)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(7), cursor:'pointer'}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(8)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(8), cursor:'pointer'}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(9)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(9), cursor:'pointer'}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(10)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(10), cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(1)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(1)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(2)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(2)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(3)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(3)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(4)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(4)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(5)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(5)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(6)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(6)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(7)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(7)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(8)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(8)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(9)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(9)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(10)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(10)}}></img></td>    
       </tr>
       </tbody>
     </table></div>);
@@ -244,7 +244,7 @@ class Grid extends Component {
       board: emptyGrid(width, height)
     }
     var url = "ws".concat(window.location.toString().substring(4));
-    url = "ws://146.169.45.167:7777/" // temp url used for local debugging
+    // url = "ws://89.122.28.235:7777/" // temp url used for local debugging
     ws = new WebSocket(url);
     ws.onopen = function() {
       console.log("web socket opened : ".concat(url));
@@ -346,9 +346,9 @@ function get() {
                 .concat(" py1=")
                 .concat(py1.toString())
                 .concat(" px2=")
-                .concat(width-1)
-                .concat(" py2=")
                 .concat(height-1)
+                .concat(" py2=")
+                .concat(width-1)
     console.log("Sending query : ".concat(queryRequest));
     ws.send(queryRequest);
   } else {
