@@ -78,18 +78,15 @@ void *DB_conn::run_query(int expectation, string s)
   log -> record(ME, (string)"Running query " + wrapper);
   //
   write(socketid, c, strlen(c));
-
-  //c.socket()->emit("benis");
-  //
+  bzero(answer_buf, DB_MAX_BUF);
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+  while(read(socketid, answer_buf, DB_MAX_BUF - 1) == 0)
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+  }
   if(expectation)
   {
     //struct answer *result = 0;
-    bzero(answer_buf, DB_MAX_BUF);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    while(read(socketid, answer_buf, DB_MAX_BUF - 1) == 0)
-    {
-      std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-    }
     if(expectation == EXPECT_CLIENT)
     {
       //TODO: free ans string
@@ -102,7 +99,7 @@ void *DB_conn::run_query(int expectation, string s)
       log->record("tetris", *ans);
       log->record("tetris_done", "ye");
       return (void*) ans;
-    }/*
+    }
     int ni = 0;
     int number[3] = {0, 0, 0};
     int neg = 1;
@@ -110,7 +107,7 @@ void *DB_conn::run_query(int expectation, string s)
     for(; (answer_buf[i] >= '0') && (answer_buf[i] <= '9'); i++);
     for(; !((answer_buf[i] >= '0') && (answer_buf[i] <= '9')); i++);
     for(; answer_buf[i]; i++)
-    {
+    {/*
       if(answer_buf[i] == '-')
       {
         neg = -1;
