@@ -102,3 +102,15 @@ void print_bytes(uint8_t *buf, int len)
     printf("buf[%d] = %u\n", i, buf[i]);
   }
 }
+
+int str_ew(string s1, string s2)
+{
+  for(int i = 0; i < s1.length(); i++)
+  {
+    if(s1[i] != s2[i])
+    {
+      return 0
+    }
+  }
+  return 1;
+}

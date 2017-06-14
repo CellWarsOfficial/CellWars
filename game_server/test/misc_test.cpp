@@ -14,6 +14,73 @@ int math_tests()
   fails = 0;
   tests = 0;
   // TODO tests go here
+  //test binary_to_num
+  string test1 = "1101";
+  string test2 = "00001101";
+  string test3 = "11000011010011111";
+  string test4 = "0000100110011010";
+  string test5 = "100110011010";
+  tests++;
+  if(13 != binary_to_num(test1)){
+    fprintf(stderr, "TEST FAIL: binary_to_num.\n"); 
+    fails++;
+  }
+  tests++;
+  if(13 != binary_to_num(test2)){
+    fprintf(stderr, "TEST FAIL: binary_to_num.\n"); 
+    fails++;
+  }
+  tests++;
+  if(99999 != binary_to_num(test3)){
+    fprintf(stderr, "TEST FAIL: binary_to_num.\n"); 
+    fails++;
+  }
+  tests++;
+  if(2458 != binary_to_num(test4)){
+    fprintf(stderr, "TEST FAIL: binary_to_num.\n"); 
+    fails++;
+  }
+  tests++;
+  if(2458 != binary_to_num(test5)){
+    fprintf(stderr, "TEST FAIL: binary_to_num.\n"); 
+    fails++;
+  }
+  //test num_to_binary
+  int test6 = 70;
+  int test7 = 63;
+  int test8 = 0;
+  int test9 = 00111;
+  int test10 = 111;
+  tests++;
+  if("1000110"(test6)){
+    fprintf(stderr, "TEST FAIL: num_to_binary.\n"); 
+    fails++;
+  }
+  tests++;
+  if("111111" != num_to_binary(test7)){
+    fprintf(stderr, "TEST FAIL: num_to_binary.\n"); 
+    fails++;
+  }
+  tests++;
+  if("0" != num_to_binary(test8)){
+    fprintf(stderr, "TEST FAIL: num_to_binary.\n"); 
+    fails++;
+  }
+  tests++;
+  if("7" != num_to_binary(test9)){
+    fprintf(stderr, "TEST FAIL: num_to_binary.\n"); 
+    fails++;
+  }
+  tests++;
+  if("7" != num_to_binary(test10)){
+    fprintf(stderr, "TEST FAIL: num_to_binary.\n"); 
+    fails++;
+  }
+  tests++;
+  if(2458 != binary_to_num(test5)){
+    fprintf(stderr, "TEST FAIL: binary_to_num.\n"); 
+    fails++;
+  }
   fprintf(stderr, "%d/%d tests passed - math\n", tests - fails, tests);
   return fails;
 }
