@@ -14,8 +14,14 @@
   color: white;
 }
 
+.cell:hover {
+  border-color: black;
+}
+
 .cell {
+  border: 1px solid #ddd;
   margin-left: 3px;
+  -webkit-transition-duration: 0.4s;
   margin-right: 3px;
 }
 

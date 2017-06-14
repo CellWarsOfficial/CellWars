@@ -148,16 +148,15 @@ function ImgSquare(props) {
   if (props.userID === 0) {
     src = pac_thing;
   }
-  var style = {display: 'inline-block'};
 
   return (
-    <div style={style}>
+    <div style={{display: 'inline-block'}}>
     <input
     type="image"
     alt="cell"
     src={src}
     onClick={props.onClick}
-    style={{width:20, height:20, backgroundColor:rainbow(props.userID), border:'1px solid #ddd'}}
+    style={{width:20, height:20, backgroundColor:rainbow(props.userID)}}
     className='cell'>
     </input>
     </div>
