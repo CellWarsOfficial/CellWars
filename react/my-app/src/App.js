@@ -21,13 +21,21 @@ var DISPLAYMODE = {
 };
 
 
+const INTRO_PAGE = 0;
+const GAME_PAGE = 1;
+const RULE_PAGE_0 = 2
+const RULE_PAGE_1 = 3
+const RULE_PAGE_2 = 4
+const RULE_PAGE_3 = 5
+const RULE_PAGE_4 = 6
+
 
 class App extends Component {
   constructor() {
     super();
     this.state = {
       displayMode: 0,
-      isVisible: false,
+      currentPage: INTRO_PAGE,
     }
   }
 
@@ -48,8 +56,8 @@ class App extends Component {
     });
   }
 
-  handleClick() {
-    this.setState({isVisible: true});
+  setPageTo(page) {
+    this.setState({currentPage: page});
   }
 
   render() {
@@ -59,31 +67,44 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h2>Cell Wars</h2>
         </div>
-        <br></br>
+        <div style={{position: 'absolute', right:'10px'}}>
+          <HelpButton onClick={() => this.setPageTo(RULE_PAGE_0)} currentPage = {this.state.currentPage}/>
+        </div>
         <br></br>
         <br></br>
         <div className="App-grid">
-          <UserPicker isVisible = {this.state.isVisible} onClick={() => this.handleClick()}/>
-          <Grid displayMode = {this.state.displayMode} isVisible = {this.state.isVisible}/>
+          <UserPicker currentPage = {this.state.currentPage} onClick={() => this.setPageTo(GAME_PAGE)}/>
+          <Grid displayMode = {this.state.displayMode} currentPage = {this.state.currentPage}/>
         </div>
         <p></p>
-          <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()} isVisible = {this.state.isVisible}/> &nbsp;
-          <GetButton onClick={() => this.get()} isVisible = {this.state.isVisible}/> &nbsp;
-          <SubmitButton onClick={() => this.submit()} isVisible = {this.state.isVisible}/> &nbsp;
+          <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()} currentPage = {this.state.currentPage}/> &nbsp;
+          <GetButton onClick={() => this.get()} currentPage = {this.state.currentPage}/> &nbsp;
+          <SubmitButton onClick={() => this.submit()} currentPage = {this.state.currentPage}/> &nbsp;
       </div>
     );
   }
 }
 
-
+class HelpButton extends Component {
+  render() {
+    if (this.props.currentPage >= RULE_PAGE_0) {  // hide help button on help pages
+      return null;
+    }
+    return (
+      <button onClick = {this.props.onClick} className={'roundButton'}>
+      Help
+      </button>
+    );
+  }
+}
 
 class SubmitButton extends Component {
   render() {
-  if (!this.props.isVisible) {
+  if (this.props.currentPage !== GAME_PAGE) {
     return null;
   }
   return (
-      <button onClick = {this.props.onClick}>
+      <button onClick = {this.props.onClick} className={'roundButton'}>
       Submit
       </button>
     );
@@ -92,11 +113,11 @@ class SubmitButton extends Component {
 
 class GetButton extends Component {
   render() {
-  if (!this.props.isVisible) {
+  if (this.props.currentPage !== GAME_PAGE) {
     return null;
   }
   return (
-      <button onClick = {this.props.onClick}>
+      <button onClick = {this.props.onClick} className={'roundButton'}>
       Get
       </button>
     );
@@ -106,11 +127,11 @@ class GetButton extends Component {
 
 class DisplayModeAdvancer extends Component {
   render() {
-  if (!this.props.isVisible) {
+  if (this.props.currentPage !== GAME_PAGE) {
     return null;
   }
     return (
-      <button className="display-mode-button" onClick={this.props.onClick}>
+      <button className="display-mode-button" onClick={this.props.onClick} className={'roundButton'}>
       Advance Display
       </button>
     );
@@ -239,23 +260,23 @@ function fittedExample(width, height) { // Generates an example board fitting to
 
 class UserPicker extends Component {
   render() {
-    if (this.props.isVisible)
+    if (this.props.currentPage !== INTRO_PAGE)
     {
      return null;
     }
 
-    return (<div><br></br><h2>Pick your player</h2><br></br><br></br><br></br><table width="100%">
+    return (<div><h2>Pick your colour</h2><br></br><table width="100%">
       <tr className = "textcenter">
-        <td width = "75" onClick={() => this.handleClick(1)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(1)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(2)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(2)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(3)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(3)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(4)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(4)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(5)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(5)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(6)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(6)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(7)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(7)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(8)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(8)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(9)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(9)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(10)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(10)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(1)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(1), cursor:'pointer', cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(2)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(2), cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(3)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(3), cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(4)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(4), cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(5)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(5), cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(6)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(6), cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(7)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(7), cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(8)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(8), cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(9)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(9), cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(10)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(10), cursor:'pointer'}}></img></td>    
       </tr>
     </table></div>);
 
@@ -304,7 +325,7 @@ class Grid extends Component {
   }
 
   render() {
-    if (!this.props.isVisible) {
+    if (this.props.currentPage !== GAME_PAGE) {
       return null;
     }
     var rows = [];
