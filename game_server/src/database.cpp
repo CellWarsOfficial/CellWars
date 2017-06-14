@@ -99,7 +99,7 @@ void *DB_conn::run_query(int expectation, string s)
       log->record("tetris", *ans);
       log->record("tetris_done", "ye");
       return (void*) ans;
-    }
+    }/*
     int ni = 0;
     int number[3] = {0, 0, 0};
     int neg = 1;
@@ -107,7 +107,7 @@ void *DB_conn::run_query(int expectation, string s)
     for(; (answer_buf[i] >= '0') && (answer_buf[i] <= '9'); i++);
     for(; !((answer_buf[i] >= '0') && (answer_buf[i] <= '9')); i++);
     for(; answer_buf[i]; i++)
-    {/*
+    {
       if(answer_buf[i] == '-')
       {
         neg = -1;
