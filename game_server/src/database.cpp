@@ -79,30 +79,23 @@ void *DB_conn::run_query(int expectation, string s)
   }
   const char *c = wrapper.c_str();
   char answer_buf[DB_MAX_BUF];
+
   log -> record(ME, (string)"Running query " + wrapper);
-  //
-  write(socketid, c, strlen(c));
-  memset(answer_buf, 0, sizeof(char) * DB_MAX_BUF);
   db_lock.lock();
-  std::this_thread::sleep_for(std::chrono::milliseconds(500));
-  while(read(socketid, answer_buf, DB_MAX_BUF - 1) == 0)
-  {
-    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-  }
-  db_lock.unlock();
+  write(socketid, c, strlen(c));
   if(expectation)
   {
     struct answer *result = NULL;
+    memset(answer_buf, 0, sizeof(char) * DB_MAX_BUF);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    while(read(socketid, answer_buf, DB_MAX_BUF - 1) == 0)
+    {
+      std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+    }
+    db_lock.unlock();
     if(expectation == EXPECT_CLIENT)
     {
-      //TODO: free ans string
-      string ans = "";
-      for(int i = 0; answer_buf[i]; i++)
-      {
-        printf("add %c | %d\n", answer_buf[i], i);
-        ans = ans + answer_buf[i];
-      }
-      return (void*) new String_container(ans);
+      return new String_container(string_get_next_token(answer_buf, "\0"));
     }
     const char *point = answer_buf;
     int n = stoi(string_get_next_token(point, STR_WHITE)), i;
@@ -124,6 +117,7 @@ void *DB_conn::run_query(int expectation, string s)
     }
     return (void *)result;
   }
+  db_lock.unlock();
   return NULL;
 }
 
