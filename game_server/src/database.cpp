@@ -67,7 +67,11 @@ void *DB_conn::run_query(int expectation, string s)
   string wrapper;
   if(expectation)
   {
-    wrapper = "copy (SELECT count(*) FROM agents.grid) to STDOUT WITH CSV; copy (" + s + ") TO STDOUT WITH CSV;\n";
+    wrapper = "copy (SELECT count(*) FROM agents.grid WHERE " 
+            + string_get_next_token(string_seek(s.c_str(), "WHERE"), "") 
+            + ") to STDOUT WITH CSV; copy (" 
+            + s 
+            + ") TO STDOUT WITH CSV;\n";
   }
   else
   {
@@ -86,7 +90,7 @@ void *DB_conn::run_query(int expectation, string s)
   }
   if(expectation)
   {
-    //struct answer *result = 0;
+    struct answer *result = NULL;
     if(expectation == EXPECT_CLIENT)
     {
       //TODO: free ans string
@@ -96,47 +100,27 @@ void *DB_conn::run_query(int expectation, string s)
         printf("add %c | %d\n", answer_buf[i], i);
         *ans = *ans + answer_buf[i];
       }
-      log->record("tetris", *ans);
-      log->record("tetris_done", "ye");
       return (void*) ans;
-    }/*
-    int ni = 0;
-    int number[3] = {0, 0, 0};
-    int neg = 1;
-    int i = 0;
-    for(; (answer_buf[i] >= '0') && (answer_buf[i] <= '9'); i++);
-    for(; !((answer_buf[i] >= '0') && (answer_buf[i] <= '9')); i++);
-    for(; answer_buf[i]; i++)
-    {
-      if(answer_buf[i] == '-')
-      {
-        neg = -1;
-        continue;
-      }
-      if((answer_buf[i] >= '0') && (answer_buf[i] <= '9'))
-      {
-        number[ni] = number[ni] * 10 + (int)(answer_buf[i] - '0');
-        continue;
-      }
-      number[ni] = number[ni] * neg;
-      neg = 1;
-      ni++;
-      if(ni == 3)
-      {
-        void *aux = malloc(sizeof(struct answer));
-        ((struct answer *)aux) -> next = result;
-        result = (struct answer *)aux;
-        result -> row = number[0];
-        result -> col = number[1];
-        result -> t = number[2];
-        number[0] = 0;
-        number[1] = 0;
-        number[2] = 0;
-        ni = 0;
-      }
     }
-    return (void *)result;*/
-    return NULL;
+    const char *point = answer_buf;
+    log -> record(ME, (string)"Received " + string_get_next_token(point, STR_WHITE));
+    int n = stoi(string_get_next_token(point, STR_WHITE)), i;
+    point = string_seek(point, "\n"); // skip size;
+    for(i = 0; i < n; i++)
+    {
+      void *aux = malloc(sizeof(struct answer));
+      check_malloc(aux);
+      ((struct answer *)aux) -> next = result;
+      result = (struct answer *)aux;
+
+      result -> row = stoi(string_get_next_token(point, STR_WHITE));
+      point = string_seek(point, " ");
+      result -> col = stoi(string_get_next_token(point, STR_WHITE));
+      point = string_seek(point, " ");
+      result -> t = stoi(string_get_next_token(point, STR_WHITE));
+      point = string_seek(point, "\n");
+    }
+    return (void *)result;
   }
   return NULL;
 }
