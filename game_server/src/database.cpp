@@ -83,24 +83,26 @@ void *DB_conn::run_query(int expectation, string s)
   //
   if(expectation)
   {
-    struct answer *result = 0;
+    //struct answer *result = 0;
     bzero(answer_buf, DB_MAX_BUF);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     while(read(socketid, answer_buf, DB_MAX_BUF - 1) == 0)
     {
-      read(socketid, answer_buf, DB_MAX_BUF - 1);
+      std::this_thread::sleep_for(std::chrono::milliseconds(5000));
     }
     if(expectation == EXPECT_CLIENT)
     {
       //TODO: free ans string
-      string *ans = (string *) malloc(DB_MAX_BUF * sizeof(char));
-      for(int i = 0; i < DB_MAX_BUF; i++)
+      string *ans = new string();
+      for(int i = 0; answer_buf[i]; i++)
       {
+        printf("add %c | %d\n", answer_buf[i], i);
         *ans = *ans + answer_buf[i];
       }
-      log->record(ME, *ans);
-      while(1);
+      log->record("tetris", *ans);
+      log->record("tetris_done", "ye");
       return (void*) ans;
-    }
+    }/*
     int ni = 0;
     int number[3] = {0, 0, 0};
     int neg = 1;
@@ -136,7 +138,8 @@ void *DB_conn::run_query(int expectation, string s)
         ni = 0;
       }
     }
-    return (void *)result;
+    return (void *)result;*/
+    return NULL;
   }
   return NULL;
 }
