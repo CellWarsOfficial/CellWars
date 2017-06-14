@@ -240,7 +240,6 @@ class UserPicker extends Component {
 class Grid extends Component {
   constructor() {
     super();
-    this.updateDimensions();
     this.state = {
       board: emptyGrid(width, height)
     }
@@ -277,7 +276,9 @@ class Grid extends Component {
 
           board[row][col] = uid;
         }
-        this.state.board = board;
+        this.setState({
+          board: board
+        });
     }.bind(this);
   }
 
@@ -330,17 +331,13 @@ class Grid extends Component {
   }
 
   componentDidMount() {
-    window.addEventListener("resize", () => {this.updateDimensions(); get(); this.forceUpdate()});
+    window.addEventListener("resize", () => {get()});
   }
-
-  updateDimensions() {
-    width = Math.floor(window.innerWidth / 50);
-    height = Math.floor((window.innerHeight - headerHeight) / 50);
-  }
-
 }
 
 function get() {
+  width = Math.floor(window.innerWidth / 50);
+  height = Math.floor((window.innerHeight - headerHeight) / 50);
   if (ws.readyState === WS_READY) {
     var px1 = 0;
     var py1 = 0;
