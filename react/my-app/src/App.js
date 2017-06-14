@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import pac_thing from './images/pac_thing.png';
+import arrow from './images/arrow.png';
 import './App.css';
 
 var ws;
@@ -214,16 +215,16 @@ class UserPicker extends Component {
     return (<div><h2>Pick your colour</h2><br></br><table width="100%">
       <tbody>
       <tr className = "textcenter">
-        <td width = "75" onClick={() => this.handleClick(1)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(1)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(2)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(2)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(3)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(3)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(4)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(4)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(5)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(5)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(6)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(6)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(7)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(7)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(8)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(8)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(9)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(9)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(10)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(10)}}></img></td>    
+        <td onClick={() => this.handleClick(1)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(1)}}></img></td>    
+        <td onClick={() => this.handleClick(2)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(2)}}></img></td>    
+        <td onClick={() => this.handleClick(3)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(3)}}></img></td>    
+        <td onClick={() => this.handleClick(4)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(4)}}></img></td>    
+        <td onClick={() => this.handleClick(5)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(5)}}></img></td>    
+        <td onClick={() => this.handleClick(6)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(6)}}></img></td>    
+        <td onClick={() => this.handleClick(7)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(7)}}></img></td>    
+        <td onClick={() => this.handleClick(8)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(8)}}></img></td>    
+        <td onClick={() => this.handleClick(9)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(9)}}></img></td>    
+        <td onClick={() => this.handleClick(10)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(10)}}></img></td>    
       </tr>
       </tbody>
     </table></div>);
@@ -379,6 +380,69 @@ class RulePage1 extends Component {
     <div onClick={this.props.onClick} style={{height: divHeight}}>
     <h1>Cell Law I</h1>
     <h2>Any live cell with fewer than two live neighbours will die, as if caused by underpopulation.</h2>
+    <div className="fullExample">
+    <div className="gridExample left">
+      <table>
+      <tbody>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    <div className="arrow"><img alt="arrow" src={arrow} style={{width: '100px', height: '240px'}}></img></div>
+    <div className="gridExample right">
+      <table>
+      <tbody>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    </div>
     </div>
     );
   }
@@ -394,6 +458,69 @@ class RulePage2 extends Component {
     <div onClick={this.props.onClick} style={{height: divHeight}}>
     <h1>Cell Law II</h1>
     <h2>Any live cell with two or three live neighbours lives on to the next generation.</h2>
+    <div className="fullExample">
+    <div className="gridExample left">
+      <table>
+      <tbody>
+      <tr>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    <div className="arrow"><img alt="arrow" src={arrow} style={{width: '100px', height: '240px'}}></img></div>
+    <div className="gridExample right">
+      <table>
+      <tbody>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    </div>
     </div>
     );
   }
@@ -410,6 +537,69 @@ class RulePage3 extends Component {
     <h1>Cell Law III</h1>
     <h2>Any dead cell with exactly 3 live neighbours and a majority cell type can be identified
         among them, the cell will be reborn as the same type as the majority.</h2>
+    <div className="fullExample">
+    <div className="gridExample left">
+      <table>
+      <tbody>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    <div className="arrow"><img alt="arrow" src={arrow} style={{width: '100px', height: '240px'}}></img></div>
+    <div className="gridExample right">
+      <table>
+      <tbody>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    </div>
     </div>
     );
   }
@@ -425,6 +615,69 @@ class RulePage4 extends Component {
     <div onClick={this.props.onClick} style={{height: divHeight}}>
     <h1>Cell Law IV</h1>
     <h2>Any live cell with greater than three live neighbours dies, as if caused by overpopulation.</h2>
+    <div className="fullExample">
+    <div className="gridExample left">
+      <table>
+      <tbody>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    <div className="arrow"><img alt="arrow" src={arrow} style={{width: '100px', height: '240px'}}></img></div>
+    <div className="gridExample right">
+      <table>
+      <tbody>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    </div>
     </div>
     );
   }
