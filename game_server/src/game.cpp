@@ -251,21 +251,22 @@ string Game::user_want(int px1, int py1, int px2, int py2)
   string query = "SELECT * FROM agents.grid WHERE x>= " + 
                   std::to_string(px1) + " AND x<= " + std::to_string(px2) + 
                   " AND y>= " + std::to_string(py1) + " AND y <= " + 
-                  std::to_string(py2) + ";"; 
-  char *result = (char *) db_info->run_query(EXPECT_READ, query);  
-  string output = "";
-  for(int i = 0; (char) result[i] != '\0'; i++)
-  {
-    output = output + result[i];
-  }
-  return output;
+                  std::to_string(py2); 
+  log -> record(ME, query);
+  string *result = (string *) db_info->run_query(EXPECT_CLIENT, query);  
+  //string output = "";
+  //for(int i = 0; result[i]; i++)
+  //{
+  //  output = output + result[i];
+  //}
+  return *result;
 }
 
 void Game::user_does(int x, int y, CELL_TYPE t)
 {
   string query = "UPDATE agents.grid SET CELL_TYPE = '" + std::to_string(t) +
                  "' WHERE x = " + std::to_string(x) + " AND y = " + 
-                 std::to_string(y) + ";";
+                 std::to_string(y);
   db_info->run_query(EXPECT_CLIENT, query);  
 }
 

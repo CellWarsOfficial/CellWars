@@ -81,7 +81,7 @@ void *DB_conn::run_query(int expectation, string s)
 
   //c.socket()->emit("benis");
   //
-  if(expectation == EXPECT_READ)
+  if(expectation)
   {
     struct answer *result = 0;
     bzero(answer_buf, DB_MAX_BUF);
@@ -97,6 +97,8 @@ void *DB_conn::run_query(int expectation, string s)
       {
         *ans = *ans + answer_buf[i];
       }
+      log->record(ME, *ans);
+      while(1);
       return (void*) ans;
     }
     int ni = 0;
