@@ -346,9 +346,9 @@ function get() {
                 .concat(" py1=")
                 .concat(py1.toString())
                 .concat(" px2=")
-                .concat(width-1)
-                .concat(" py2=")
                 .concat(height-1)
+                .concat(" py2=")
+                .concat(width-1)
     console.log("Sending query : ".concat(queryRequest));
     ws.send(queryRequest);
   } else {
