@@ -12,11 +12,6 @@ const headerHeight = 230;
 const players = 10; //determines how colours are split between userID's
 var yourUserID = 1;
 
-// const x1Home = width/2 - 2;
-// const x2Home = width/2 + 2;
-// const y1Home = height/2 - 2;
-// const y2Home = height/2 + 2; //location of the editable home region
-
 var DISPLAYMODE = {
   COLOURS: {value: 0, name: "colours"},
   EMOJIS: {value: 1, name: "emojis"}
@@ -41,10 +36,6 @@ class App extends Component {
       displayMode: 0,
       currentPage: INTRO_PAGE,
     }
-  }
-
-  submit() {
-    window.alert("This button won't be used for now.. Updating a cell submits");
   }
 
   advanceDisplayMode() {
@@ -91,7 +82,6 @@ class App extends Component {
     );
   }
 }
-// <SubmitButton onClick={() => this.submit()} currentPage = {this.state.currentPage}/> &nbsp;
 
 class HelpButton extends Component {
   render() {
@@ -101,19 +91,6 @@ class HelpButton extends Component {
     return (
       <button onClick = {this.props.onClick} className={'roundButton'}>
       Help
-      </button>
-    );
-  }
-}
-
-class SubmitButton extends Component {
-  render() {
-  if (this.props.currentPage !== GAME_PAGE) {
-    return null;
-  }
-  return (
-      <button onClick = {this.props.onClick} className={'roundButton'}>
-      Submit
       </button>
     );
   }
@@ -172,9 +149,6 @@ function ImgSquare(props) {
     src = pac_thing;
   }
   var style = {display: 'inline-block'};
-  // if (props.inHomeArea) {
-  //   style = {backgroundColor: 'red', display: 'inline-block'};
-  // }
 
   return (
     <div style={style}>
@@ -192,21 +166,14 @@ function ImgSquare(props) {
 }
 
 
-
-
-// function outsideHomeArea(row, col) {
-//   return (row < y1Home || row >= y2Home ||
-//           col < x1Home || col >= x2Home);
-// }
-
 class Row extends Component {
   renderSquare(userIDturtle, row, col) {
     return (
       <ImgSquare
+      key={row.toString().concat(col.toString())}
       userID={userIDturtle}
       onClick={() => this.props.onClick(row, col)}
       displayMode={this.props.displayMode}
-      // inHomeArea={!outsideHomeArea(row, col)}
       />
     );
   }
@@ -227,9 +194,9 @@ class Row extends Component {
 
 function emptyGrid(width, height) { // Generates an example board fitting to the width and height global variables
   var ret = [];
-  for (var i = 0; i < height; i++) {
+  for (var i = 0; i < width; i++) {
     var row = [];
-    for (var j = 0; j < width; j++) {
+    for (var j = 0; j < height; j++) {
       row.push(0);
     }
     ret.push(row);
@@ -246,6 +213,7 @@ class UserPicker extends Component {
     }
 
     return (<div><h2>Pick your colour</h2><br></br><table width="100%">
+      <tbody>
       <tr className = "textcenter">
         <td width = "75" onClick={() => this.handleClick(1)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(1), cursor:'pointer'}}></img></td>    
         <td width = "75" onClick={() => this.handleClick(2)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(2), cursor:'pointer'}}></img></td>    
@@ -258,6 +226,7 @@ class UserPicker extends Component {
         <td width = "75" onClick={() => this.handleClick(9)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(9), cursor:'pointer'}}></img></td>    
         <td width = "75" onClick={() => this.handleClick(10)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(10), cursor:'pointer'}}></img></td>    
       </tr>
+      </tbody>
     </table></div>);
 
   }
@@ -277,7 +246,7 @@ class Grid extends Component {
       board: emptyGrid(width, height)
     }
     var url = "ws".concat(window.location.toString().substring(4));
-    url = "ws://146.169.45.167:7777/" // temp url used for local debugging
+    // url = "ws://146.169.45.167:7777/" // temp url used for local debugging
     ws = new WebSocket(url);
     ws.onopen = function() {
       console.log("web socket opened : ".concat(url));
@@ -289,15 +258,16 @@ class Grid extends Component {
     ws.onerror = function() {
       console.log("web socket error");
     }
-    const board = this.state.board.slice();
     ws.onmessage = function (evt)
     {
       var received_msg = evt.data;
+      const board = this.state.board;
       console.log("web socket message received: ".concat(received_msg));
+
       
       var lines = received_msg.split('\n');
 
-      if (lines[0] === lines.length) {        // if the received message is valid
+      if (Number(lines[0]) === lines.length - 1) {        // if the received message is valid
 
         for (let i = 0; i < width; i++) {
           for (let j = 0; j < height; j++) {
@@ -307,8 +277,8 @@ class Grid extends Component {
 
         for (let i = 1; i <= lines[0]; i++) { // filling grid with received information
           var data = lines[i].split(',');
-          if (lines[i].length() !== 3) {
-            console.log("parse error");
+          if (data.length !== 3) {
+            console.log("parse error format");
             break;
           }
           var row = data[0];
@@ -318,7 +288,7 @@ class Grid extends Component {
           board[row][col] = uid;
         }
       } else {
-        console.log("parse error");
+        console.log("parse error size");
       }
     }
   }
@@ -326,11 +296,6 @@ class Grid extends Component {
 
 
   handleClick(row, col) {
-    // if (outsideHomeArea(row, col)) {
-    //   window.alert("You may only toggle cells in your home area.");
-    //   return;
-    // }
-
     const board = this.state.board.slice(); //Clones the board
 
     board[row][col] = (board[row][col] === 0) ? yourUserID : 0;
@@ -354,7 +319,7 @@ class Grid extends Component {
 
   renderRow(row) {
     return (
-      <div>
+      <div key={row.toString()}>
         <Row
           squares={this.state.board[row]}
           row={row}
