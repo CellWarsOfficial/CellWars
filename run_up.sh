@@ -1,5 +1,6 @@
 #!/bin/bash
 
+make uninstall
 rm -rf .tmpoutput
 touch .tmpoutput
 status=0

@@ -103,8 +103,8 @@ void *DB_conn::run_query(int expectation, string s)
       return (void*) ans;
     }
     const char *point = answer_buf;
-    log -> record(ME, (string)"Received " + string_get_next_token(point, STR_WHITE));
     int n = stoi(string_get_next_token(point, STR_WHITE)), i;
+    log -> record(ME, (string)"Received " + to_string(n));
     point = string_seek(point, "\n"); // skip size;
     for(i = 0; i < n; i++)
     {
@@ -114,9 +114,9 @@ void *DB_conn::run_query(int expectation, string s)
       result = (struct answer *)aux;
 
       result -> row = stoi(string_get_next_token(point, STR_WHITE));
-      point = string_seek(point, " ");
+      point = string_seek(point, ",");
       result -> col = stoi(string_get_next_token(point, STR_WHITE));
-      point = string_seek(point, " ");
+      point = string_seek(point, ",");
       result -> t = stoi(string_get_next_token(point, STR_WHITE));
       point = string_seek(point, "\n");
     }
