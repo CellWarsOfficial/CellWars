@@ -223,17 +223,6 @@ void Game::up_db()
   log -> record(ME, "Database updated");
 }
 
-void Game::user_say(int px, int py, CELL_TYPE col)
-{
-  if(!valid_coordonate(px, py))
-  {
-    return;
-  }
-  std::map<uint64_t,Block*>::iterator find_res;
-  find_res = super_node.find(0);
-  find_res -> second -> map[px][py] = col;
-}
-
 string Game::user_want(int px1, int py1, int px2, int py2)
 {
   if(px1 > px2)
@@ -266,6 +255,9 @@ string Game::user_want(int px1, int py1, int px2, int py2)
 
 void Game::user_does(int x, int y, CELL_TYPE t)
 {
+  // TODO improve block update
+  std::map<uint64_t,Block*>::iterator find_res = super_node.find(0);
+  find_res -> second -> set(x, y, t);
   string query = "DELETE FROM agents.grid WHERE x=" +
                  std::to_string(x) + " AND y=" + std::to_string(y);
   db_info->run_query(NO_READ, query);
