@@ -348,6 +348,7 @@ class Grid extends Component {
       <MoveDown/>
       <MoveUp/>
       <MoveRight/>
+      <MoveReset/>
       </div>);
   }
 
@@ -435,6 +436,23 @@ class MoveDown extends Component {
 
   handleClick() {
     offsetHeight += 1;
+    get();
+  }
+}
+
+class MoveReset extends Component {
+  render() {
+    var char = 'Re-Centre';
+    return(
+      <button onClick = {this.handleClick} className={'moveButton'}>
+      {char}
+      </button>
+    );
+  }
+
+  handleClick() {
+    offsetHeight = 0;
+    offsetWidth = 0;
     get();
   }
 }

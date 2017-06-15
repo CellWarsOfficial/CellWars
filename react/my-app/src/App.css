@@ -57,14 +57,16 @@
 
 .left {
   display: inline-block;
-  position: absolute;
-  left: 10%;
+  text-align: left;
+  margin-left: -3em;
+  margin-right: 6em;
 }
 
 .right {
   display: inline-block;
-  position: absolute;
-  right: 10%;
+  text-align: right;
+  margin-right: -3em;
+  margin-left: 6em;
 }
 
 .gridExample td:hover {
@@ -80,11 +82,15 @@
 
 .arrow {
   display: inline-block;
-  text-align: center;
 }
 
 .fullExample {
+  margin: 0 auto;
+  padding: 40px;
   border: 1px dashed grey;
+  text-align: center;
+  width: 60%;
+  position: relative;
 }
 
 h2 {
