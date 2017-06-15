@@ -22,6 +22,6 @@ void xormask(uint32_t *buf, uint32_t mask);
 
 void print_bytes(uint8_t *buf, int len);
 
-int str_eq(string rhs);
+int str_eq(string s1, string s2);
 
 #endif

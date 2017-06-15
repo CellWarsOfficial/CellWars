@@ -20,6 +20,21 @@ int math_tests()
   string test3 = "11000011010011111";
   string test4 = "0000100110011010";
   string test5 = "100110011010";
+  unsigned long test6 = 70;
+  unsigned long test7 = 63;
+  unsigned long test8 = 0;
+  unsigned long test9 = 7;
+  unsigned long test10 = 8;
+  string test11 = "000000111";
+  string test12 = "000000111111";
+  string test13 = "0010000";
+  string test14 = "000100000";
+  string test15 = "000100001";
+  string test16 = "Mihai";
+  string test17 = "journey";
+  string test18 = "persona";
+  string test19 = "car";
+  string test20 = "cat";
   tests++;
   if(13 != binary_to_num(test1)){
     fprintf(stderr, "TEST FAIL: binary_to_num.\n"); 
@@ -46,41 +61,60 @@ int math_tests()
     fails++;
   }
   //test num_to_binary
-  int test6 = 70;
-  int test7 = 63;
-  int test8 = 0;
-  int test9 = 00111;
-  int test10 = 111;
   tests++;
-  if("1000110"(test6)){
+  if(!str_eq("01000110", num_to_binary(test6))){
+    fprintf(stderr, "TEST FAIL: num_to_binary.\n"); 
+    string s = num_to_binary(test6);
+    printf("HERE:%s\n", s.c_str());
+    fails++;
+  }
+  tests++;
+  if(!str_eq("00111111", num_to_binary(test7))){
     fprintf(stderr, "TEST FAIL: num_to_binary.\n"); 
     fails++;
   }
   tests++;
-  if("111111" != num_to_binary(test7)){
+  if(!str_eq("00000000", num_to_binary(test8))){
     fprintf(stderr, "TEST FAIL: num_to_binary.\n"); 
     fails++;
   }
   tests++;
-  if("0" != num_to_binary(test8)){
+  if(!str_eq("00000111", num_to_binary(test9))){
     fprintf(stderr, "TEST FAIL: num_to_binary.\n"); 
     fails++;
   }
   tests++;
-  if("7" != num_to_binary(test9)){
+  if(!str_eq("00001000", num_to_binary(test10))){
     fprintf(stderr, "TEST FAIL: num_to_binary.\n"); 
     fails++;
   }
+  //test encode_six_bits
   tests++;
-  if("7" != num_to_binary(test10)){
-    fprintf(stderr, "TEST FAIL: num_to_binary.\n"); 
+  if(7 != encode_six_bits(test11, 3)){
+    fprintf(stderr, "TEST FAIL: encode_six_bits.\n"); 
     fails++;
   }
   tests++;
-  if(2458 != binary_to_num(test5)){
-    fprintf(stderr, "TEST FAIL: binary_to_num.\n"); 
+  if(7 != encode_six_bits(test12, 3)){
+    fprintf(stderr, "TEST FAIL: encode_six_bits.\n"); 
     fails++;
   }
+  tests++;
+  if(16 != encode_six_bits(test13, 1)){
+    fprintf(stderr, "TEST FAIL: encode_six_bits.\n"); 
+    fails++;
+  }
+  tests++;
+  if(32 != encode_six_bits(test14, 3)){
+    fprintf(stderr, "TEST FAIL: encode_six_bits.\n"); 
+    fails++;
+  }
+  tests++;
+  if(33 != encode_six_bits(test15, 3)){
+    fprintf(stderr, "TEST FAIL: encode_six_bits.\n"); 
+    fails++;
+  }
+  //test encode_base64.
   fprintf(stderr, "%d/%d tests passed - math\n", tests - fails, tests);
   return fails;
 }
