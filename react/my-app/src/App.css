@@ -57,14 +57,14 @@
 
 .left {
   display: inline-block;
-  text-align: left;
+  text-align: center;
   margin-left: -3em;
   margin-right: 6em;
 }
 
 .right {
   display: inline-block;
-  text-align: right;
+  text-align: center;
   margin-right: -3em;
   margin-left: 6em;
 }
