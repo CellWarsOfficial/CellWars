@@ -227,7 +227,7 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
                               );
       px = game -> user_does(px, py, t);
       memset(comm_buf, 0, len * sizeof(char));
-      delta = form_answer(to_string(px), comm_buf);
+      len = form_answer(to_string(px) + "\n", comm_buf);
       write(s, comm_buf, len);
       memset(comm_buf, 0, len * sizeof(char));
     }
