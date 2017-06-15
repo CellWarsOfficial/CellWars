@@ -203,6 +203,7 @@ class ImgSquare extends Component {
 
   handleMouseOver() {
     if (this.props.displayMode === DISPLAYMODE.COLOURS.value) {
+      window.alert("something");
       this.setState({
         src: mouse_over
       });
