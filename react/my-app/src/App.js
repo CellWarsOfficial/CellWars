@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import pac_thing from './images/pac_thing.png';
+import logo from './images/logo.gif';
+import mouse_over from './images/logo.gif';
+import idle_cell from './images/idle_cell.gif';
 import arrow from './images/arrow.png';
 import './App.css';
 
@@ -147,13 +148,13 @@ function ImgSquare(props) {
   var src = null;
 
   if (props.displayMode === DISPLAYMODE.COLOURS.value) {
-    src = pac_thing;
+    src = idle_cell;
   } else if (props.displayMode === DISPLAYMODE.EMOJIS.value) {
     src = 'https://www.doc.ic.ac.uk/project/2016/271/g1627123/images/emojis/'.concat((props.userID).toString()).concat('.png');
   }
 
   if (props.userID === 0) {
-    src = pac_thing;
+    src = idle_cell;
   }
 
   return (
@@ -223,16 +224,16 @@ class UserPicker extends Component {
     return (<div><h2>Pick your colour</h2><br></br><table width="100%">
       <tbody>
       <tr className = "textcenter">
-        <td onClick={() => this.handleClick(1)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(1)}}></img></td>    
-        <td onClick={() => this.handleClick(2)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(2)}}></img></td>    
-        <td onClick={() => this.handleClick(3)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(3)}}></img></td>    
-        <td onClick={() => this.handleClick(4)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(4)}}></img></td>    
-        <td onClick={() => this.handleClick(5)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(5)}}></img></td>    
-        <td onClick={() => this.handleClick(6)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(6)}}></img></td>    
-        <td onClick={() => this.handleClick(7)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(7)}}></img></td>    
-        <td onClick={() => this.handleClick(8)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(8)}}></img></td>    
-        <td onClick={() => this.handleClick(9)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(9)}}></img></td>    
-        <td onClick={() => this.handleClick(10)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(10)}}></img></td>    
+        <td onClick={() => this.handleClick(1)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(1)}}></img></td>    
+        <td onClick={() => this.handleClick(2)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(2)}}></img></td>    
+        <td onClick={() => this.handleClick(3)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(3)}}></img></td>    
+        <td onClick={() => this.handleClick(4)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(4)}}></img></td>    
+        <td onClick={() => this.handleClick(5)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(5)}}></img></td>    
+        <td onClick={() => this.handleClick(6)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(6)}}></img></td>    
+        <td onClick={() => this.handleClick(7)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(7)}}></img></td>    
+        <td onClick={() => this.handleClick(8)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(8)}}></img></td>    
+        <td onClick={() => this.handleClick(9)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(9)}}></img></td>    
+        <td onClick={() => this.handleClick(10)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(10)}}></img></td>    
       </tr>
       </tbody>
     </table></div>);
@@ -518,8 +519,8 @@ class RulePage1 extends Component {
       </tr>
       <tr>
         <td></td>
-        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
-        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
         <td></td>
       </tr>
       <tr>
@@ -583,21 +584,21 @@ class RulePage2 extends Component {
       <table>
       <tbody>
       <tr>
-        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
         <td></td>
-        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td></td>
-        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
-        <td></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
         <td></td>
       </tr>
       <tr>
         <td></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
         <td></td>
-        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
         <td></td>
       </tr>
       <tr>
@@ -621,7 +622,7 @@ class RulePage2 extends Component {
       </tr>
       <tr>
         <td></td>
-        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
         <td></td>
         <td></td>
       </tr>
@@ -665,7 +666,7 @@ class RulePage3 extends Component {
         <td></td>
         <td></td>
         <td></td>
-        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
       </tr>
       <tr>
         <td></td>
@@ -675,9 +676,9 @@ class RulePage3 extends Component {
       </tr>
       <tr>
         <td></td>
-        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
         <td></td>
-        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
       </tr>
       <tr>
         <td></td>
@@ -701,7 +702,7 @@ class RulePage3 extends Component {
       <tr>
         <td></td>
         <td></td>
-        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
         <td></td>
       </tr>
       <tr>
@@ -747,21 +748,21 @@ class RulePage4 extends Component {
       </tr>
       <tr>
         <td></td>
-        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
         <td></td>
-        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
       </tr>
       <tr>
         <td></td>
         <td></td>
-        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
         <td></td>
       </tr>
       <tr>
         <td></td>
-        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
         <td></td>
-        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
       </tr>
       </tbody>
       </table>
