@@ -41,6 +41,7 @@ class Game
   int gen_to_run;
   int plan_time;
   std::map <uint64_t, Block*> super_node;
+  Block *get_block(int x, int y);
   void check_run();
   void plan_stage(int wait_time);
   void crank_stage(int generations);
