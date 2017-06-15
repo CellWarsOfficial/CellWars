@@ -278,7 +278,6 @@ class Grid extends Component {
       width = Math.floor(window.innerWidth / 30);
       height = Math.floor((window.innerHeight - headerHeight) / 30);
       var received_msg = evt.data;
-      var board = emptyGrid(width, height);
       console.log("Web socket message received: ".concat(received_msg));
 
       var lines = received_msg.trim().split('\n');
@@ -286,6 +285,7 @@ class Grid extends Component {
       switch(websocket_task) {
         case TASK_QUERY:
           if ((lines.length - 1) === Number(lines[0])) { // validity check on line numbers
+            var board = emptyGrid(width, height);
             for (let i = 1; i <= lines[0]; i++) { // filling grid with received information
               var data = lines[i].trim().split(',');
               if (data.length !== 3) {
@@ -303,6 +303,9 @@ class Grid extends Component {
 
               board[row][col] = uid;
             }
+            this.setState({
+              board: board
+            });
             console.log("Parse info : successfully parsed query")
           } else {
             console.log("Parse error : unexpected number of lines");
@@ -340,9 +343,6 @@ class Grid extends Component {
           lock = LOCK_FREE;
       }
 
-        this.setState({
-          board: board
-        });
     }.bind(this);
   }
 
@@ -362,11 +362,11 @@ class Grid extends Component {
                 .concat(" t=")
                 .concat(board[row][col]);
     console.log("Sending query : ".concat(updateRequest));
-    var rand = new Date().getMilliseconds();
 
     while (ws.readyState === WS_READY) {
+      var rand = new Date().getMilliseconds();
       while (lock !== LOCK_FREE) {
-          setTimeout(() => {console.log("Waiting for websocket..")}, 100);
+          // setTimeout(() => {console.log("Waiting for websocket..")}, rand);
       }
       lock = rand;
       if (lock !== rand) {
@@ -432,12 +432,12 @@ function get() {
               .concat(width - 1 + offsetWidth)
   console.log("Sending query : ".concat(queryRequest));
 
-  var rand = new Date().getMilliseconds();
 
 
   while (ws.readyState === WS_READY) {
+    var rand = new Date().getMilliseconds();
     while (lock !== LOCK_FREE) {
-        setTimeout(() => {console.log("Waiting for websocket..")}, 100);
+        // setTimeout(() => {console.log("Waiting for websocket..")}, rand);
     }
     lock = rand;
     if (lock !== rand) {
