@@ -8,6 +8,10 @@ var ws;
 
 var width = 20;
 var height = 20; //dimensions of the board
+
+var offsetWidth = 0;
+var offsetHeight = 0;
+
 const headerHeight = 230;
 
 const players = 10; //determines how colours are split between userID's
@@ -196,7 +200,9 @@ function emptyGrid(width, height) { // Generates an example board fitting to the
   for (var i = 0; i < height; i++) {
     var row = [];
     for (var j = 0; j < width; j++) {
+      // TEMP DEBUG
       row.push(0);
+      // row.push(i*width + j);
     }
     ret.push(row);
   }
@@ -244,7 +250,7 @@ class Grid extends Component {
       board: emptyGrid(width, height)
     }
     var url = "ws".concat(window.location.toString().substring(4));
-    // url = "ws://146.169.45.167:7777/" // temp url used for local debugging
+    url = "ws://146.169.45.167:7777/" // temp url used for local debugging
     ws = new WebSocket(url);
     ws.onopen = function() {
       console.log("web socket opened : ".concat(url));
@@ -292,14 +298,14 @@ class Grid extends Component {
       board: board
     });
 
+    var updateRequest = "UPDATE px="
+                .concat(row + offsetHeight)
+                .concat(" py=")
+                .concat(col + offsetWidth)
+                .concat(" t=")
+                .concat(board[row][col]);
+    console.log("Sending query : ".concat(updateRequest));
     if (ws.readyState === WS_READY) {
-      var updateRequest = "UPDATE px="
-                  .concat(row)
-                  .concat(" py=")
-                  .concat(col)
-                  .concat(" t=")
-                  .concat(board[row][col]);
-      console.log("Sending query : ".concat(updateRequest));
       ws.send(updateRequest);
     } else {
       console.log("Websocket is not ready!");
@@ -327,7 +333,15 @@ class Grid extends Component {
     for (var i = 0; i < height; i++) {
       rows.push(this.renderRow(i));
     }
-    return <div>{rows}</div>;
+
+    return (
+      <div>
+      {rows}
+      <MoveLeft/>
+      <MoveDown/>
+      <MoveUp/>
+      <MoveRight/>
+      </div>);
   }
 
   componentDidMount() {
@@ -338,21 +352,87 @@ class Grid extends Component {
 function get() {
   width = Math.floor(window.innerWidth / 50);
   height = Math.floor((window.innerHeight - headerHeight) / 50);
+  var queryRequest = "QUERY px1="
+              .concat(offsetHeight)
+              .concat(" py1=")
+              .concat(offsetWidth)
+              .concat(" px2=")
+              .concat(height - 1 + offsetHeight)
+              .concat(" py2=")
+              .concat(width - 1 + offsetWidth)
+  console.log("Sending query : ".concat(queryRequest));
   if (ws.readyState === WS_READY) {
-    var px1 = 0;
-    var py1 = 0;
-    var queryRequest = "QUERY px1="
-                .concat(px1.toString())
-                .concat(" py1=")
-                .concat(py1.toString())
-                .concat(" px2=")
-                .concat(height-1)
-                .concat(" py2=")
-                .concat(width-1)
-    console.log("Sending query : ".concat(queryRequest));
     ws.send(queryRequest);
   } else {
     console.log("Websocket is not ready!");
+  }
+}
+
+class MoveRight extends Component {
+  render() {
+    var char = '>';
+    return(
+      <button onClick = {this.handleClick} className={'moveButton'}>
+      {char}
+      </button>
+    );
+  }
+
+  handleClick() {
+    offsetWidth += 1;
+    get();
+  }
+}
+
+class MoveLeft extends Component {
+  render() {
+    var char = '<';
+    return(
+      <button onClick = {this.handleClick} className={'moveButton'}>
+      {char}
+      </button>
+    );
+  }
+
+  handleClick() {
+    if (offsetWidth > 0) {
+      offsetWidth -= 1;
+      get();
+    }
+  }
+}
+
+class MoveUp extends Component {
+  render() {
+    var char = '^';
+    return(
+      <button onClick = {this.handleClick} className={'moveButton'}>
+      {char}
+      </button>
+    );
+  }
+
+  handleClick() {
+    if (offsetHeight > 0) {
+      offsetHeight -= 1;
+      get();
+    }
+  }
+}
+
+class MoveDown extends Component {
+  render() {
+    var char = 'v';
+    return(
+      <button onClick = {this.handleClick} className={'moveButton'}>
+      {char}
+      </button>
+    );
+  }
+
+  handleClick() {
+    offsetHeight += 1;
+    get();
   }
 }
 

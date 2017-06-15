@@ -90,3 +90,17 @@
 h2 {
   color: #222222;
 }
+
+.moveButton {
+  margin: 10px;
+  border-radius: 6px;
+  font-size: 16px;
+  text-decoration: none;
+  display: inline-block;
+  background-color: #00FF65;
+  color: white;
+  -webkit-transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+.moveButton:hover {background-color: white; color: black;}
