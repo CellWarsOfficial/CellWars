@@ -97,7 +97,7 @@ class HelpButton extends Component {
     }
     return (
       <button onClick = {this.props.onClick} className={'roundButton'}>
-      Help
+      Rules
       </button>
     );
   }
@@ -118,7 +118,7 @@ class DisplayModeAdvancer extends Component {
   render() {
     return (
       <button onClick={this.props.onClick} className={'roundButton'}>
-      Advance Display
+      Alternative Display
       </button>
     );
   }
@@ -246,7 +246,7 @@ class Grid extends Component {
       // cache: emptyGrid(width + LOOKAHEAD*2, height + LOOKAHEAD*2),
     }
     var url = "ws".concat(window.location.toString().substring(4));
-    // url = "ws://89.122.28.235:7777/" // temp url used for local debugging
+    url = "ws://89.122.28.235:7777/" // temp url used for local debugging
     ws = new WebSocket(url);
     ws.onopen = function() {
       console.log("Web socket opened : ".concat(url));
@@ -362,7 +362,6 @@ class Grid extends Component {
       <MoveUp onClick={() => this.get()}/>
       <MoveRight onClick={() => this.get()}/>
       <MoveReset onClick={() => this.get()}/>
-      <p></p>
       <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()}/> &nbsp;
       <GetButton onClick={() => this.get()}/> &nbsp;
       </div>);
@@ -479,7 +478,7 @@ class MoveReset extends Component {
   render() {
     var char = 'Re-Centre';
     return(
-      <button onClick = {() => this.handleClick()} className={'moveButton'}>
+      <button onClick = {() => this.handleClick()} className={'roundButton'}>
       {char}
       </button>
     );
