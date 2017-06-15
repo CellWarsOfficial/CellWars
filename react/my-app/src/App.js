@@ -250,7 +250,7 @@ class Grid extends Component {
       board: emptyGrid(width, height)
     }
     var url = "ws".concat(window.location.toString().substring(4));
-    url = "ws://146.169.45.167:7777/" // temp url used for local debugging
+    // url = "ws://146.169.45.167:7777/" // temp url used for local debugging
     ws = new WebSocket(url);
     ws.onopen = function() {
       console.log("web socket opened : ".concat(url));
@@ -264,6 +264,8 @@ class Grid extends Component {
     }
     ws.onmessage = function (evt)
     {
+      width = Math.floor(window.innerWidth / 50);
+      height = Math.floor((window.innerHeight - headerHeight) / 50);
       var received_msg = evt.data;
       var board = emptyGrid(width, height);
       console.log("web socket message received: ".concat(received_msg));
@@ -308,7 +310,7 @@ class Grid extends Component {
     if (ws.readyState === WS_READY) {
       ws.send(updateRequest);
     } else {
-      console.log("Websocket is not ready!");
+      console.log("ABORT: Websocket is not ready!");
     }
   }
 
@@ -350,8 +352,8 @@ class Grid extends Component {
 }
 
 function get() {
-  width = Math.floor(window.innerWidth / 50);
-  height = Math.floor((window.innerHeight - headerHeight) / 50);
+  var width = Math.floor(window.innerWidth / 50);
+  var height = Math.floor((window.innerHeight - headerHeight) / 50);
   var queryRequest = "QUERY px1="
               .concat(offsetHeight)
               .concat(" py1=")
@@ -364,7 +366,7 @@ function get() {
   if (ws.readyState === WS_READY) {
     ws.send(queryRequest);
   } else {
-    console.log("Websocket is not ready!");
+    console.log("ABORT: Websocket is not ready!");
   }
 }
 
