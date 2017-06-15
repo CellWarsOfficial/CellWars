@@ -74,7 +74,6 @@ class App extends Component {
       <div className="App">
         <div className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1>Cell Wars</h1>
         </div>
         <div style={{position: 'absolute', right:'10px'}}>
           <HelpButton onClick={() => this.setPageTo(RULE_PAGE_0)} currentPage = {this.state.currentPage}/>
@@ -230,16 +229,16 @@ class UserPicker extends Component {
     return (<div><h2>Pick your colour</h2><br></br><table width="100%">
       <tbody>
       <tr className = "textcenter">
-        <td onClick={() => this.handleClick(1)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(1)}}></img></td>    
-        <td onClick={() => this.handleClick(2)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(2)}}></img></td>    
-        <td onClick={() => this.handleClick(3)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(3)}}></img></td>    
-        <td onClick={() => this.handleClick(4)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(4)}}></img></td>    
-        <td onClick={() => this.handleClick(5)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(5)}}></img></td>    
-        <td onClick={() => this.handleClick(6)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(6)}}></img></td>    
-        <td onClick={() => this.handleClick(7)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(7)}}></img></td>    
-        <td onClick={() => this.handleClick(8)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(8)}}></img></td>    
-        <td onClick={() => this.handleClick(9)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(9)}}></img></td>    
-        <td onClick={() => this.handleClick(10)}><img alt="pacman" src={idle_cell} className={'tableImage'} style={{backgroundColor:rainbow(10)}}></img></td>    
+        <td onClick={() => this.handleClick(1)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(1)}}></img></td>    
+        <td onClick={() => this.handleClick(2)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(2)}}></img></td>    
+        <td onClick={() => this.handleClick(3)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(3)}}></img></td>    
+        <td onClick={() => this.handleClick(4)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(4)}}></img></td>    
+        <td onClick={() => this.handleClick(5)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(5)}}></img></td>    
+        <td onClick={() => this.handleClick(6)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(6)}}></img></td>    
+        <td onClick={() => this.handleClick(7)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(7)}}></img></td>    
+        <td onClick={() => this.handleClick(8)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(8)}}></img></td>    
+        <td onClick={() => this.handleClick(9)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(9)}}></img></td>    
+        <td onClick={() => this.handleClick(10)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(10)}}></img></td>    
       </tr>
       </tbody>
     </table></div>);
