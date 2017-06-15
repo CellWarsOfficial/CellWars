@@ -37,7 +37,7 @@ const TASK_IDLE = 0;
 const TASK_QUERY = 1;
 const TASK_UPDATE = 2;
 
-const UPDATE_FAIL = 1;
+const UPDATE_FAIL = 0;
 const UPDATE_SUCCESS = 1;
 
 var websocket_task = TASK_IDLE;
@@ -330,9 +330,10 @@ class Grid extends Component {
           break;
 
         case TASK_IDLE: 
-        default: console.log("Unexpected websocket task");
+        default: 
+          console.log("Unexpected websocket task");
+          websocket_task = TASK_IDLE;
       }
-
 
         this.setState({
           board: board
