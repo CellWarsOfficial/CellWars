@@ -100,7 +100,7 @@ int Logger::record(string process, string message)
   }
   logger_lock.lock();
   buffer[buffer_read] = 
-      '[' + to_string(time(NULL)) + ']' + process + ": " + message + '\n';
+      '[' + to_string(chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now().time_since_epoch()).count()) + ']' + process + ": " + message + '\n';
   buffer_read++;
   if(buffer_read == buffer_size)
   {
