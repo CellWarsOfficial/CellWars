@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import logo from './images/logo.gif';
-import mouse_over from './images/logo.gif';
+import mouse_over from './images/mouse_over.gif';
 import idle_cell from './images/idle_cell.gif';
+import big_cell from './images/big_cell.gif';
 import arrow from './images/arrow.png';
 import './App.css';
 
@@ -168,8 +169,61 @@ function ImgSquare(props) {
     </input>
     </div>
     );
-
 }
+
+class ImgSquare extends Component {
+  constructor() {
+    super();
+    this.handleMouseOver = this.handleMouseOver.bind(this);
+    this.handleMouseOut = this.handleMouseOut.bind(this);
+    this.goState();
+  }
+
+  goState() {
+    if (this.props.displayMode === DISPLAYMODE.COLOURS.value) {
+      src = idle_cell;
+    } else if (this.props.displayMode === DISPLAYMODE.EMOJIS.value) {
+      src = 'https://www.doc.ic.ac.uk/project/2016/271/g1627123/images/emojis/'.concat((props.userID).toString()).concat('.png');
+    }
+    this.state = {
+      src: src
+    }
+  }
+
+  handleMouseOver() {
+    if (props.displayMode === DISPLAYMODE.COLOURS.value) {
+      this.setState({
+        src: mouse_over
+      });
+    }
+  }
+
+  handleMouseOut() {
+    this.goState();
+  }
+
+  render() {
+    return (
+      <div style={{display: 'inline-block'}}>
+      <input
+      type="image"
+      alt="cell"
+      src={this.state.src}
+      onClick={props.onClick}
+      style={{width:20, height:20, backgroundColor:rainbow(props.userID)}}
+      className='cell'>
+      </input>
+      </div>
+    );
+  }
+}
+
+
+
+
+
+
+
 
 
 class Row extends Component {
