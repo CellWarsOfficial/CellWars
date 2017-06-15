@@ -266,8 +266,7 @@ class Grid extends Component {
     {
       width = Math.floor(window.innerWidth / 30);
       height = Math.floor((window.innerHeight - headerHeight) / 30);
-      // var received_msg = evt.data;
-      var received_msg = "1\n";
+      var received_msg = evt.data;
       var board = emptyGrid(width, height);
       console.log("Web socket message received: ".concat(received_msg));
 
