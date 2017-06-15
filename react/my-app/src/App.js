@@ -180,7 +180,7 @@ function ImgSquare(props) {
 
 class ImgSquare extends Component {
   constructor() {
-    super();
+    super(props);
     this.handleMouseOver = this.handleMouseOver.bind(this);
     this.handleMouseOut = this.handleMouseOut.bind(this);
     this.goState();
