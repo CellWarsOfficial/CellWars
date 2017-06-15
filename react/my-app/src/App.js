@@ -143,7 +143,7 @@ function rainbow(n) {
 
 
 
-
+/*
 function ImgSquare(props) {
   var src = null;
 
@@ -170,6 +170,7 @@ function ImgSquare(props) {
     </div>
     );
 }
+*/
 
 class ImgSquare extends Component {
   constructor() {
@@ -180,10 +181,11 @@ class ImgSquare extends Component {
   }
 
   goState() {
+    var src = null;
     if (this.props.displayMode === DISPLAYMODE.COLOURS.value) {
       src = idle_cell;
     } else if (this.props.displayMode === DISPLAYMODE.EMOJIS.value) {
-      src = 'https://www.doc.ic.ac.uk/project/2016/271/g1627123/images/emojis/'.concat((props.userID).toString()).concat('.png');
+      src = 'https://www.doc.ic.ac.uk/project/2016/271/g1627123/images/emojis/'.concat((this.props.userID).toString()).concat('.png');
     }
     this.state = {
       src: src
@@ -191,7 +193,7 @@ class ImgSquare extends Component {
   }
 
   handleMouseOver() {
-    if (props.displayMode === DISPLAYMODE.COLOURS.value) {
+    if (this.props.displayMode === DISPLAYMODE.COLOURS.value) {
       this.setState({
         src: mouse_over
       });
@@ -209,8 +211,8 @@ class ImgSquare extends Component {
       type="image"
       alt="cell"
       src={this.state.src}
-      onClick={props.onClick}
-      style={{width:20, height:20, backgroundColor:rainbow(props.userID)}}
+      onClick={this.props.onClick}
+      style={{width:20, height:20, backgroundColor:rainbow(this.props.userID)}}
       className='cell'>
       </input>
       </div>
