@@ -40,7 +40,9 @@ const TASK_UPDATE = 2;
 const UPDATE_FAIL = 0;
 const UPDATE_SUCCESS = 1;
 
+const LOCK_FREE = 1337;
 var websocket_task = TASK_IDLE;
+var lock = LOCK_FREE;
 
 
 class App extends Component {
@@ -307,6 +309,7 @@ class Grid extends Component {
           }
           
           websocket_task = TASK_IDLE;
+          lock = LOCK_FREE;
           break;
 
         case TASK_UPDATE:
@@ -327,12 +330,14 @@ class Grid extends Component {
           }
 
           websocket_task = TASK_IDLE;
+          lock = LOCK_FREE;
           break;
 
         case TASK_IDLE: 
         default: 
           console.log("Unexpected websocket task");
           websocket_task = TASK_IDLE;
+          lock = LOCK_FREE;
       }
 
         this.setState({
@@ -357,13 +362,21 @@ class Grid extends Component {
                 .concat(" t=")
                 .concat(board[row][col]);
     console.log("Sending query : ".concat(updateRequest));
-    if (ws.readyState === WS_READY) {
-      while (websocket_task !== TASK_IDLE) {
-        setTimeout(() => {console.log("Waiting for websocket..")}, 1000);
+    var rand = new Date().getMilliseconds();
+
+    while (ws.readyState === WS_READY) {
+      while (lock !== LOCK_FREE) {
+          setTimeout(() => {console.log("Waiting for websocket..")}, 100);
+      }
+      lock = rand;
+      if (lock !== rand) {
+        continue;
       }
       websocket_task = TASK_UPDATE;
       ws.send(updateRequest);
-    } else {
+      break;
+    }
+    if (ws.readyState !== WS_READY) {
       console.log("ABORT: Websocket is not ready!");
     }
   }
@@ -418,15 +431,25 @@ function get() {
               .concat(" py2=")
               .concat(width - 1 + offsetWidth)
   console.log("Sending query : ".concat(queryRequest));
-    if (ws.readyState === WS_READY) {
-      while (websocket_task !== TASK_IDLE) {
-        setTimeout(() => {console.log("Waiting for websocket..")}, 1000);
-      }
-      websocket_task = TASK_QUERY;
-      ws.send(queryRequest);
-    } else {
-      console.log("ABORT: Websocket is not ready!");
+
+  var rand = new Date().getMilliseconds();
+
+
+  while (ws.readyState === WS_READY) {
+    while (lock !== LOCK_FREE) {
+        setTimeout(() => {console.log("Waiting for websocket..")}, 100);
     }
+    lock = rand;
+    if (lock !== rand) {
+      continue;
+    }
+    websocket_task = TASK_QUERY;
+    ws.send(queryRequest);
+    break;
+  }
+  if (ws.readyState !== WS_READY) {
+    console.log("ABORT: Websocket is not ready!");
+  }
 }
 
 class MoveRight extends Component {
