@@ -146,6 +146,7 @@ void Game::plan_stage(int wait_time)
 
 void Game::crank_stage(int generations)
 {
+  crank_lock.lock();
   log -> record(ME, "Sending the change buffer");
   int x, y, o_x, o_y, updated_x, updated_y;
   CELL_TYPE t;
@@ -214,6 +215,7 @@ void Game::crank_stage(int generations)
     up_db();
   }
   log -> record(ME, "Crank - finish");
+  crank_lock.unlock();
 }
 
 void Game::sync_padding()
@@ -270,7 +272,6 @@ void Game::sync_padding()
 
 void Game::up_db()
 {
-  crank_lock.lock();
   log -> record(ME, "Updating database");
   std::map<uint64_t,Block*>::iterator i;
   for (i = super_node.begin(); i != super_node.end(); i++)
@@ -278,7 +279,6 @@ void Game::up_db()
     db_info -> update_db(i -> second);
   }
   log -> record(ME, "Database updated");
-  crank_lock.unlock();
 }
 
 string Game::user_want(int px1, int py1, int px2, int py2)
