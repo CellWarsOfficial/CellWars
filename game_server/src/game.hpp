@@ -10,6 +10,7 @@
 #include <mutex>
 #include <cstdlib>
 #include <string>
+#include <queue>
 
 #define GFLAG_running (flags&JUST_31_MASK)
 #define GFLAG_stepped_tick (flags&JUST_30_MASK)
@@ -49,6 +50,7 @@ class Game
   void sync_padding();
   void up_db();
   void clean_up();
+  std::queue<string> query_buffer;  
 };
 
 #endif
