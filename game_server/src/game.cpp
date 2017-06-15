@@ -214,6 +214,7 @@ void Game::sync_padding()
 
 void Game::up_db()
 {
+  crank_lock.lock();
   log -> record(ME, "Updating database");
   std::map<uint64_t,Block*>::iterator i;
   for (i = super_node.begin(); i != super_node.end(); i++)
@@ -221,6 +222,7 @@ void Game::up_db()
     db_info -> update_db(i -> second);
   }
   log -> record(ME, "Database updated");
+  crank_lock.unlock();
 }
 
 string Game::user_want(int px1, int py1, int px2, int py2)
@@ -242,7 +244,9 @@ string Game::user_want(int px1, int py1, int px2, int py2)
                   " AND y>=" + std::to_string(py1) + " AND y<=" +
                   std::to_string(py2);
   log -> record(ME, query);
+  crank_lock.lock();
   String_container *c = (String_container *) db_info->run_query(EXPECT_CLIENT, query);
+  crank_lock.unlock();
   string result = c -> s;
   free(c);
   //string output = "";
@@ -255,6 +259,7 @@ string Game::user_want(int px1, int py1, int px2, int py2)
 
 int Game::user_does(int x, int y, CELL_TYPE t)
 {
+  crank_lock.lock();
   int updated_x = 0;
   int updated_y = 0;
   if(x < 0)
@@ -309,6 +314,7 @@ int Game::user_does(int x, int y, CELL_TYPE t)
      && t
     )
   {
+    crank_lock.unlock();
     return 1;
   }
   curr_block->map[curr_block->rectify_x(x)][curr_block->rectify_y(y)] = t;
@@ -322,6 +328,7 @@ int Game::user_does(int x, int y, CELL_TYPE t)
             std::to_string(y) + ")";
     db_info->run_query(NO_READ, query);
   }
+  crank_lock.unlock();
   return 2;
 }
 

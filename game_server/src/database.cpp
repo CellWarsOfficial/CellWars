@@ -87,7 +87,7 @@ void *DB_conn::run_query(int expectation, string s)
   {
     struct answer *result = NULL;
     memset(answer_buf, 0, sizeof(char) * DB_MAX_BUF);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    std::this_thread::sleep_for(std::chrono::milliseconds(DB_DELAY));
     while(read(socketid, answer_buf, DB_MAX_BUF - 1) == 0)
     {
       std::this_thread::sleep_for(std::chrono::milliseconds(5000));
@@ -100,9 +100,7 @@ void *DB_conn::run_query(int expectation, string s)
     const char *point = answer_buf;
     int n = stoi(string_get_next_token(point, STR_WHITE)), i;
     log -> record(ME, (string)"Received " + to_string(n));
-    printf("|||%s|||\n", point);
     point = string_seek(point, "\n"); // skip size;
-    printf("zzz%szzz\n", point);
     for(i = 0; i < n; i++)
     {
       void *aux = malloc(sizeof(struct answer));
