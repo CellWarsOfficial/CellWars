@@ -255,9 +255,57 @@ string Game::user_want(int px1, int py1, int px2, int py2)
 
 void Game::user_does(int x, int y, CELL_TYPE t)
 {
-  // TODO improve block update
-  std::map<uint64_t,Block*>::iterator find_res = super_node.find(0);
-  find_res -> second -> set(x, y, t);
+  int updated_x = 0;
+  int updated_y = 0;
+  if(x < 0)
+  {
+    x = x * (-1);
+    updated_x = 1;
+
+  }
+  if(y < 0)
+  {
+    y = y * (-1);
+    updated_y = 1;
+  }
+  int o_x = x - x % 1000;
+  int o_y = y - y % 1000;
+  if(!(o_x % 1000) && updated_x)
+  {
+    o_x = o_x + 1000;
+  }
+  if(!(o_y % 1000) && updated_y)
+  {
+    o_y = o_y + 1000;
+  }
+  if(updated_x)
+  {
+    o_x = o_x * (-1);
+  }
+  if(updated_y)
+  {
+    o_y = o_y * (-1);
+  }
+  Block *curr_block;
+  std::map<uint64_t,Block*>::iterator find_res = super_node.find(compress_xy(o_x, o_y));
+  if(find_res != super_node.end())
+  {
+    curr_block = find_res->second;
+  }
+  else
+  {
+    curr_block = new Block(o_x, o_y);
+    super_node[compress_xy(o_x, o_y)] = curr_block;
+  }
+  if(updated_x)
+  {
+    x = x * (-1);
+  }
+  if(updated_y)
+  {
+    y = y * (-1);
+  }
+  curr_block->map[curr_block->rectify_x(x)][curr_block->rectify_y(y)] = t;
   string query = "DELETE FROM agents.grid WHERE x=" +
                  std::to_string(x) + " AND y=" + std::to_string(y);
   db_info->run_query(NO_READ, query);
