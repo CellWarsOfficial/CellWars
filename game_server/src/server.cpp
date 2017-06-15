@@ -82,12 +82,20 @@ void Server::act(int s, int id)
       log -> record(this_con, "responding with:" + answer);
 
       string response = (string)SV_HTTP_SWITCH + '\n';
-      response = response + "Connection: Upgrade\n";
+      response = response + "Connection: Upgrade, keep-alive\n";
       point = string_seek(comm_buf, "Upgrade:");
       if(point)
       {
         response = response
                  + "Upgrade: "
+                 + string_get_next_token(point, STR_WHITE)
+                 + '\n';
+      }
+      point = string_seek(comm_buf, "Sec-WebSocket-Version:");
+      if(point)
+      {
+        response = response
+                 + "Sec-WebSocket-Version: "
                  + string_get_next_token(point, STR_WHITE)
                  + '\n';
       }
@@ -147,6 +155,14 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
   int len, delta;
   uint32_t mask;
   uint8_t size_desc;
+  /*
+  log -> record(this_con, "Sending warm welcome message");
+  {
+    len = form_answer("Welcome to hell, suka blyat.", comm_buf);
+    write(s, comm_buf, len);
+    memset(comm_buf, 0, len * sizeof(char));
+  }
+  */
   log -> record(this_con, "Websocket started");
   while((len = read(s, comm_buf, SV_MAX_BUF - SV_PROCESS_ERROR)))
   {
@@ -188,41 +204,9 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
                               );
       string to_send = game -> user_want(px1, py1, px2, py2);
       memset(comm_buf, 0, len * sizeof(char));
-      len = to_send.length();
-      delta = 0;
-      comm_buf[delta] = 129; // text frame
-      delta += 1; // skip type
-      if(len < 126)
-      {
-        log -> record(this_con, "Answer is petite");
-        comm_buf[delta] = (char)len; // size fits
-        delta += 1; // skip size
-      }
-      if((len >= 126) && (len <= 65535))
-      {
-        log -> record(this_con, "Answer is eh");
-        comm_buf[delta] = 126; // 2 extra bytes
-        comm_buf[delta + 1] = (char)((len >> 8) % 256);
-        comm_buf[delta + 2] = (char)(len % 256);
-        delta += 3; // skip size
-      }
-      if(len > 65535)
-      {
-        log -> record(this_con, "Answer is fat");
-        comm_buf[delta] = 127; // 8 extra bytes, God help us!
-        int auxl = len;
-        for(int i = 8; i; i--)
-        {
-          comm_buf[delta + i] = (char)(auxl % 256);
-          auxl = auxl >> 8;
-        }
-        delta += 9; // skip size
-      }
-      // Heck, mask can be added here!
-      virtual_buf = comm_buf + delta;
-      to_send.copy(virtual_buf, len, 0);
-      len += delta;
+      len = form_answer(to_send, comm_buf);
       write(s, comm_buf, len);
+      memset(comm_buf, 0, len * sizeof(char));
     }
     point = string_seek(virtual_buf, "UPDATE");
     if(point)
@@ -241,10 +225,15 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
                               + to_string(py) + " " 
                               + to_string(t)
                               );
-      game -> user_does(px, py, t);
+      px = game -> user_does(px, py, t);
+      memset(comm_buf, 0, len * sizeof(char));
+      delta = form_answer(to_string(px), comm_buf);
+      write(s, comm_buf, len);
+      memset(comm_buf, 0, len * sizeof(char));
     }
     memset(comm_buf, 0, len * sizeof(char));
   }
+  log -> record(this_con, "Websocket terminating");
 }
 
 FILE *get_404()
@@ -288,4 +277,39 @@ void catfile(FILE *f, int s, char *buf)
   {
     write(s, buf, n);
   }
+}
+
+int form_answer(string to_send, char *comm_buf)
+{
+  int len, delta = 0;
+  len = to_send.length();
+  comm_buf[delta] = 129; // text frame
+  delta += 1; // skip type
+  if(len < 126)
+  {
+    comm_buf[delta] = (char)len; // size fits
+    delta += 1; // skip size
+  }
+  if((len >= 126) && (len <= 65535))
+  {
+    comm_buf[delta] = 126; // 2 extra bytes
+    comm_buf[delta + 1] = (char)((len >> 8) % 256);
+    comm_buf[delta + 2] = (char)(len % 256);
+    delta += 3; // skip size
+  }
+  if(len > 65535)
+  {
+    comm_buf[delta] = 127; // 8 extra bytes, God help us!
+    int auxl = len;
+    for(int i = 8; i; i--)
+    {
+      comm_buf[delta + i] = (char)(auxl % 256);
+      auxl = auxl >> 8;
+    }
+    delta += 9; // skip size
+  }
+  // Heck, mask can be added here!
+  to_send.copy(comm_buf + delta, len, 0);
+  len += delta;
+  return len;
 }

@@ -253,7 +253,7 @@ string Game::user_want(int px1, int py1, int px2, int py2)
   return result;
 }
 
-void Game::user_does(int x, int y, CELL_TYPE t)
+int Game::user_does(int x, int y, CELL_TYPE t)
 {
   int updated_x = 0;
   int updated_y = 0;
@@ -305,6 +305,12 @@ void Game::user_does(int x, int y, CELL_TYPE t)
   {
     y = y * (-1);
   }
+  if(curr_block->map[curr_block->rectify_x(x)][curr_block->rectify_y(y)] != 0 
+     && t
+    )
+  {
+    return 1;
+  }
   curr_block->map[curr_block->rectify_x(x)][curr_block->rectify_y(y)] = t;
   string query = "DELETE FROM agents.grid WHERE x=" +
                  std::to_string(x) + " AND y=" + std::to_string(y);
@@ -316,6 +322,7 @@ void Game::user_does(int x, int y, CELL_TYPE t)
             std::to_string(y) + ")";
     db_info->run_query(NO_READ, query);
   }
+  return 2;
 }
 
 /* clean_up assumes FR and database are in sync, as it is normally called

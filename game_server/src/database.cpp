@@ -100,14 +100,15 @@ void *DB_conn::run_query(int expectation, string s)
     const char *point = answer_buf;
     int n = stoi(string_get_next_token(point, STR_WHITE)), i;
     log -> record(ME, (string)"Received " + to_string(n));
+    printf("|||%s|||\n", point);
     point = string_seek(point, "\n"); // skip size;
+    printf("zzz%szzz\n", point);
     for(i = 0; i < n; i++)
     {
       void *aux = malloc(sizeof(struct answer));
       check_malloc(aux);
       ((struct answer *)aux) -> next = result;
       result = (struct answer *)aux;
-
       result -> row = stoi(string_get_next_token(point, STR_WHITE));
       point = string_seek(point, ",");
       result -> col = stoi(string_get_next_token(point, STR_WHITE));
