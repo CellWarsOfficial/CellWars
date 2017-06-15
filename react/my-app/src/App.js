@@ -1,12 +1,17 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import pac_thing from './images/pac_thing.png';
+import arrow from './images/arrow.png';
 import './App.css';
 
 var ws;
 
 var width = 20;
 var height = 20; //dimensions of the board
+
+var offsetWidth = 0;
+var offsetHeight = 0;
+
 const headerHeight = 230;
 
 const players = 10; //determines how colours are split between userID's
@@ -27,6 +32,17 @@ const RULE_PAGE_3 = 5
 const RULE_PAGE_4 = 6
 
 const WS_READY = 1;
+
+const TASK_IDLE = 0;
+const TASK_QUERY = 1;
+const TASK_UPDATE = 2;
+
+const UPDATE_FAIL = 0;
+const UPDATE_SUCCESS = 1;
+
+const LOCK_FREE = 1337;
+var websocket_task = TASK_IDLE;
+var lock = LOCK_FREE;
 
 
 class App extends Component {
@@ -147,16 +163,15 @@ function ImgSquare(props) {
   if (props.userID === 0) {
     src = pac_thing;
   }
-  var style = {display: 'inline-block'};
 
   return (
-    <div style={style}>
+    <div style={{display: 'inline-block'}}>
     <input
     type="image"
     alt="cell"
     src={src}
     onClick={props.onClick}
-    style={{width:20, height:20, backgroundColor:rainbow(props.userID), border:'1px solid #ddd'}}
+    style={{width:20, height:20, backgroundColor:rainbow(props.userID)}}
     className='cell'>
     </input>
     </div>
@@ -196,7 +211,9 @@ function emptyGrid(width, height) { // Generates an example board fitting to the
   for (var i = 0; i < height; i++) {
     var row = [];
     for (var j = 0; j < width; j++) {
+      // TEMP DEBUG
       row.push(0);
+      // row.push(i*width + j);
     }
     ret.push(row);
   }
@@ -214,16 +231,16 @@ class UserPicker extends Component {
     return (<div><h2>Pick your colour</h2><br></br><table width="100%">
       <tbody>
       <tr className = "textcenter">
-        <td width = "75" onClick={() => this.handleClick(1)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(1), cursor:'pointer'}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(2)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(2), cursor:'pointer'}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(3)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(3), cursor:'pointer'}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(4)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(4), cursor:'pointer'}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(5)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(5), cursor:'pointer'}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(6)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(6), cursor:'pointer'}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(7)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(7), cursor:'pointer'}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(8)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(8), cursor:'pointer'}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(9)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(9), cursor:'pointer'}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(10)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(10), cursor:'pointer'}}></img></td>    
+        <td onClick={() => this.handleClick(1)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(1)}}></img></td>    
+        <td onClick={() => this.handleClick(2)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(2)}}></img></td>    
+        <td onClick={() => this.handleClick(3)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(3)}}></img></td>    
+        <td onClick={() => this.handleClick(4)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(4)}}></img></td>    
+        <td onClick={() => this.handleClick(5)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(5)}}></img></td>    
+        <td onClick={() => this.handleClick(6)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(6)}}></img></td>    
+        <td onClick={() => this.handleClick(7)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(7)}}></img></td>    
+        <td onClick={() => this.handleClick(8)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(8)}}></img></td>    
+        <td onClick={() => this.handleClick(9)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(9)}}></img></td>    
+        <td onClick={() => this.handleClick(10)}><img alt="pacman" src={pac_thing} className={'tableImage'} style={{backgroundColor:rainbow(10)}}></img></td>    
       </tr>
       </tbody>
     </table></div>);
@@ -244,44 +261,90 @@ class Grid extends Component {
       board: emptyGrid(width, height)
     }
     var url = "ws".concat(window.location.toString().substring(4));
-    // url = "ws://146.169.45.167:7777/" // temp url used for local debugging
+    // url = "ws://89.122.28.235:7777/" // temp url used for local debugging
     ws = new WebSocket(url);
     ws.onopen = function() {
-      console.log("web socket opened : ".concat(url));
+      console.log("Web socket opened : ".concat(url));
       get();
     }
     ws.onclose = function() {
-      console.log("web socket closed : ".concat(url));
+      console.log("Web socket closed : ".concat(url));
     }
     ws.onerror = function() {
-      console.log("web socket error");
+      console.log("Web socket error");
     }
     ws.onmessage = function (evt)
     {
+      width = Math.floor(window.innerWidth / 30);
+      height = Math.floor((window.innerHeight - headerHeight) / 30);
       var received_msg = evt.data;
-      var board = emptyGrid(width, height);
-      console.log("web socket message received: ".concat(received_msg));
+      console.log("Web socket message received: ".concat(received_msg));
 
-      var lines = received_msg.split('\n');
+      var lines = received_msg.trim().split('\n');
 
-        for (let i = 1; i <= lines[0]; i++) { // filling grid with received information
-          var data = lines[i].split(',');
-          if (data.length !== 3) {
-            console.log("parse error format");
-            break;
+      switch(websocket_task) {
+        case TASK_QUERY:
+          if ((lines.length - 1) === Number(lines[0])) { // validity check on line numbers
+            var board = emptyGrid(width, height);
+            for (let i = 1; i <= lines[0]; i++) { // filling grid with received information
+              var data = lines[i].trim().split(',');
+              if (data.length !== 3) {
+                console.log("Parse error : unexpected number of commas");
+                break;
+              }
+              var row = data[0] - offsetHeight;
+              var col = data[1] - offsetWidth;
+              var uid = data[2];
+
+              if (row < 0 || row >= height || col < 0 || col >= width) {
+                console.log("Parse error : cell out of bounds");
+                break;
+              }
+
+              board[row][col] = uid;
+            }
+            this.setState({
+              board: board
+            });
+            console.log("Parse info : successfully parsed query")
+          } else {
+            console.log("Parse error : unexpected number of lines");
           }
-          var row = data[0];
-          var col = data[1];
-          var uid = data[2];
+          
+          websocket_task = TASK_IDLE;
+          lock = LOCK_FREE;
+          break;
 
-          board[row][col] = uid;
-        }
-        this.setState({
-          board: board
-        });
+        case TASK_UPDATE:
+          // checking if response is from a Submit request
+          if (lines.length === 1) {
+            switch(Number(lines[0])) {
+              case UPDATE_FAIL:
+                console.log("Submit request responsed : FAIL");
+                window.alert("Submit request responsed : FAIL");
+              break;
+              case UPDATE_SUCCESS:
+                console.log("Submit request responsed : SUCCESS");
+                break;
+              default: console.log("Parse error : unexpected submit response (value)");
+            }
+          } else {
+            console.log("Parse error : unexpected submit response (number of lines)");
+          }
+
+          websocket_task = TASK_IDLE;
+          lock = LOCK_FREE;
+          break;
+
+        case TASK_IDLE: 
+        default: 
+          console.log("Unexpected websocket task");
+          websocket_task = TASK_IDLE;
+          lock = LOCK_FREE;
+      }
+
     }.bind(this);
   }
-
 
 
   handleClick(row, col) {
@@ -292,17 +355,29 @@ class Grid extends Component {
       board: board
     });
 
-    if (ws.readyState === WS_READY) {
-      var updateRequest = "UPDATE px="
-                  .concat(row)
-                  .concat(" py=")
-                  .concat(col)
-                  .concat(" t=")
-                  .concat(board[row][col]);
-      console.log("Sending query : ".concat(updateRequest));
+    var updateRequest = "UPDATE px="
+                .concat(row + offsetHeight)
+                .concat(" py=")
+                .concat(col + offsetWidth)
+                .concat(" t=")
+                .concat(board[row][col]);
+    console.log("Sending query : ".concat(updateRequest));
+
+    while (ws.readyState === WS_READY) {
+      var rand = new Date().getMilliseconds();
+      while (lock !== LOCK_FREE) {
+          // setTimeout(() => {console.log("Waiting for websocket..")}, rand);
+      }
+      lock = rand;
+      if (lock !== rand) {
+        continue;
+      }
+      websocket_task = TASK_UPDATE;
       ws.send(updateRequest);
-    } else {
-      console.log("Websocket is not ready!");
+      break;
+    }
+    if (ws.readyState !== WS_READY) {
+      console.log("ABORT: Websocket is not ready!");
     }
   }
 
@@ -327,7 +402,16 @@ class Grid extends Component {
     for (var i = 0; i < height; i++) {
       rows.push(this.renderRow(i));
     }
-    return <div>{rows}</div>;
+
+    return (
+      <div>
+      {rows}
+      <MoveLeft/>
+      <MoveDown/>
+      <MoveUp/>
+      <MoveRight/>
+      <MoveReset/>
+      </div>);
   }
 
   componentDidMount() {
@@ -336,23 +420,116 @@ class Grid extends Component {
 }
 
 function get() {
-  width = Math.floor(window.innerWidth / 50);
-  height = Math.floor((window.innerHeight - headerHeight) / 50);
-  if (ws.readyState === WS_READY) {
-    var px1 = 0;
-    var py1 = 0;
-    var queryRequest = "QUERY px1="
-                .concat(px1.toString())
-                .concat(" py1=")
-                .concat(py1.toString())
-                .concat(" px2=")
-                .concat(height-1)
-                .concat(" py2=")
-                .concat(width-1)
-    console.log("Sending query : ".concat(queryRequest));
+  var width = Math.floor(window.innerWidth / 30);
+  var height = Math.floor((window.innerHeight - headerHeight) / 30);
+  var queryRequest = "QUERY px1="
+              .concat(offsetHeight)
+              .concat(" py1=")
+              .concat(offsetWidth)
+              .concat(" px2=")
+              .concat(height - 1 + offsetHeight)
+              .concat(" py2=")
+              .concat(width - 1 + offsetWidth)
+  console.log("Sending query : ".concat(queryRequest));
+
+
+
+  while (ws.readyState === WS_READY) {
+    var rand = new Date().getMilliseconds();
+    while (lock !== LOCK_FREE) {
+        // setTimeout(() => {console.log("Waiting for websocket..")}, rand);
+    }
+    lock = rand;
+    if (lock !== rand) {
+      continue;
+    }
+    websocket_task = TASK_QUERY;
     ws.send(queryRequest);
-  } else {
-    console.log("Websocket is not ready!");
+    break;
+  }
+  if (ws.readyState !== WS_READY) {
+    console.log("ABORT: Websocket is not ready!");
+  }
+}
+
+class MoveRight extends Component {
+  render() {
+    var char = '>';
+    return(
+      <button onClick = {this.handleClick} className={'moveButton'}>
+      {char}
+      </button>
+    );
+  }
+
+  handleClick() {
+    offsetWidth += 1;
+    get();
+  }
+}
+
+class MoveLeft extends Component {
+  render() {
+    var char = '<';
+    return(
+      <button onClick = {this.handleClick} className={'moveButton'}>
+      {char}
+      </button>
+    );
+  }
+
+  handleClick() {
+    offsetWidth -= 1;
+    get();
+  }
+}
+
+class MoveUp extends Component {
+  render() {
+    var char = '^';
+    return(
+      <button onClick = {this.handleClick} className={'moveButton'}>
+      {char}
+      </button>
+    );
+  }
+
+  handleClick() {
+    offsetHeight -= 1;
+    get();
+  }
+}
+
+class MoveDown extends Component {
+  render() {
+    var char = 'v';
+    return(
+      <button onClick = {this.handleClick} className={'moveButton'}>
+      {char}
+      </button>
+    );
+  }
+
+  handleClick() {
+    offsetHeight += 1;
+    get();
+  }
+}
+
+class MoveReset extends Component {
+  render() {
+    var char = 'Re-Centre';
+    return(
+      <button onClick = {this.handleClick} className={'moveButton'}>
+      {char}
+      </button>
+    );
+  }
+
+  handleClick() {
+    offsetHeight = 0;
+    offsetWidth = 0;
+    get();
   }
 }
 
@@ -374,10 +551,74 @@ class RulePage1 extends Component {
     if (this.props.currentPage !== RULE_PAGE_1) {
       return null;
     }
+    var divHeight = ((window.innerHeight - headerHeight)*.8).toString().concat('px');
     return (
-    <div onClick={this.props.onClick}>
+    <div onClick={this.props.onClick} style={{height: divHeight}}>
     <h1>Cell Law I</h1>
     <h2>Any live cell with fewer than two live neighbours will die, as if caused by underpopulation.</h2>
+    <div className="fullExample">
+    <div className="gridExample left">
+      <table>
+      <tbody>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    <div className="arrow"><img alt="arrow" src={arrow} style={{width: '100px', height: '240px'}}></img></div>
+    <div className="gridExample right">
+      <table>
+      <tbody>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    </div>
     </div>
     );
   }
@@ -388,10 +629,74 @@ class RulePage2 extends Component {
     if (this.props.currentPage !== RULE_PAGE_2) {
       return null;
     }
+    var divHeight = ((window.innerHeight - headerHeight)*.8).toString().concat('px');
     return (
-    <div onClick={this.props.onClick}>
+    <div onClick={this.props.onClick} style={{height: divHeight}}>
     <h1>Cell Law II</h1>
     <h2>Any live cell with two or three live neighbours lives on to the next generation.</h2>
+    <div className="fullExample">
+    <div className="gridExample left">
+      <table>
+      <tbody>
+      <tr>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    <div className="arrow"><img alt="arrow" src={arrow} style={{width: '100px', height: '240px'}}></img></div>
+    <div className="gridExample right">
+      <table>
+      <tbody>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    </div>
     </div>
     );
   }
@@ -402,11 +707,75 @@ class RulePage3 extends Component {
     if (this.props.currentPage !== RULE_PAGE_3) {
       return null;
     }
+    var divHeight = ((window.innerHeight - headerHeight)*.8).toString().concat('px');
     return (
-    <div onClick={this.props.onClick}>
+    <div onClick={this.props.onClick} style={{height: divHeight}}>
     <h1>Cell Law III</h1>
     <h2>Any dead cell with exactly 3 live neighbours and a majority cell type can be identified
         among them, the cell will be reborn as the same type as the majority.</h2>
+    <div className="fullExample">
+    <div className="gridExample left">
+      <table>
+      <tbody>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    <div className="arrow"><img alt="arrow" src={arrow} style={{width: '100px', height: '240px'}}></img></div>
+    <div className="gridExample right">
+      <table>
+      <tbody>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(1)}}></img></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    </div>
     </div>
     );
   }
@@ -417,10 +786,74 @@ class RulePage4 extends Component {
     if (this.props.currentPage !== RULE_PAGE_4) {
       return null;
     }
+    var divHeight = ((window.innerHeight - headerHeight)*.8).toString().concat('px');
     return (
-    <div onClick={this.props.onClick}>
+    <div onClick={this.props.onClick} style={{height: divHeight}}>
     <h1>Cell Law IV</h1>
     <h2>Any live cell with greater than three live neighbours dies, as if caused by overpopulation.</h2>
+    <div className="fullExample">
+    <div className="gridExample left">
+      <table>
+      <tbody>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
+        <td></td>
+        <td><img alt="pacman" src={pac_thing} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    <div className="arrow"><img alt="arrow" src={arrow} style={{width: '100px', height: '240px'}}></img></div>
+    <div className="gridExample right">
+      <table>
+      <tbody>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    </div>
     </div>
     );
   }
