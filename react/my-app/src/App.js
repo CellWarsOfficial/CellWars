@@ -1,14 +1,23 @@
 import React, { Component } from 'react';
-import logo from './images/logo.gif';
-import idle_cell from './images/idle_cell.gif';
-import big_cell from './images/big_cell.png';
-import arrow from './images/arrow.png';
 import './App.css';
+
+const VOL = 'https://www.doc.ic.ac.uk/project/2016/271/g1627123/images/';
+const idle_cell = VOL.concat('idle_cell.gif');
+const big_cell = VOL.concat('big_cell.png')
+const logo = VOL.concat('logo.gif');
+const small_cell = VOL.concat('small_cell.png');
+const arrow = VOL.concat('arrow.png');
 
 var ws;
 
 var width = 20;
 var height = 20; //dimensions of the board
+
+const LOOKAHEAD = 20;
+var last_px1 = 0;
+var last_px2 = height - 1;
+var last_py1 = 0;
+var last_py2 = width - 1;
 
 var offsetWidth = 0;
 var offsetHeight = 0;
@@ -42,15 +51,8 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      displayMode: 0,
       currentPage: INTRO_PAGE,
     }
-  }
-
-  advanceDisplayMode() {
-    this.setState({
-      displayMode: (this.state.displayMode + 1) % 2
-    });
   }
 
   setPageTo(page) {
@@ -81,11 +83,8 @@ class App extends Component {
           <RulePage3 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_4)}/>
           <RulePage4 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(lastPage)}/>
           <UserPicker currentPage = {this.state.currentPage} onClick={() => this.setPageTo(GAME_PAGE)}/>
-          <Grid displayMode = {this.state.displayMode} currentPage = {this.state.currentPage}/>
+          <Grid currentPage = {this.state.currentPage}/>
         </div>
-        <p></p>
-          <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()} currentPage = {this.state.currentPage}/> &nbsp;
-          <GetButton onClick={() => get()} currentPage = {this.state.currentPage}/> &nbsp;
       </div>
     );
   }
@@ -106,9 +105,6 @@ class HelpButton extends Component {
 
 class GetButton extends Component {
   render() {
-  if (this.props.currentPage !== GAME_PAGE) {
-    return null;
-  }
   return (
       <button onClick = {this.props.onClick} className={'roundButton'}>
       Get
@@ -120,9 +116,6 @@ class GetButton extends Component {
 
 class DisplayModeAdvancer extends Component {
   render() {
-  if (this.props.currentPage !== GAME_PAGE) {
-    return null;
-  }
     return (
       <button onClick={this.props.onClick} className={'roundButton'}>
       Advance Display
@@ -147,11 +140,11 @@ function ImgSquare(props) {
   if (props.displayMode === DISPLAYMODE.COLOURS.value) {
     src = idle_cell;
   } else if (props.displayMode === DISPLAYMODE.EMOJIS.value) {
-    src = 'https://www.doc.ic.ac.uk/project/2016/271/g1627123/images/emojis/'.concat((props.userID).toString()).concat('.png');
+    src = VOL.concat('emojis/').concat((props.userID).toString()).concat('.png');
   }
 
   if (props.userID === 0) {
-    src = idle_cell;
+    src = small_cell;
   }
 
   return (
@@ -248,15 +241,17 @@ class Grid extends Component {
   constructor() {
     super();
     this.state = {
-      board: emptyGrid(width, height)
+      displayMode: 0,
+      board: emptyGrid(width, height),
+      // cache: emptyGrid(width + LOOKAHEAD*2, height + LOOKAHEAD*2),
     }
     var url = "ws".concat(window.location.toString().substring(4));
     // url = "ws://89.122.28.235:7777/" // temp url used for local debugging
     ws = new WebSocket(url);
     ws.onopen = function() {
       console.log("Web socket opened : ".concat(url));
-      get();
-    }
+      this.get();
+    }.bind(this);
     ws.onclose = function() {
       console.log("Web socket closed : ".concat(url));
     }
@@ -300,7 +295,7 @@ class Grid extends Component {
           case UPDATE_FAIL:
             console.log("Submit request responsed : FAIL");
             window.alert("Submit request responsed : FAIL");
-            get();
+            this.get();
           break;
           case UPDATE_SUCCESS:
             console.log("Submit request responsed : SUCCESS");
@@ -344,7 +339,7 @@ class Grid extends Component {
           squares={this.state.board[row]}
           row={row}
           onClick={(r, c) => this.handleClick(r, c)}
-          displayMode={this.props.displayMode}
+          displayMode={this.state.displayMode}
         />
       </div>
     );
@@ -362,44 +357,65 @@ class Grid extends Component {
     return (
       <div>
       {rows}
-      <MoveLeft/>
-      <MoveDown/>
-      <MoveUp/>
-      <MoveRight/>
-      <MoveReset/>
+      <MoveLeft onClick={() => this.get()}/>
+      <MoveDown onClick={() => this.get()}/>
+      <MoveUp onClick={() => this.get()}/>
+      <MoveRight onClick={() => this.get()}/>
+      <MoveReset onClick={() => this.get()}/>
+      <p></p>
+      <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()}/> &nbsp;
+      <GetButton onClick={() => this.get()}/> &nbsp;
       </div>);
   }
 
   componentDidMount() {
-    window.addEventListener("resize", () => {get()});
+    window.addEventListener("resize", () => {this.get()});
+  }
+
+  advanceDisplayMode() {
+    this.setState({
+      displayMode: (this.state.displayMode + 1) % 2
+    });
+  }
+
+  get() {
+    var width = Math.floor(window.innerWidth / 30);
+    var height = Math.floor((window.innerHeight - headerHeight) / 30);
+    var px1 = offsetHeight;
+    var py1 = offsetWidth;
+    var px2 = height - 1 + offsetHeight;
+    var py2 = width - 1 + offsetWidth;
+
+    if (px1 > last_px1 && py1 > last_py1 && px2 < last_px2 && py2 < last_py2) {
+      // update board with cache
+
+    } else {
+      var queryRequest = "QUERY px1="
+                  .concat(px1)
+                  .concat(" py1=")
+                  .concat(py1)
+                  .concat(" px2=")
+                  .concat(px2)
+                  .concat(" py2=")
+                  .concat(py2);
+      console.log("Sending query : ".concat(queryRequest));
+
+      if (ws.readyState !== WS_READY) {
+        console.log("ABORT: Websocket is not ready!");
+      } else {
+        ws.send(queryRequest);
+      }
+    }
+
   }
 }
 
-function get() {
-  var width = Math.floor(window.innerWidth / 30);
-  var height = Math.floor((window.innerHeight - headerHeight) / 30);
-  var queryRequest = "QUERY px1="
-              .concat(offsetHeight)
-              .concat(" py1=")
-              .concat(offsetWidth)
-              .concat(" px2=")
-              .concat(height - 1 + offsetHeight)
-              .concat(" py2=")
-              .concat(width - 1 + offsetWidth)
-  console.log("Sending query : ".concat(queryRequest));
-
-  if (ws.readyState !== WS_READY) {
-    console.log("ABORT: Websocket is not ready!");
-  } else {
-    ws.send(queryRequest);
-  }
-}
 
 class MoveRight extends Component {
   render() {
     var char = '>';
     return(
-      <button onClick = {this.handleClick} className={'moveButton'}>
+      <button onClick = {() => this.handleClick()} className={'moveButton'}>
       {char}
       </button>
     );
@@ -407,7 +423,7 @@ class MoveRight extends Component {
 
   handleClick() {
     offsetWidth += 1;
-    get();
+    this.props.onClick();
   }
 }
 
@@ -415,7 +431,7 @@ class MoveLeft extends Component {
   render() {
     var char = '<';
     return(
-      <button onClick = {this.handleClick} className={'moveButton'}>
+      <button onClick = {() => this.handleClick()} className={'moveButton'}>
       {char}
       </button>
     );
@@ -423,7 +439,7 @@ class MoveLeft extends Component {
 
   handleClick() {
     offsetWidth -= 1;
-    get();
+    this.props.onClick();
   }
 }
 
@@ -431,7 +447,7 @@ class MoveUp extends Component {
   render() {
     var char = '^';
     return(
-      <button onClick = {this.handleClick} className={'moveButton'}>
+      <button onClick = {() => this.handleClick()} className={'moveButton'}>
       {char}
       </button>
     );
@@ -439,7 +455,7 @@ class MoveUp extends Component {
 
   handleClick() {
     offsetHeight -= 1;
-    get();
+    this.props.onClick();
   }
 }
 
@@ -447,7 +463,7 @@ class MoveDown extends Component {
   render() {
     var char = 'v';
     return(
-      <button onClick = {this.handleClick} className={'moveButton'}>
+      <button onClick = {() => this.handleClick()} className={'moveButton'}>
       {char}
       </button>
     );
@@ -455,7 +471,7 @@ class MoveDown extends Component {
 
   handleClick() {
     offsetHeight += 1;
-    get();
+    this.props.onClick();
   }
 }
 
@@ -463,7 +479,7 @@ class MoveReset extends Component {
   render() {
     var char = 'Re-Centre';
     return(
-      <button onClick = {this.handleClick} className={'moveButton'}>
+      <button onClick = {() => this.handleClick()} className={'moveButton'}>
       {char}
       </button>
     );
@@ -472,7 +488,7 @@ class MoveReset extends Component {
   handleClick() {
     offsetHeight = 0;
     offsetWidth = 0;
-    get();
+    this.props.onClick();
   }
 }
 
