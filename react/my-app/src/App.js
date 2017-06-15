@@ -253,29 +253,43 @@ class Grid extends Component {
     // url = "ws://89.122.28.235:7777/" // temp url used for local debugging
     ws = new WebSocket(url);
     ws.onopen = function() {
-      console.log("web socket opened : ".concat(url));
+      console.log("Web socket opened : ".concat(url));
       get();
     }
     ws.onclose = function() {
-      console.log("web socket closed : ".concat(url));
+      console.log("Web socket closed : ".concat(url));
     }
     ws.onerror = function() {
-      console.log("web socket error");
+      console.log("Web socket error");
     }
     ws.onmessage = function (evt)
     {
       width = Math.floor(window.innerWidth / 30);
       height = Math.floor((window.innerHeight - headerHeight) / 30);
-      var received_msg = evt.data;
+      // var received_msg = evt.data;
+      var received_msg = "1\n";
       var board = emptyGrid(width, height);
-      console.log("web socket message received: ".concat(received_msg));
+      console.log("Web socket message received: ".concat(received_msg));
 
-      var lines = received_msg.split('\n');
+      var lines = received_msg.trim().split('\n');
 
+
+      // checking if response is from a Submit request
+      if (Number(lines[0]) === 0 && lines.length === 1) {
+        // submit response success
+        console.log("Submit request responsed : FAIL");
+      } else if (Number(lines[0]) === 1 && lines.length === 1) {
+        // submit response failed
+        console.log("Submit request responsed : SUCCESS");
+      }
+
+      // checking if response is from a Get request
+
+      if ((lines.length - 1) === Number(lines[0])) {
         for (let i = 1; i <= lines[0]; i++) { // filling grid with received information
-          var data = lines[i].split(',');
+          var data = lines[i].trim().split(',');
           if (data.length !== 3) {
-            console.log("parse error format");
+            console.log("Parse error : unexpected number of commas");
             break;
           }
           var row = data[0] - offsetHeight;
@@ -283,12 +297,15 @@ class Grid extends Component {
           var uid = data[2];
 
           if (row < 0 || row >= height || col < 0 || col >= width) {
-            console.log("Parse: cell out of bounds");
+            console.log("Parse error : cell out of bounds");
             break;
           }
 
           board[row][col] = uid;
         }
+      } else {
+        console.log("Parse error : unexpected number of lines");
+      }
         this.setState({
           board: board
         });
