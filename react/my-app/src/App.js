@@ -300,6 +300,7 @@ class Grid extends Component {
           case UPDATE_FAIL:
             console.log("Submit request responsed : FAIL");
             window.alert("Submit request responsed : FAIL");
+            get();
           break;
           case UPDATE_SUCCESS:
             console.log("Submit request responsed : SUCCESS");

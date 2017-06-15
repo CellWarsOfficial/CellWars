@@ -18,6 +18,7 @@
 }
 
 .cell {
+  border-radius: 8px;
   border: 1px solid #ddd;
   margin-left: 3px;
   -webkit-transition-duration: 0.4s;
