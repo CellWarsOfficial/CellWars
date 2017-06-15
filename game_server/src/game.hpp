@@ -51,7 +51,6 @@ class Game
   void up_db();
   void clean_up();
   std::queue<int> change_buffer;
-  std::queue<Block *> block_queue;
 };
 
 #endif

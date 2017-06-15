@@ -147,24 +147,48 @@ void Game::plan_stage(int wait_time)
 void Game::crank_stage(int generations)
 {
   log -> record(ME, "Sending the change buffer");
-  int x, y, o_x, o_y;
+  int x, y, o_x, o_y, updated_x, updated_y;
   CELL_TYPE t;
   Block *curr_block;
   std::map<uint64_t,Block*>::iterator find_res;
-  while(!change_buffer.empty() && !block_queue.empty())
+  while(!change_buffer.empty())
   {
-    //db_info->run_query(NO_READ, (string) query_buffer.front());
-    //query_buffer.pop();
     x = change_buffer.front();
     change_buffer.pop();
     y = change_buffer.front();
     change_buffer.pop();
     t = (CELL_TYPE) change_buffer.front();
     change_buffer.pop();
-    o_x = change_buffer.front();
-    change_buffer.pop();
-    o_y = change_buffer.front();
-    change_buffer.pop();
+    updated_x = 0;
+    updated_y = 0;
+    if(x < 0)
+    {
+      x = x * (-1);
+      updated_x = 1;
+    }
+    if(y < 0)
+    {
+      y = y * (-1);
+      updated_y = 1;
+    }
+    o_x = x - x % 1000;
+    o_y = y - y % 1000;
+    if(!(o_x % 1000) && updated_x)
+    {
+      o_x = o_x + 1000;
+    }
+    if(!(o_y % 1000) && updated_y)
+    {
+      o_y = o_y + 1000;
+    }
+    if(updated_x)
+    {
+      o_x = o_x * (-1);
+    }
+    if(updated_y)
+    {
+      o_y = o_y * (-1);
+    }
     find_res = super_node.find(compress_xy(o_x, o_y));
     if(find_res != super_node.end())
     {
@@ -287,78 +311,9 @@ string Game::user_want(int px1, int py1, int px2, int py2)
 int Game::user_does(int x, int y, CELL_TYPE t)
 {
   crank_lock.lock();
-  int updated_x = 0;
-  int updated_y = 0;
-  if(x < 0)
-  {
-    x = x * (-1);
-    updated_x = 1;
-  }
-  if(y < 0)
-  {
-    y = y * (-1);
-    updated_y = 1;
-  }
-  int o_x = x - x % 1000;
-  int o_y = y - y % 1000;
-  if(!(o_x % 1000) && updated_x)
-  {
-    o_x = o_x + 1000;
-  }
-  if(!(o_y % 1000) && updated_y)
-  {
-    o_y = o_y + 1000;
-  }
-  if(updated_x)
-  {
-    o_x = o_x * (-1);
-  }
-  if(updated_y)
-  {
-    o_y = o_y * (-1);
-  }
-  Block *curr_block;
-  std::map<uint64_t,Block*>::iterator find_res = super_node.find(compress_xy(o_x, o_y));
-  if(find_res != super_node.end())
-  {
-    curr_block = find_res->second;
-  }
-  else
-  {
-    curr_block = new Block(o_x, o_y);
-    super_node[compress_xy(o_x, o_y)] = curr_block;
-  }
-  if(updated_x)
-  {
-    x = x * (-1);
-  }
-  if(updated_y)
-  {
-    y = y * (-1);
-  }
-  if(curr_block->map[curr_block->rectify_x(x)][curr_block->rectify_y(y)] != 0 && t)
-  {
-    crank_lock.unlock();
-    return 1;
-  }
-  //curr_block->map[curr_block->rectify_x(x)][curr_block->rectify_y(y)] = t;
   change_buffer.push(x);
   change_buffer.push(y);
   change_buffer.push((int) t);
-  change_buffer.push(o_x);
-  change_buffer.push(o_y);
-  //string query = "DELETE FROM agents.grid WHERE x=" +
-  //               std::to_string(x) + " AND y=" + std::to_string(y);
-  //db_info->run_query(NO_READ, query);
-  //query_buffer.push(query);
-  //if(t)
-  //{
-  //  query = "INSERT INTO agents.grid(user_id, x, y) VALUES (" +
-  //          std::to_string(t) + ", " + std::to_string(x) + ", " +
-  //          std::to_string(y) + ")";
-  //  //db_info->run_query(NO_READ, query);
-  //  query_buffer.push(query);
-  //}
   crank_lock.unlock();
   return 2;
 }
