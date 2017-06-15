@@ -196,9 +196,9 @@ class ImgSquare extends Component {
     } else if (this.props.displayMode === DISPLAYMODE.EMOJIS.value) {
       src = 'https://www.doc.ic.ac.uk/project/2016/271/g1627123/images/emojis/'.concat((this.props.userID).toString()).concat('.png');
     }
-    this.state = {
+    this.setState = ({
       src: src
-    }
+    });
   }
 
   handleMouseOver() {
