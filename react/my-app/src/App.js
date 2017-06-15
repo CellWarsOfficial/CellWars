@@ -278,9 +278,14 @@ class Grid extends Component {
             console.log("parse error format");
             break;
           }
-          var row = data[0];
-          var col = data[1];
+          var row = data[0] - offsetHeight;
+          var col = data[1] - offsetWidth;
           var uid = data[2];
+
+          if (row < 0 || row >= height || col < 0 || col >= width) {
+            console.log("Parse: cell out of bounds");
+            break;
+          }
 
           board[row][col] = uid;
         }
@@ -397,10 +402,8 @@ class MoveLeft extends Component {
   }
 
   handleClick() {
-    if (offsetWidth > 0) {
-      offsetWidth -= 1;
-      get();
-    }
+    offsetWidth -= 1;
+    get();
   }
 }
 
@@ -415,10 +418,8 @@ class MoveUp extends Component {
   }
 
   handleClick() {
-    if (offsetHeight > 0) {
-      offsetHeight -= 1;
-      get();
-    }
+    offsetHeight -= 1;
+    get();
   }
 }
 
