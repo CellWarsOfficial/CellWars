@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import logo from './images/logo.gif';
 import mouse_over from './images/mouse_over.gif';
 import idle_cell from './images/idle_cell.gif';
-import big_cell from './images/big_cell.gif';
+import big_cell from './images/big_cell.png';
 import arrow from './images/arrow.png';
 import './App.css';
 
