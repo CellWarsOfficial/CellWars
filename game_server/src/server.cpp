@@ -206,6 +206,7 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
       memset(comm_buf, 0, len * sizeof(char));
       len = form_answer(to_send, comm_buf);
       write(s, comm_buf, len);
+      memset(comm_buf, 0, len * sizeof(char));
     }
     point = string_seek(virtual_buf, "UPDATE");
     if(point)
@@ -224,10 +225,11 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
                               + to_string(py) + " " 
                               + to_string(t)
                               );
-      game -> user_does(px, py, t);
+      px = game -> user_does(px, py, t);
       memset(comm_buf, 0, len * sizeof(char));
-      len = form_answer("1\n", comm_buf);
+      delta = form_answer(to_string(px), comm_buf);
       write(s, comm_buf, len);
+      memset(comm_buf, 0, len * sizeof(char));
     }
     memset(comm_buf, 0, len * sizeof(char));
   }
