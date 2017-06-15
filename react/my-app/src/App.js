@@ -180,7 +180,7 @@ class ImgSquare extends Component {
     }
     this.handleMouseOver = this.handleMouseOver.bind(this);
     this.handleMouseOut = this.handleMouseOut.bind(this);
-    this.goState();
+    this.goState().bind(this);
   }
 
   goState() {
