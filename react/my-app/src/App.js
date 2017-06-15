@@ -222,6 +222,8 @@ class ImgSquare extends Component {
       alt="cell"
       src={this.state.src}
       onClick={this.props.onClick}
+      onMouseOver={this.handleMouseOver}
+      onMouseOut={this.handleMouseOut}
       style={{width:20, height:20, backgroundColor:rainbow(this.props.userID)}}
       className='cell'>
       </input>
