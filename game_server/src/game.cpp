@@ -146,6 +146,13 @@ void Game::plan_stage(int wait_time)
 
 void Game::crank_stage(int generations)
 {
+  log -> record(ME, "Sending the query buffer");
+  while(!query_buffer.empty())
+  {
+    db_info->run_query(NO_READ, (string) query_buffer.front());
+    query_buffer.pop();
+  }
+  log -> record(ME, "Sent the query buffer");
   log -> record(ME, "Crank - start");
   std::map<uint64_t,Block*>::iterator i;
   for (i = super_node.begin(); i != super_node.end(); i++)
@@ -249,11 +256,6 @@ string Game::user_want(int px1, int py1, int px2, int py2)
   crank_lock.unlock();
   string result = c -> s;
   free(c);
-  //string output = "";
-  //for(int i = 0; result[i]; i++)
-  //{
-  //  output = output + result[i];
-  //}
   return result;
 }
 
@@ -266,7 +268,6 @@ int Game::user_does(int x, int y, CELL_TYPE t)
   {
     x = x * (-1);
     updated_x = 1;
-
   }
   if(y < 0)
   {
@@ -310,9 +311,7 @@ int Game::user_does(int x, int y, CELL_TYPE t)
   {
     y = y * (-1);
   }
-  if(curr_block->map[curr_block->rectify_x(x)][curr_block->rectify_y(y)] != 0 
-     && t
-    )
+  if(curr_block->map[curr_block->rectify_x(x)][curr_block->rectify_y(y)] != 0 && t)
   {
     crank_lock.unlock();
     return 1;
@@ -320,13 +319,15 @@ int Game::user_does(int x, int y, CELL_TYPE t)
   curr_block->map[curr_block->rectify_x(x)][curr_block->rectify_y(y)] = t;
   string query = "DELETE FROM agents.grid WHERE x=" +
                  std::to_string(x) + " AND y=" + std::to_string(y);
-  db_info->run_query(NO_READ, query);
+  //db_info->run_query(NO_READ, query);
+  query_buffer.push(query);
   if(t)
   {
     query = "INSERT INTO agents.grid(user_id, x, y) VALUES (" +
             std::to_string(t) + ", " + std::to_string(x) + ", " +
             std::to_string(y) + ")";
-    db_info->run_query(NO_READ, query);
+    //db_info->run_query(NO_READ, query);
+    query_buffer.push(query);
   }
   crank_lock.unlock();
   return 2;
