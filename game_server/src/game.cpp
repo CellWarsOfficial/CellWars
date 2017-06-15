@@ -199,7 +199,7 @@ void Game::crank_stage(int generations)
       curr_block = new Block(o_x, o_y);
       super_node[compress_xy(o_x, o_y)] = curr_block;
     }
-    curr_block->map[curr_block->rectify_x(x)][curr_block->rectify_y(y)] = t;
+    curr_block->set(curr_block->rectify_x(x), curr_block->rectify_y(y), t);
   }
   log -> record(ME, "Sent the change buffer");
   log -> record(ME, "Crank - start");
