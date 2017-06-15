@@ -175,6 +175,9 @@ function ImgSquare(props) {
 class ImgSquare extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      src: idle_cell
+    }
     this.handleMouseOver = this.handleMouseOver.bind(this);
     this.handleMouseOut = this.handleMouseOut.bind(this);
     this.goState();
