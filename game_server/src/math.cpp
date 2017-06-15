@@ -9,15 +9,15 @@ string encode(string input)
   size_t len = input.length();
   unsigned char hash[20];
   SHA1((unsigned char*)(input.c_str()), len, hash);
-  string output = encode_base64(hash);
+  string output = encode_base64(hash, 20);
   return output;
 }
 
-string encode_base64(unsigned char *input)
+string encode_base64(unsigned char *input, int length)
 {
   int i = 0;
   string long_binary = "";
-  while(i < 20)
+  while(i < length)
   {
      long_binary = long_binary + num_to_binary(((int) input[i]));
      i++;
@@ -26,7 +26,7 @@ string encode_base64(unsigned char *input)
   string pad = "00000000";
   while((long_binary.length() % 3) != 0)
   {
-    long_binary = long_binary + pad; 
+    long_binary = long_binary + pad;
     padding_no++;
   }
   string encoded = "";
