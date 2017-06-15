@@ -9,18 +9,7 @@ string encode(string input)
   size_t len = input.length();
   unsigned char hash[20];
   SHA1((unsigned char*)(input.c_str()), len, hash);
-//  stringstream s;
-//  s << hash;
-//  string hashed_out = s.str();
   string output = encode_base64(hash);
-  return output;
-}
-
-unsigned char* convert_type(string input)
-{
-  size_t len = input.length();
-  unsigned char* output = (unsigned char*) malloc(len * sizeof(char)); 
-  check_malloc(output);
   return output;
 }
 
@@ -55,32 +44,6 @@ string encode_base64(unsigned char *input)
     buff[buff.length() - 1 - i] = '=';
   }
   return buff;
-}
-
-string add_padding(string input)
-{
-  
-  return 0;
-}
-
-string num_to_str(unsigned long input)
-{
-  std::string output;
-  char q;
-  while(input > 0)
-  {
-    q = (char) (input % 10 + 48);
-    output = q + output;
-    input = input / 10;
-  }
-  return output;
-}
-
-string str_to_binary(string input)
-{
-
-
-  return 0;
 }
 
 string num_to_binary(unsigned long input)
@@ -121,16 +84,6 @@ int binary_to_num(string input)
       result = (result << 1) | 1;
     else if (input[i] == '0' )
       result <<= 1;
-  }
-  return result;
-}
-
-int str_to_num(string input)
-{
-  int result = 0;
-  for(int i = 0; input.length(); i++)
-  {
-    result = result + ((int) input[input.length() - i - 1]) * std::pow(10, i);
   }
   return result;
 }

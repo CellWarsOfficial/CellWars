@@ -5,6 +5,7 @@
 #include <cctype>
 #include <thread>
 #include <math.hpp>
+#include <strings.hpp>
 
 #define ME "server"
 
@@ -25,6 +26,7 @@ Server::Server(int port, Logger *l)
   if(bind(socketid, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
   {
     log -> record(ME, "Failed to bind socket.");
+    exit(0);
     return;
   }
   listen(socketid, SV_MAX_LISTEN);
@@ -56,166 +58,234 @@ void Server::start(Game *game)
   }
 }
 
-int buffer_parse_detector(const char *b, const char *pattern)
-{
-  int i = 0, j = 0;
-  while(b[i])
-  {
-    if(b[i] == pattern[j])
-    {
-      j++;
-      if(pattern[j] == 0)
-      {
-        return i + 1;
-      }
-    }
-    else
-    {
-      j = 0;
-    }
-    i++;
-  }
-  return -1;
-}
-
-int buffer_parse_detector(const char *b, string pattern)
-{
-  return buffer_parse_detector(b, pattern.c_str());
-}
-
 void Server::act(int s, int id)
 {
-  int n, i, m, key, up_p, new_prot_p, argpos, u, px = 0, py = 0, col = 0;
-  string file_path, token, up_m, new_prot_m;
-  string this_con = ME + to_string(id);
+  int len;
+  string this_con = (string)"conn " + to_string(id);
   char *comm_buf = new char[SV_MAX_BUF];
-  FILE *f;
-  bzero(comm_buf, SV_MAX_BUF);
-  m = read(s, comm_buf, SV_MAX_BUF - 1);
+  const char *point, *key;
+  memset(comm_buf, 0, SV_MAX_BUF * sizeof(char));
+
+  len = read(s, comm_buf, SV_MAX_BUF - 1);
   log -> record(this_con, "new connection");
-  i = buffer_parse_detector(comm_buf, "GET");
-  if(i >= 0) // no get = ignore straight away
+  point = string_seek(comm_buf, "GET");
+
+  if(point) // Expect HTTP protocol
   {
-// what's the client looking for
-    file_path = get_next_token(comm_buf, i);
-    argpos = buffer_parse_detector(file_path.c_str(), "?");
-    if(argpos >= 0)
+    key = string_seek(comm_buf, "Sec-WebSocket-Key:");
+    if(key)
     {
-      for(u = argpos; file_path[u] != '='; u++)
-      while(isdigit((int)file_path[u]))
+      log -> record(this_con, "Executing websocket handshakira");
+      string token = string_get_next_token(key, STR_WHITE);
+      log -> record(this_con, "requesting WS with token: " + token);
+      string answer = encode(token);
+      log -> record(this_con, "responding with:" + answer);
+
+      string response = (string)SV_HTTP_SWITCH + '\n';
+      response = response + "Connection: Upgrade\n";
+      point = string_seek(comm_buf, "Upgrade:");
+      if(point)
       {
-        px = px * 10 + (int)(file_path[u] - '0');
+        response = response
+                 + "Upgrade: "
+                 + string_get_next_token(point, STR_WHITE)
+                 + '\n';
       }
-      for(; file_path[u] != '='; u++)
-      while(isdigit((int)file_path[u]))
+      response = response + "Sec-WebSocket-Accept: " + answer + '\n';
+      point = string_seek(comm_buf, "Sec-WebSocket-Protocol:");
+      if(point)
       {
-        py = py * 10 + (int)(file_path[u] - '0');
+        response = response
+                 + "Sec-WebSocket-Protocol: "
+                 + string_get_next_token(point, STR_WHITE)
+                 + '\n';
       }
-      for(; file_path[u] != '='; u++)
-      while(isdigit((int)file_path[u]))
-      {
-        col = col * 10 + (int)(file_path[u] - '0');
-      }
-      game -> user_say(px, py, (CELL_TYPE)col);
-      log -> record(this_con, "user_move");
-      file_path = "/";
-    }
-    if(file_path.compare("/") == 0)
-    {
-      log -> record(this_con, "client asking for index");
-      file_path = (string)SV_HTML_PATH + "/index.html";
-    }
-    else
-    {
-      log -> record(this_con, "client asking for file " + file_path);
-      if(buffer_parse_detector(file_path.c_str(), "..") != -1)
-      {
-        log -> record(this_con, "client hacking, managing");
-        file_path = "/not_found.html";
-      }
-      file_path = (string)SV_HTML_PATH + file_path;
-    }
-// does he want to upgrade to ws?
-    key = buffer_parse_detector(comm_buf, "Sec-WebSocket-Key:");
-    if(key >= 0)
-    {
-      token = get_next_token(comm_buf, key);
-      up_p = buffer_parse_detector(comm_buf, "Upgrade:");
-      if(up_p >= 0)
-      {
-        up_m = get_next_token(comm_buf, up_p);
-      }
-      new_prot_p = buffer_parse_detector(comm_buf, "Sec-WebSocket-Protocol:");
-      if(new_prot_p >= 0)
-      {
-        new_prot_m = get_next_token(comm_buf, new_prot_p);
-      }
-      goto up_ws;
+      response = response + SV_HTTP_END;
+
+      point = response.c_str();
+      write(s, point, strlen(point));
+      memset(comm_buf, 0, len);
+      hijack_ws(this_con, s, comm_buf);
+      return;
     }
 
-// finished parsing
-    bzero(comm_buf, m);
-// deliverr the file
-    f = fopen(file_path.c_str(), "r");
-    if(f)
+    log -> record(this_con, (string)"standard connection");
+    string file_path = string_get_next_token(point, STR_WHITE);
+    log -> record(this_con, (string)"client asking for " + file_path);
+    FILE *f = get_file(file_path);
+    int expect = 200;
+    if(f == NULL)
     {
-      log -> record(this_con, "file found");
+      f = get_404();
+      expect = 404;
+    }
+
+    if(expect == 200)
+    {
+      log -> record(this_con, "200 HIT");
       write(s, SV_HTTP_OK, strlen(SV_HTTP_OK));
-write_now:
-      while((n = fread(comm_buf, 1, SV_MAX_BUF - 1, f)) > 0)
-      {
-        write(s, comm_buf, n);
-      }
-      fclose(f);
+      catfile(f, s, comm_buf);
     }
-    else
+    if(expect == 404)
     {
-      log -> record(this_con, "file not found");
+      log -> record(this_con, "404 MISS");
       write(s, SV_HTTP_NOT_FOUND, strlen(SV_HTTP_NOT_FOUND));
-      file_path = (string)SV_HTML_PATH + "/not_found.html";
-      f = fopen(file_path.c_str(), "r");
-      goto write_now;
+      catfile(f, s, comm_buf);
     }
   }
-// update to ws if required
-up_ws:
-  if(key >= 0)
-  {
-    // Solve handshake
-    bzero(comm_buf, SV_MAX_BUF);
-    log -> record(this_con, "Executing websocket handshakira");
-    log -> record(this_con, "token is: " + token);
-    string response = (string)SV_HTTP_SWITCH + '\n';
-    string magic = encode(token);
-    response = response + "Connection: Upgrade\n";
-    if(up_p >= 0)
-    {
-      response = response + "Upgrade: " + up_m + '\n';
-    }
-    response = response + "Sec-WebSocket-Accept: " + magic + '\n';
-    if(new_prot_p >= 0)
-    {
-      response = response + "Sec-WebSocket-Protocol: " + new_prot_m + '\n';
-    }
-    response = response + SV_HTTP_END;
-    log -> record(this_con, response  );
-    // Send handshake
-    write(s, response.c_str(), strlen(response.c_str()));
-    while(1);
-  }
-// be done with it
+
   write(s, SV_HTTP_END, 2);
   delete comm_buf;
   close(s);
+  return;
 }
 
-string get_next_token(char *b, int i)
+void Server::hijack_ws(string this_con, int s, char *comm_buf)
 {
-  string result = "";
-  for(; (isspace(b[i]) && (b[i])); i++);
-  for(; (!isspace(b[i]) && (b[i])); i++)
+  const char *point;
+  char *virtual_buf;
+  int len, delta;
+  uint32_t mask;
+  uint8_t size_desc;
+  log -> record(this_con, "Websocket started");
+  while((len = read(s, comm_buf, SV_MAX_BUF - SV_PROCESS_ERROR)))
   {
-    result = result + b[i];
+    delta = 1; // skip type
+    size_desc = ((uint8_t *)comm_buf)[delta];
+    delta += 1; // default 1 byte length
+    if(size_desc == 254)
+    {
+      delta += 2; // 2 more bytes for size
+    }
+    if(size_desc == 255)
+    {
+      delta += 8; // 8 more bytes for size
+    }
+    mask = *((uint32_t *)(comm_buf + delta));
+    delta += sizeof(uint32_t); // skip mask
+    virtual_buf = comm_buf + delta;
+    xormask((uint32_t *)virtual_buf, mask);
+    memset(comm_buf + len, 0, SV_PROCESS_ERROR);
+    virtual_buf = comm_buf + delta;
+    point = string_seek(virtual_buf, "QUERY");
+    if(point)
+    {
+      log -> record(this_con, "Query received");
+      int px1, py1, px2, py2;
+      point = string_seek(virtual_buf, "px1=");
+      px1 = stoi(string_get_next_token(point, STR_WHITE));
+      point = string_seek(virtual_buf, "py1=");
+      py1 = stoi(string_get_next_token(point, STR_WHITE));
+      point = string_seek(virtual_buf, "px2=");
+      px2 = stoi(string_get_next_token(point, STR_WHITE));
+      point = string_seek(virtual_buf, "py2=");
+      py2 = stoi(string_get_next_token(point, STR_WHITE));
+      log -> record(this_con, "will query " 
+                              + to_string(px1) + " " 
+                              + to_string(py1) + " " 
+                              + to_string(px2) + " " 
+                              + to_string(py2)
+                              );
+      string to_send = game -> user_want(px1, py1, px2, py2);
+      memset(comm_buf, 0, len * sizeof(char));
+      len = to_send.length();
+      delta = 0;
+      comm_buf[delta] = 129; // text frame
+      delta += 1; // skip type
+      if(len < 126)
+      {
+        log -> record(this_con, "Answer is petite");
+        comm_buf[delta] = (char)len; // size fits
+        delta += 1; // skip size
+      }
+      if((len >= 126) && (len <= 65535))
+      {
+        log -> record(this_con, "Answer is eh");
+        comm_buf[delta] = 126; // 2 extra bytes
+        comm_buf[delta + 1] = (char)((len >> 8) % 256);
+        comm_buf[delta + 2] = (char)(len % 256);
+        delta += 3; // skip size
+      }
+      if(len > 65535)
+      {
+        log -> record(this_con, "Answer is fat");
+        comm_buf[delta] = 127; // 8 extra bytes, God help us!
+        int auxl = len;
+        for(int i = 8; i; i--)
+        {
+          comm_buf[delta + i] = (char)(auxl % 256);
+          auxl = auxl >> 8;
+        }
+        delta += 9; // skip size
+      }
+      // Heck, mask can be added here!
+      virtual_buf = comm_buf + delta;
+      to_send.copy(virtual_buf, len, 0);
+      len += delta;
+      write(s, comm_buf, len);
+    }
+    point = string_seek(virtual_buf, "UPDATE");
+    if(point)
+    {
+      log -> record(this_con, "Update received");
+      int px, py;
+      CELL_TYPE t;
+      point = string_seek(virtual_buf, "px=");
+      px = stoi(string_get_next_token(point, STR_WHITE));
+      point = string_seek(virtual_buf, "py=");
+      py = stoi(string_get_next_token(point, STR_WHITE));
+      point = string_seek(virtual_buf, "t=");
+      t = (CELL_TYPE)stoi(string_get_next_token(point, STR_WHITE));
+      log -> record(this_con, "will update " 
+                              + to_string(px) + " " 
+                              + to_string(py) + " " 
+                              + to_string(t)
+                              );
+      game -> user_does(px, py, t);
+    }
+    memset(comm_buf, 0, len * sizeof(char));
   }
-  return result;
+}
+
+FILE *get_404()
+{
+  // Deliver file 404
+  FILE *f;
+  f = fopen(SV_HTML_MISSING, "r");
+  check_malloc(f);
+  return f;
+}
+
+FILE *get_file(string file)
+{
+  // detect illegal access
+  if(file.find("..") != string::npos)
+  {
+    return NULL;
+  }
+  // remove GET arguments
+  size_t qmark = file.find("?");
+  if(qmark != string::npos)
+  {
+    file.erase(qmark, SV_MAX_BUF);
+  }
+  // add index.html default
+  if(file.back() == '/')
+  {
+    file = file + "index.html"; 
+  }
+  // use path to file
+  file = (string)SV_HTML_PATH + file;
+  // attempt to open
+  FILE *f = fopen(file.c_str(), "r");
+  return f;
+}
+
+void catfile(FILE *f, int s, char *buf)
+{
+  int n;
+  while((n = fread(buf, 1, SV_MAX_BUF - 1, f)) > 0)
+  {
+    write(s, buf, n);
+  }
 }

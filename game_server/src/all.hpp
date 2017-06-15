@@ -13,5 +13,6 @@
 #include <action.hpp>
 #include <server.hpp>
 #include <math.hpp>
+#include <strings.hpp>
 
 #endif
