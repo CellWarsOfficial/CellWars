@@ -250,7 +250,7 @@ class Grid extends Component {
       board: emptyGrid(width, height)
     }
     var url = "ws".concat(window.location.toString().substring(4));
-    // url = "ws://146.169.45.167:7777/" // temp url used for local debugging
+    // url = "ws://89.122.28.235:7777/" // temp url used for local debugging
     ws = new WebSocket(url);
     ws.onopen = function() {
       console.log("web socket opened : ".concat(url));
@@ -264,8 +264,8 @@ class Grid extends Component {
     }
     ws.onmessage = function (evt)
     {
-      width = Math.floor(window.innerWidth / 50);
-      height = Math.floor((window.innerHeight - headerHeight) / 50);
+      width = Math.floor(window.innerWidth / 30);
+      height = Math.floor((window.innerHeight - headerHeight) / 30);
       var received_msg = evt.data;
       var board = emptyGrid(width, height);
       console.log("web socket message received: ".concat(received_msg));
@@ -358,8 +358,8 @@ class Grid extends Component {
 }
 
 function get() {
-  var width = Math.floor(window.innerWidth / 50);
-  var height = Math.floor((window.innerHeight - headerHeight) / 50);
+  var width = Math.floor(window.innerWidth / 30);
+  var height = Math.floor((window.innerHeight - headerHeight) / 30);
   var queryRequest = "QUERY px1="
               .concat(offsetHeight)
               .concat(" py1=")
