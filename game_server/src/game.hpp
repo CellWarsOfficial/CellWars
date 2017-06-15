@@ -50,7 +50,8 @@ class Game
   void sync_padding();
   void up_db();
   void clean_up();
-  std::queue<string> query_buffer;  
+  std::queue<int> change_buffer;
+  std::queue<Block *> block_queue;
 };
 
 #endif

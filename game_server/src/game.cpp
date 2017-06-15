@@ -146,13 +146,22 @@ void Game::plan_stage(int wait_time)
 
 void Game::crank_stage(int generations)
 {
-  log -> record(ME, "Sending the query buffer");
-  while(!query_buffer.empty())
+  log -> record(ME, "Sending the change buffer");
+  while(!change_buffer.empty() && !block_queue.empty())
   {
-    db_info->run_query(NO_READ, (string) query_buffer.front());
-    query_buffer.pop();
+    //db_info->run_query(NO_READ, (string) query_buffer.front());
+    //query_buffer.pop();
+    int x = change_buffer.front();
+    change_buffer.pop();
+    int y = change_buffer.front();
+    change_buffer.pop();
+    CELL_TYPE t = change_buffer.front();
+    change_buffer.pop();
+    Block *b = block_queue.front();
+    block_queue.pop();
+    b->map[b->rectify_x(x)][b->rectify_y(y)] = t;
   }
-  log -> record(ME, "Sent the query buffer");
+  log -> record(ME, "Sent the change buffer");
   log -> record(ME, "Crank - start");
   std::map<uint64_t,Block*>::iterator i;
   for (i = super_node.begin(); i != super_node.end(); i++)
@@ -316,19 +325,23 @@ int Game::user_does(int x, int y, CELL_TYPE t)
     crank_lock.unlock();
     return 1;
   }
-  curr_block->map[curr_block->rectify_x(x)][curr_block->rectify_y(y)] = t;
-  string query = "DELETE FROM agents.grid WHERE x=" +
-                 std::to_string(x) + " AND y=" + std::to_string(y);
+  //curr_block->map[curr_block->rectify_x(x)][curr_block->rectify_y(y)] = t;
+  change_buffer.push(x);
+  change_buffer.push(y);
+  change_buffer.push(t);
+  block_queue.push(curr_block);
+  //string query = "DELETE FROM agents.grid WHERE x=" +
+  //               std::to_string(x) + " AND y=" + std::to_string(y);
   //db_info->run_query(NO_READ, query);
-  query_buffer.push(query);
-  if(t)
-  {
-    query = "INSERT INTO agents.grid(user_id, x, y) VALUES (" +
-            std::to_string(t) + ", " + std::to_string(x) + ", " +
-            std::to_string(y) + ")";
-    //db_info->run_query(NO_READ, query);
-    query_buffer.push(query);
-  }
+  //query_buffer.push(query);
+  //if(t)
+  //{
+  //  query = "INSERT INTO agents.grid(user_id, x, y) VALUES (" +
+  //          std::to_string(t) + ", " + std::to_string(x) + ", " +
+  //          std::to_string(y) + ")";
+  //  //db_info->run_query(NO_READ, query);
+  //  query_buffer.push(query);
+  //}
   crank_lock.unlock();
   return 2;
 }
