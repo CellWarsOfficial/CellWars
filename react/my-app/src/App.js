@@ -33,6 +33,15 @@ const RULE_PAGE_4 = 6
 
 const WS_READY = 1;
 
+const TASK_IDLE = 0;
+const TASK_QUERY = 1;
+const TASK_UPDATE = 2;
+
+const UPDATE_FAIL = 1;
+const UPDATE_SUCCESS = 1;
+
+var websocket_task = TASK_IDLE;
+
 
 class App extends Component {
   constructor() {
@@ -272,45 +281,64 @@ class Grid extends Component {
 
       var lines = received_msg.trim().split('\n');
 
+      switch(websocket_task) {
+        case TASK_QUERY:
+          if ((lines.length - 1) === Number(lines[0])) { // validity check on line numbers
+            for (let i = 1; i <= lines[0]; i++) { // filling grid with received information
+              var data = lines[i].trim().split(',');
+              if (data.length !== 3) {
+                console.log("Parse error : unexpected number of commas");
+                break;
+              }
+              var row = data[0] - offsetHeight;
+              var col = data[1] - offsetWidth;
+              var uid = data[2];
 
-      // checking if response is from a Submit request
-      if (Number(lines[0]) === 0 && lines.length === 1) {
-        // submit response success
-        console.log("Submit request responsed : FAIL");
-      } else if (Number(lines[0]) === 1 && lines.length === 1) {
-        // submit response failed
-        console.log("Submit request responsed : SUCCESS");
+              if (row < 0 || row >= height || col < 0 || col >= width) {
+                console.log("Parse error : cell out of bounds");
+                break;
+              }
+
+              board[row][col] = uid;
+            }
+            console.log("Parse info : successfully parsed query")
+          } else {
+            console.log("Parse error : unexpected number of lines");
+          }
+          
+          websocket_task = TASK_IDLE;
+          break;
+
+        case TASK_UPDATE:
+          // checking if response is from a Submit request
+          if (lines.length === 1) {
+            switch(Number(lines[0])) {
+              case UPDATE_FAIL:
+                console.log("Submit request responsed : FAIL");
+                window.alert("Submit request responsed : FAIL");
+              break;
+              case UPDATE_SUCCESS:
+                console.log("Submit request responsed : SUCCESS");
+                break;
+              default: console.log("Parse error : unexpected submit response (value)");
+            }
+          } else {
+            console.log("Parse error : unexpected submit response (number of lines)");
+          }
+
+          websocket_task = TASK_IDLE;
+          break;
+
+        case TASK_IDLE: 
+        default: console.log("Unexpected websocket task");
       }
 
-      // checking if response is from a Get request
 
-      if ((lines.length - 1) === Number(lines[0])) {
-        for (let i = 1; i <= lines[0]; i++) { // filling grid with received information
-          var data = lines[i].trim().split(',');
-          if (data.length !== 3) {
-            console.log("Parse error : unexpected number of commas");
-            break;
-          }
-          var row = data[0] - offsetHeight;
-          var col = data[1] - offsetWidth;
-          var uid = data[2];
-
-          if (row < 0 || row >= height || col < 0 || col >= width) {
-            console.log("Parse error : cell out of bounds");
-            break;
-          }
-
-          board[row][col] = uid;
-        }
-      } else {
-        console.log("Parse error : unexpected number of lines");
-      }
         this.setState({
           board: board
         });
     }.bind(this);
   }
-
 
 
   handleClick(row, col) {
@@ -329,6 +357,10 @@ class Grid extends Component {
                 .concat(board[row][col]);
     console.log("Sending query : ".concat(updateRequest));
     if (ws.readyState === WS_READY) {
+      while (websocket_task !== TASK_IDLE) {
+        setTimeout(() => {console.log("Waiting for websocket..")}, 1000);
+      }
+      websocket_task = TASK_UPDATE;
       ws.send(updateRequest);
     } else {
       console.log("ABORT: Websocket is not ready!");
@@ -385,11 +417,15 @@ function get() {
               .concat(" py2=")
               .concat(width - 1 + offsetWidth)
   console.log("Sending query : ".concat(queryRequest));
-  if (ws.readyState === WS_READY) {
-    ws.send(queryRequest);
-  } else {
-    console.log("ABORT: Websocket is not ready!");
-  }
+    if (ws.readyState === WS_READY) {
+      while (websocket_task !== TASK_IDLE) {
+        setTimeout(() => {console.log("Waiting for websocket..")}, 1000);
+      }
+      websocket_task = TASK_QUERY;
+      ws.send(queryRequest);
+    } else {
+      console.log("ABORT: Websocket is not ready!");
+    }
 }
 
 class MoveRight extends Component {
