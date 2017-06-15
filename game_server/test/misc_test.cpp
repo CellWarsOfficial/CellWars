@@ -35,83 +35,120 @@ int math_tests()
   string test18 = "persona";
   string test19 = "car";
   string test20 = "cat";
+  string test21 = "";
   tests++;
   if(13 != binary_to_num(test1)){
-    fprintf(stderr, "TEST FAIL: binary_to_num.\n"); 
+    fprintf(stderr, "TEST FAIL: binary_to_num.\n");
     fails++;
   }
   tests++;
   if(13 != binary_to_num(test2)){
-    fprintf(stderr, "TEST FAIL: binary_to_num.\n"); 
+    fprintf(stderr, "TEST FAIL: binary_to_num.\n");
     fails++;
   }
   tests++;
   if(99999 != binary_to_num(test3)){
-    fprintf(stderr, "TEST FAIL: binary_to_num.\n"); 
+    fprintf(stderr, "TEST FAIL: binary_to_num.\n");
     fails++;
   }
   tests++;
   if(2458 != binary_to_num(test4)){
-    fprintf(stderr, "TEST FAIL: binary_to_num.\n"); 
+    fprintf(stderr, "TEST FAIL: binary_to_num.\n");
     fails++;
   }
   tests++;
   if(2458 != binary_to_num(test5)){
-    fprintf(stderr, "TEST FAIL: binary_to_num.\n"); 
+    fprintf(stderr, "TEST FAIL: binary_to_num.\n");
     fails++;
   }
   //test num_to_binary
   tests++;
   if(!str_eq("01000110", num_to_binary(test6))){
-    fprintf(stderr, "TEST FAIL: num_to_binary.\n"); 
+    fprintf(stderr, "TEST FAIL: num_to_binary.\n");
     string s = num_to_binary(test6);
     printf("HERE:%s\n", s.c_str());
     fails++;
   }
   tests++;
   if(!str_eq("00111111", num_to_binary(test7))){
-    fprintf(stderr, "TEST FAIL: num_to_binary.\n"); 
+    fprintf(stderr, "TEST FAIL: num_to_binary.\n");
     fails++;
   }
   tests++;
   if(!str_eq("00000000", num_to_binary(test8))){
-    fprintf(stderr, "TEST FAIL: num_to_binary.\n"); 
+    fprintf(stderr, "TEST FAIL: num_to_binary.\n");
     fails++;
   }
   tests++;
   if(!str_eq("00000111", num_to_binary(test9))){
-    fprintf(stderr, "TEST FAIL: num_to_binary.\n"); 
+    fprintf(stderr, "TEST FAIL: num_to_binary.\n");
     fails++;
   }
   tests++;
   if(!str_eq("00001000", num_to_binary(test10))){
-    fprintf(stderr, "TEST FAIL: num_to_binary.\n"); 
+    fprintf(stderr, "TEST FAIL: num_to_binary.\n");
     fails++;
   }
   //test encode_six_bits
   tests++;
   if(7 != encode_six_bits(test11, 3)){
-    fprintf(stderr, "TEST FAIL: encode_six_bits.\n"); 
+    fprintf(stderr, "TEST FAIL: encode_six_bits.\n");
     fails++;
   }
   tests++;
   if(7 != encode_six_bits(test12, 3)){
-    fprintf(stderr, "TEST FAIL: encode_six_bits.\n"); 
+    fprintf(stderr, "TEST FAIL: encode_six_bits.\n");
     fails++;
   }
   tests++;
   if(16 != encode_six_bits(test13, 1)){
-    fprintf(stderr, "TEST FAIL: encode_six_bits.\n"); 
+    fprintf(stderr, "TEST FAIL: encode_six_bits.\n");
     fails++;
   }
   tests++;
   if(32 != encode_six_bits(test14, 3)){
-    fprintf(stderr, "TEST FAIL: encode_six_bits.\n"); 
+    fprintf(stderr, "TEST FAIL: encode_six_bits.\n");
     fails++;
   }
   tests++;
   if(33 != encode_six_bits(test15, 3)){
-    fprintf(stderr, "TEST FAIL: encode_six_bits.\n"); 
+    fprintf(stderr, "TEST FAIL: encode_six_bits.\n");
+    fails++;
+  }
+  tests++;
+  if(!str_eq("TWloYWk=", encode_base64((unsigned char *) test16.c_str(), test16.length()))){
+    printf("OUT: %s\n", (encode_base64((unsigned char *) test16.c_str(), test16.length()).c_str()));
+    fprintf(stderr, "TEST FAIL: encode_base64.\n");
+    fails++;
+  }
+  tests++;
+  if(!str_eq("am91cm5leQ==", encode_base64((unsigned char *) test17.c_str(), test17.length()))){
+    printf("OUT: %s\n", (encode_base64((unsigned char *) test17.c_str(), test17.length()).c_str()));
+    fprintf(stderr, "TEST FAIL: encode_base64.\n");
+    fails++;
+  }
+  tests++;
+  if(!str_eq("cGVyc29uYQ==", encode_base64((unsigned char *) test18.c_str(), test18.length()))){
+    printf("OUT: %s\n", (encode_base64((unsigned char *) test18.c_str(), test18.length()).c_str()));
+    fprintf(stderr, "TEST FAIL: encode_base64.\n");
+    fails++;
+  }
+  tests++;
+  if(!str_eq("Y2Fy", encode_base64((unsigned char *) test19.c_str(), test19.length()))){
+    printf("OUT: %s\n", (encode_base64((unsigned char *) test19.c_str(), test19.length()).c_str()));
+    fprintf(stderr, "TEST FAIL: encode_base64.\n");
+    fails++;
+  }
+  tests++;
+  if(!str_eq("Y2F0", encode_base64((unsigned char *) test20.c_str(), test20.length()))){
+    printf("OUT: %s\n", (encode_base64((unsigned char *) test20.c_str(), test20.length()).c_str()));
+    fprintf(stderr, "TEST FAIL: encode_base64.\n");
+    fails++;
+  }
+  tests++;
+  if(!str_eq("", encode_base64((unsigned char *) test21.c_str(), test21.length()))){
+    printf("OUT: %s\n", (encode_base64((unsigned char *) test21.c_str(), test21.length()).c_str()));
+    fprintf(stderr, "TEST FAIL: encode_base64.\n");
     fails++;
   }
   //test encode_base64.
