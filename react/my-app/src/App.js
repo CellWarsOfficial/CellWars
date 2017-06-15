@@ -3,6 +3,8 @@ import logo from './logo.svg';
 import pac_thing from './images/pac_thing.png';
 import './App.css';
 
+var ws;
+
 var width = 20;
 var height = 20; //dimensions of the board
 const headerHeight = 230;
@@ -10,16 +12,21 @@ const headerHeight = 230;
 const players = 10; //determines how colours are split between userID's
 var yourUserID = 1;
 
-const x1Home = width/2 - 2;
-const x2Home = width/2 + 2;
-const y1Home = height/2 - 2;
-const y2Home = height/2 + 2; //location of the editable home region
-
 var DISPLAYMODE = {
   COLOURS: {value: 0, name: "colours"},
   EMOJIS: {value: 1, name: "emojis"}
 };
 
+var lastPage = 0;
+const INTRO_PAGE = 0;
+const GAME_PAGE = 1;
+const RULE_PAGE_0 = 2
+const RULE_PAGE_1 = 3
+const RULE_PAGE_2 = 4
+const RULE_PAGE_3 = 5
+const RULE_PAGE_4 = 6
+
+const WS_READY = 1;
 
 
 class App extends Component {
@@ -27,19 +34,8 @@ class App extends Component {
     super();
     this.state = {
       displayMode: 0,
-      isVisible: false,
+      currentPage: INTRO_PAGE,
     }
-  }
-
-
-  get() {
-    // TODO
-    window.alert("Not yet implemented.");
-  }
-
-  submit() {
-    // TODO
-    window.alert("Not yet implemented.");
   }
 
   advanceDisplayMode() {
@@ -48,8 +44,14 @@ class App extends Component {
     });
   }
 
-  handleClick() {
-    this.setState({isVisible: true});
+  setPageTo(page) {
+    if (this.state.currentPage < RULE_PAGE_0) {
+      lastPage = this.state.currentPage;
+    }
+    if (page === RULE_PAGE_0 && lastPage === GAME_PAGE) {
+      page = RULE_PAGE_1;
+    }
+    this.setState({currentPage: page});
   }
 
   render() {
@@ -57,34 +59,38 @@ class App extends Component {
       <div className="App">
         <div className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h2>Cell Wars</h2>
+          <h1>Cell Wars</h1>
         </div>
-        <br></br>
+        <div style={{position: 'absolute', right:'10px'}}>
+          <HelpButton onClick={() => this.setPageTo(RULE_PAGE_0)} currentPage = {this.state.currentPage}/>
+        </div>
         <br></br>
         <br></br>
         <div className="App-grid">
-          <UserPicker isVisible = {this.state.isVisible} onClick={() => this.handleClick()}/>
-          <Grid displayMode = {this.state.displayMode} isVisible = {this.state.isVisible}/>
+          <RulePage0 currentPage = {this.state.currentPage}/>
+          <RulePage1 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_2)}/>
+          <RulePage2 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_3)}/>
+          <RulePage3 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_4)}/>
+          <RulePage4 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(lastPage)}/>
+          <UserPicker currentPage = {this.state.currentPage} onClick={() => this.setPageTo(GAME_PAGE)}/>
+          <Grid displayMode = {this.state.displayMode} currentPage = {this.state.currentPage}/>
         </div>
         <p></p>
-          <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()} isVisible = {this.state.isVisible}/> &nbsp;
-          <GetButton onClick={() => this.get()} isVisible = {this.state.isVisible}/> &nbsp;
-          <SubmitButton onClick={() => this.submit()} isVisible = {this.state.isVisible}/> &nbsp;
+          <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()} currentPage = {this.state.currentPage}/> &nbsp;
+          <GetButton onClick={() => get()} currentPage = {this.state.currentPage}/> &nbsp;
       </div>
     );
   }
 }
 
-
-
-class SubmitButton extends Component {
+class HelpButton extends Component {
   render() {
-  if (!this.props.isVisible) {
-    return null;
-  }
-  return (
-      <button onClick = {this.props.onClick}>
-      Submit
+    if (this.props.currentPage >= RULE_PAGE_0) {  // hide help button on help pages
+      return null;
+    }
+    return (
+      <button onClick = {this.props.onClick} className={'roundButton'}>
+      Help
       </button>
     );
   }
@@ -92,11 +98,11 @@ class SubmitButton extends Component {
 
 class GetButton extends Component {
   render() {
-  if (!this.props.isVisible) {
+  if (this.props.currentPage !== GAME_PAGE) {
     return null;
   }
   return (
-      <button onClick = {this.props.onClick}>
+      <button onClick = {this.props.onClick} className={'roundButton'}>
       Get
       </button>
     );
@@ -106,11 +112,11 @@ class GetButton extends Component {
 
 class DisplayModeAdvancer extends Component {
   render() {
-  if (!this.props.isVisible) {
+  if (this.props.currentPage !== GAME_PAGE) {
     return null;
   }
     return (
-      <button className="display-mode-button" onClick={this.props.onClick}>
+      <button onClick={this.props.onClick} className={'roundButton'}>
       Advance Display
       </button>
     );
@@ -126,39 +132,11 @@ function rainbow(n) {
   return 'hsl(' + n + ',100%,50%)';
 }
 
-/*
-function Square(props) {
-  var label = '';
-  if (props.isColourBlind) {
-    label = props.userID; //Write the userIDs on squares when colourblind mode is on
-  }
-  var border = '';
-  if (props.inHomeArea) {
-    border = '1px solid #200' //Home area cells get a border
-  }
-
-  return (
-    <button
-      className="square"
-      onClick={props.onClick}
-      style={{backgroundColor:rainbow(props.userID), border:border}}>
-      {label}
-    </button>
-  );
-}
-*/
-
 
 
 
 function ImgSquare(props) {
   var src = null;
-
-  var border = '1px solid #ddd';
-
-  if (props.inHomeArea) {
-    border = '1px solid #200' //Home area cells get a border
-  }
 
   if (props.displayMode === DISPLAYMODE.COLOURS.value) {
     src = pac_thing;
@@ -169,36 +147,32 @@ function ImgSquare(props) {
   if (props.userID === 0) {
     src = pac_thing;
   }
+  var style = {display: 'inline-block'};
 
   return (
+    <div style={style}>
     <input
     type="image"
     alt="cell"
     src={src}
     onClick={props.onClick}
-    style={{width:20, height:20, backgroundColor:rainbow(props.userID), border:border}}
+    style={{width:20, height:20, backgroundColor:rainbow(props.userID), border:'1px solid #ddd'}}
     className='cell'>
     </input>
+    </div>
     );
 
 }
 
 
-
-
-function outsideHomeArea(row, col) {
-  return (row < y1Home || row >= y2Home ||
-          col < x1Home || col >= x2Home);
-}
-
 class Row extends Component {
   renderSquare(userIDturtle, row, col) {
     return (
       <ImgSquare
+      key={row.toString().concat(col.toString())}
       userID={userIDturtle}
       onClick={() => this.props.onClick(row, col)}
       displayMode={this.props.displayMode}
-      inHomeArea={!outsideHomeArea(row, col)}
       />
     );
   }
@@ -217,19 +191,12 @@ class Row extends Component {
 
 
 
-function fittedExample(width, height) { // Generates an example board fitting to the width and height global variables
+function emptyGrid(width, height) { // Generates an example board fitting to the width and height global variables
   var ret = [];
   for (var i = 0; i < height; i++) {
     var row = [];
     for (var j = 0; j < width; j++) {
-      var temp = 0;
-      if (i < height/2) {
-        temp+=3;
-      }
-      if (j < width/2) {
-        temp+=5;
-      }
-      row.push(temp);
+      row.push(0);
     }
     ret.push(row);
   }
@@ -239,24 +206,26 @@ function fittedExample(width, height) { // Generates an example board fitting to
 
 class UserPicker extends Component {
   render() {
-    if (this.props.isVisible)
+    if (this.props.currentPage !== INTRO_PAGE && this.props.currentPage !== RULE_PAGE_0)
     {
      return null;
     }
 
-    return (<div><br></br><h2>Pick your player</h2><br></br><br></br><br></br><table width="100%">
+    return (<div><h2>Pick your colour</h2><br></br><table width="100%">
+      <tbody>
       <tr className = "textcenter">
-        <td width = "75" onClick={() => this.handleClick(1)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(1)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(2)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(2)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(3)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(3)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(4)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(4)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(5)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(5)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(6)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(6)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(7)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(7)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(8)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(8)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(9)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(9)}}></img></td>    
-        <td width = "75" onClick={() => this.handleClick(10)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(10)}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(1)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(1), cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(2)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(2), cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(3)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(3), cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(4)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(4), cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(5)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(5), cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(6)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(6), cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(7)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(7), cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(8)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(8), cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(9)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(9), cursor:'pointer'}}></img></td>    
+        <td width = "75" onClick={() => this.handleClick(10)}><img alt="pacman" src={pac_thing} style={{width:100, height:100, backgroundColor:rainbow(10), cursor:'pointer'}}></img></td>    
       </tr>
+      </tbody>
     </table></div>);
 
   }
@@ -271,28 +240,75 @@ class UserPicker extends Component {
 class Grid extends Component {
   constructor() {
     super();
-    this.updateDimensions();
     this.state = {
-      board: fittedExample(width, height)
+      board: emptyGrid(width, height)
     }
+    var url = "ws".concat(window.location.toString().substring(4));
+    // url = "ws://146.169.45.167:7777/" // temp url used for local debugging
+    ws = new WebSocket(url);
+    ws.onopen = function() {
+      console.log("web socket opened : ".concat(url));
+      get();
+    }
+    ws.onclose = function() {
+      console.log("web socket closed : ".concat(url));
+    }
+    ws.onerror = function() {
+      console.log("web socket error");
+    }
+    ws.onmessage = function (evt)
+    {
+      var received_msg = evt.data;
+      var board = emptyGrid(width, height);
+      console.log("web socket message received: ".concat(received_msg));
+
+      var lines = received_msg.split('\n');
+
+        for (let i = 1; i <= lines[0]; i++) { // filling grid with received information
+          var data = lines[i].split(',');
+          if (data.length !== 3) {
+            console.log("parse error format");
+            break;
+          }
+          var row = data[0];
+          var col = data[1];
+          var uid = data[2];
+
+          board[row][col] = uid;
+        }
+        this.setState({
+          board: board
+        });
+    }.bind(this);
   }
+
+
 
   handleClick(row, col) {
     const board = this.state.board.slice(); //Clones the board
-    if (outsideHomeArea(row, col)) {
-      window.alert("You may only toggle cells in your home area.");
-      return;
-    }
 
     board[row][col] = (board[row][col] === 0) ? yourUserID : 0;
     this.setState({
       board: board
     });
+
+    if (ws.readyState === WS_READY) {
+      var updateRequest = "UPDATE px="
+                  .concat(row)
+                  .concat(" py=")
+                  .concat(col)
+                  .concat(" t=")
+                  .concat(board[row][col]);
+      console.log("Sending query : ".concat(updateRequest));
+      ws.send(updateRequest);
+    } else {
+      console.log("Websocket is not ready!");
+    }
   }
 
   renderRow(row) {
     return (
-      <div>
+      <div key={row.toString()}>
         <Row
           squares={this.state.board[row]}
           row={row}
@@ -304,7 +320,7 @@ class Grid extends Component {
   }
 
   render() {
-    if (!this.props.isVisible) {
+    if (this.props.currentPage !== GAME_PAGE) {
       return null;
     }
     var rows = [];
@@ -315,23 +331,99 @@ class Grid extends Component {
   }
 
   componentDidMount() {
-    window.addEventListener("resize", () => {this.updateDimensions(); this.updateBoard(); this.forceUpdate()});
+    window.addEventListener("resize", () => {get()});
   }
-
-  updateDimensions() {
-    width = Math.floor(window.innerWidth / 50);
-    height = Math.floor((window.innerHeight - headerHeight) / 50);
-  }
-
-  updateBoard() {
-    this.setState({
-      board: fittedExample(width, height)
-    });
-  }
-
-
 }
 
+function get() {
+  width = Math.floor(window.innerWidth / 50);
+  height = Math.floor((window.innerHeight - headerHeight) / 50);
+  if (ws.readyState === WS_READY) {
+    var px1 = 0;
+    var py1 = 0;
+    var queryRequest = "QUERY px1="
+                .concat(px1.toString())
+                .concat(" py1=")
+                .concat(py1.toString())
+                .concat(" px2=")
+                .concat(height-1)
+                .concat(" py2=")
+                .concat(width-1)
+    console.log("Sending query : ".concat(queryRequest));
+    ws.send(queryRequest);
+  } else {
+    console.log("Websocket is not ready!");
+  }
+}
 
+class RulePage0 extends Component {
+  render() {
+    if (this.props.currentPage !== RULE_PAGE_0) {
+      return null;
+    }
+    return (
+    <div>
+    <h1>To play the game you must first pick your colour which your cells will be representing!</h1>
+    </div>
+    );
+  }
+}
+
+class RulePage1 extends Component {
+  render() {
+    if (this.props.currentPage !== RULE_PAGE_1) {
+      return null;
+    }
+    return (
+    <div onClick={this.props.onClick}>
+    <h1>Cell Law I</h1>
+    <h2>Any live cell with fewer than two live neighbours will die, as if caused by underpopulation.</h2>
+    </div>
+    );
+  }
+}
+
+class RulePage2 extends Component {
+  render() {
+    if (this.props.currentPage !== RULE_PAGE_2) {
+      return null;
+    }
+    return (
+    <div onClick={this.props.onClick}>
+    <h1>Cell Law II</h1>
+    <h2>Any live cell with two or three live neighbours lives on to the next generation.</h2>
+    </div>
+    );
+  }
+}
+
+class RulePage3 extends Component {
+  render() {
+    if (this.props.currentPage !== RULE_PAGE_3) {
+      return null;
+    }
+    return (
+    <div onClick={this.props.onClick}>
+    <h1>Cell Law III</h1>
+    <h2>Any dead cell with exactly 3 live neighbours and a majority cell type can be identified
+        among them, the cell will be reborn as the same type as the majority.</h2>
+    </div>
+    );
+  }
+}
+
+class RulePage4 extends Component {
+  render() {
+    if (this.props.currentPage !== RULE_PAGE_4) {
+      return null;
+    }
+    return (
+    <div onClick={this.props.onClick}>
+    <h1>Cell Law IV</h1>
+    <h2>Any live cell with greater than three live neighbours dies, as if caused by overpopulation.</h2>
+    </div>
+    );
+  }
+}
 
 export default App;

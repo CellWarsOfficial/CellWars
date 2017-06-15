@@ -7,7 +7,7 @@ SKDIR  = ../socket.io-client-cpp/build/lib/Release
 RM     = rm -rf
 TARGET = $(BINDIR)/gameserver
 HEADER = $(wildcard $(SRCDIR)/*.hpp)
-IP     = 146.169.45.167
+IP     = localhost
 RUNFLG = -db $(IP) -w 10 -log log.l -q
 IGNORE = >/dev/null 2>&1
 KILLCOM = /bin/kill -9
@@ -95,6 +95,7 @@ install: all uninstall
 uninstall:
 	-ps -A | grep gameserver | awk '{print "echo " $$1 ";pgrep -P " $$1}' | sh | sed -e 's#^#/bin/kill -2 #' | sh
 	-while pgrep gameserver > /dev/null; do sleep 1; done
+	-sleep 60
 
 .phony: clean
 clean:

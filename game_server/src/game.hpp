@@ -26,7 +26,6 @@ class Game
   Game(DB_conn* db, Logger *log);
   void *start(FLAG_TYPE f, int gtc, int w);
   int get_status();
-  void user_say(int px, int py, CELL_TYPE t);
   string user_want(int px1, int py1, int px2, int py2);
   void user_does(int x, int y, CELL_TYPE t);
   void resume_running();
