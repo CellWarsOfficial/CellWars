@@ -13,7 +13,7 @@ var ws;
 var width = 20;
 var height = 20; //dimensions of the board
 
-const LOOKAHEAD = 20;
+const LOOKAHEAD = 1;
 var last_px1 = 0;
 var last_px2 = height - 1;
 var last_py1 = 0;
@@ -243,10 +243,10 @@ class Grid extends Component {
     this.state = {
       displayMode: 0,
       board: emptyGrid(width, height),
-      // cache: emptyGrid(width + LOOKAHEAD*2, height + LOOKAHEAD*2),
+      cache: emptyGrid(width + LOOKAHEAD*2, height + LOOKAHEAD*2),
     }
     var url = "ws".concat(window.location.toString().substring(4));
-    url = "ws://89.122.28.235:7777/" // temp url used for local debugging
+    // url = "ws://146.169.45.167:7777/" // temp url used for local debugging
     ws = new WebSocket(url);
     ws.onopen = function() {
       console.log("Web socket opened : ".concat(url));
@@ -268,27 +268,31 @@ class Grid extends Component {
       var lines = received_msg.trim().split('\n');
 
       if ((lines.length - 1) === Number(lines[0])) { // QUERY
-        var board = emptyGrid(width, height);
-        for (let i = 1; i <= lines[0]; i++) { // filling grid with received information
+        const cache_width = width + LOOKAHEAD*2;
+        const cache_height = height + LOOKAHEAD*2;
+        var cache = emptyGrid(cache_width, cache_height);
+        for (let i = 1; i <= lines[0]; i++) { // filling cache with received information
           var data = lines[i].trim().split(',');
           if (data.length !== 3) {
             console.log("Parse error : unexpected number of commas");
             break;
           }
-          var row = data[0] - offsetHeight;
-          var col = data[1] - offsetWidth;
+          var row = data[0] - offsetHeight - LOOKAHEAD;
+          var col = data[1] - offsetWidth - LOOKAHEAD;
           var uid = data[2];
 
-          if (row < 0 || row >= height || col < 0 || col >= width) {
+          if (row >= cache_height || col >= cache_width) {
             console.log("Parse error : cell out of bounds");
             break;
           }
 
-          board[row][col] = uid;
+          cache[row][col] = uid;
         }
         this.setState({
-          board: board
+          cache: cache,
         });
+        console.log("Updated cache");
+        this.updateBoardFromCache(LOOKAHEAD, LOOKAHEAD);
         console.log("Parse info : successfully parsed query")
       } else if (lines.length === 1) { // SUBMIT
         switch(Number(lines[0])) {
@@ -377,18 +381,49 @@ class Grid extends Component {
     });
   }
 
+  updateBoardFromCache(diff_px1, diff_py1) {
+    // update board with cache
+
+    console.log(diff_px1);
+
+    if (diff_px1 < 0 || diff_py1 < 0) {
+      console.log("Update cache error : out of bounds");
+      return;
+    }
+
+    console.log("Updating board from cache");
+
+    const cache = this.state.cache;
+    var board = emptyGrid(width, height);
+    for (let i = 0; i < height; i++) {
+      for (let j = 0; j < width; j++) {
+        board[i][j] = cache[i + diff_px1][j + diff_py1];
+      }
+    }
+
+    this.setState({
+      board: board,
+    });
+  }
+
   get() {
     var width = Math.floor(window.innerWidth / 30);
     var height = Math.floor((window.innerHeight - headerHeight) / 30);
     var px1 = offsetHeight;
     var py1 = offsetWidth;
-    var px2 = height - 1 + offsetHeight;
-    var py2 = width - 1 + offsetWidth;
+    var px2 = height - 1 + px1;
+    var py2 = width - 1 + py1;
 
-    if (px1 > last_px1 && py1 > last_py1 && px2 < last_px2 && py2 < last_py2) {
-      // update board with cache
+    if (px1 >= last_px1 && py1 >= last_py1 && px2 <= last_px2 && py2 <= last_py2) {
+      var diff_px1 = px1 - last_px1;
+      var diff_py1 = py1 - last_py1;
+      this.updateBoardFromCache(diff_px1, diff_py1);
 
     } else {
+      px1 -= LOOKAHEAD;
+      py1 -= LOOKAHEAD;
+      px2 += LOOKAHEAD;
+      py2 += LOOKAHEAD;
       var queryRequest = "QUERY px1="
                   .concat(px1)
                   .concat(" py1=")
@@ -397,11 +432,16 @@ class Grid extends Component {
                   .concat(px2)
                   .concat(" py2=")
                   .concat(py2);
+
       console.log("Sending query : ".concat(queryRequest));
 
       if (ws.readyState !== WS_READY) {
         console.log("ABORT: Websocket is not ready!");
       } else {
+        last_px1 = px1;
+        last_py1 = py1;
+        last_px2 = px2;
+        last_py2 = py2;
         ws.send(queryRequest);
       }
     }
