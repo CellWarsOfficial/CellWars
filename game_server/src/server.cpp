@@ -188,22 +188,53 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
     if(point)
     {
       log -> record(this_con, "Query received");
-      int px1, py1, px2, py2;
+      int px1 = 0, py1 = 0, px2 = 0, py2 = 0;
       point = string_seek(virtual_buf, "px1=");
-      px1 = stoi(string_get_next_token(point, STR_WHITE));
+      if(point)
+      {
+        px1 = stoi(string_get_next_token(point, STR_WHITE));
+      }
+      else
+      {
+        log -> record(this_con, "Bad formatting");
+      }
       point = string_seek(virtual_buf, "py1=");
-      py1 = stoi(string_get_next_token(point, STR_WHITE));
+      if(point)
+      {
+        py1 = stoi(string_get_next_token(point, STR_WHITE));
+      }
+      else
+      {
+        log -> record(this_con, "Bad formatting");
+      }
       point = string_seek(virtual_buf, "px2=");
-      px2 = stoi(string_get_next_token(point, STR_WHITE));
+      if(point)
+      {
+        px2 = stoi(string_get_next_token(point, STR_WHITE));
+      }
+      else
+      {
+        log -> record(this_con, "Bad formatting");
+      }
       point = string_seek(virtual_buf, "py2=");
-      py2 = stoi(string_get_next_token(point, STR_WHITE));
+      if(point)
+      {
+        py2 = stoi(string_get_next_token(point, STR_WHITE));
+      }
+      else
+      {
+        log -> record(this_con, "Bad formatting");
+      }
       log -> record(this_con, "will query " 
                               + to_string(px1) + " " 
                               + to_string(py1) + " " 
                               + to_string(px2) + " " 
                               + to_string(py2)
                               );
-      string to_send = game -> user_want(px1, py1, px2, py2);
+      string query = "SELECT * FROM agents.grid WHERE x>="
+                     + to_string(px1) + " AND x<=" + to_string(px2) + " AND y>="
+                     + std::to_string(py1) + " AND y<=" + to_string(py2);
+      string to_send = db_info -> run_query(EXPECT_CLIENT, query);
       memset(comm_buf, 0, len * sizeof(char));
       len = form_answer(to_send, comm_buf);
       write(s, comm_buf, len);
@@ -213,14 +244,35 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
     if(point)
     {
       log -> record(this_con, "Update received");
-      int px, py;
-      CELL_TYPE t;
+      int px = 1000000000, py = 1000000000;
+      CELL_TYPE t = 0;
       point = string_seek(virtual_buf, "px=");
-      px = stoi(string_get_next_token(point, STR_WHITE));
+      if(point)
+      {
+        px = stoi(string_get_next_token(point, STR_WHITE));
+      }
+      else
+      {
+        log -> record(this_con, "Bad formatting");
+      }
       point = string_seek(virtual_buf, "py=");
-      py = stoi(string_get_next_token(point, STR_WHITE));
+      if(point)
+      {
+        py = stoi(string_get_next_token(point, STR_WHITE));
+      }
+      else
+      {
+        log -> record(this_con, "Bad formatting");
+      }
       point = string_seek(virtual_buf, "t=");
-      t = (CELL_TYPE)stoi(string_get_next_token(point, STR_WHITE));
+      if(point)
+      {
+        t = (CELL_TYPE)stoi(string_get_next_token(point, STR_WHITE));
+      }
+      else
+      {
+        log -> record(this_con, "Bad formatting");
+      }
       log -> record(this_con, "will update " 
                               + to_string(px) + " " 
                               + to_string(py) + " " 
