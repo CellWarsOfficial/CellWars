@@ -64,7 +64,8 @@
 #define EXPECT_CLIENT 2
 #define NO_READ 0
 #define DB_MAX_BUF 2000
-#define DB_DELAY 200
+#define DB_DELAY 50
+#define DB_MAX_BUILD_SIZE 200
 
 /* Math related constants
  */
