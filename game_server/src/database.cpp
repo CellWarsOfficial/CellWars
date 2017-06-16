@@ -163,12 +163,9 @@ void DB_conn::rewrite_db(const char *f)
     fscanf(file, "%d %d %d", &x, &y, &k);
     log -> record(ME, (string)"Loading " + to_string(x) + ' ' + to_string(y) + ' ' + to_string(k));
     c = CELL_TYPE(k);
-    run_query(NO_READ, "INSERT INTO agents.grid(user_id, x, y) VALUES ("
-      + to_string(c) + ", "
-      + to_string(x) + ", "
-      + to_string(y) + ")"
-      );
+    insert_query_builder(c, x, y);
   }
+  insert_query_builder(0, 0, 0);
   fclose(file);
 }
 
