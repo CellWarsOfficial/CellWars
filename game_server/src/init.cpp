@@ -91,7 +91,8 @@ int main(int argc, char **argv)
       check_limit(i, argc);
       db_info = new DB_conn(argv[i], log);
       db_info2 = new DB_conn(argv[i], log);
-      if((db_info == 0) || !(db_info -> safe))
+      if((db_info == 0) || !(db_info -> safe)
+        || (db_info2 == 0) || !(db_info2 -> safe))
       {
         fprintf(stderr, "Database failure. Exiting\n");
         exit(EXIT_FAILURE);

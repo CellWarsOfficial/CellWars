@@ -27,8 +27,8 @@ Server::Server(int port, DB_conn *db, Logger *l)
   if(bind(socketid, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
   {
     log -> record(ME, "Failed to bind socket.");
+    fprintf(stderr, "Failed to bind socket. Exiting\n");
     exit(0);
-    return;
   }
   listen(socketid, SV_MAX_LISTEN);
   log -> record(ME, "Successfully listening to port: " + to_string(port));
@@ -330,6 +330,7 @@ void catfile(FILE *f, int s, char *buf)
   {
     write(s, buf, n);
   }
+  fclose(f);
 }
 
 int form_answer(string to_send, char *comm_buf)
