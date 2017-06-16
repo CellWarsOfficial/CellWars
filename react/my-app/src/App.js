@@ -246,7 +246,7 @@ class Grid extends Component {
       // cache: emptyGrid(width + LOOKAHEAD*2, height + LOOKAHEAD*2),
     }
     var url = "ws".concat(window.location.toString().substring(4));
-    url = "ws://89.122.28.235:7777/" // temp url used for local debugging
+    //url = "ws://89.122.28.235:7777/" // temp url used for local debugging
     ws = new WebSocket(url);
     ws.onopen = function() {
       console.log("Web socket opened : ".concat(url));
