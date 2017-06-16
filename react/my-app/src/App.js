@@ -4,7 +4,6 @@ import './App.css';
 const VOL = 'https://www.doc.ic.ac.uk/project/2016/271/g1627123/';
 const VOL_IMAGES = VOL.concat('images/');
 const idle_cell = VOL_IMAGES.concat('idle_cell.gif');
-const big_cell = VOL_IMAGES.concat('big_cell.png')
 const logo = VOL_IMAGES.concat('logo.gif');
 const small_cell = VOL_IMAGES.concat('small_cell.png');
 const arrow = VOL_IMAGES.concat('arrow.png');
