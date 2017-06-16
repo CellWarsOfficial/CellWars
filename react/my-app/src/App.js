@@ -46,6 +46,8 @@ const WS_READY = 1;
 const UPDATE_FAIL = 1;
 const UPDATE_SUCCESS = 2;
 
+const uidToNameMap = [Adam, Bob, Charles, David, Ellen, Fred, George, Harry, Igor, Jake];
+
 
 class App extends Component {
   constructor() {
@@ -365,10 +367,10 @@ class Grid extends Component {
     if (player === 0) { return; }
     if (score === 0 && player != yourUserID) { return; }
     var border = '0px solid white';
-    var playerDescription = 'player'.concat(player.toString());
+    var playerDescription = uidToNameMap[player - 1];
     if (player === yourUserID) {
       border = '1px solid grey';
-      playerDescription = 'you';
+      playerDescription = 'YOU';
     }
     var opacity = 1 - highscorePosition * 0.8 / players;
     return (
@@ -391,7 +393,7 @@ class Grid extends Component {
     var biggestScore = 0;
     var biggestPlayer = 0;
     var scoresC = [];
-    var localHighscoresClone = [7, 5, 2, 10, 40, 0, 0, 0, 0, 0, 5]; // for testing
+    var localHighscoresClone = this.state.localHighscores.slice(0); //= [50, 45, 40, 35, 30, 25, 20, 15, 10, 0]; // for testing
     for (var z = 0; z < players + 1; z++) {
       for (var y = 0; y < players + 1; y++) {
         if (localHighscoresClone[y] >= biggestScore) {
