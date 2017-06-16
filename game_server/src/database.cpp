@@ -59,9 +59,55 @@ DB_conn::DB_conn(const char *a, Logger *l)
     log -> record(ME, "Failed to connect to database");
     return;
   }
+  char *answer_buf = new char[DB_MAX_BUF];
+  check_malloc(answer_buf);
   log -> record(ME, "Connection successful");
 }
 
+DB_conn::~DB_conn()
+{
+  close(socketid);
+  delete[] answer_buf;
+}
+
+string DB_conn::run_query(int expectation, string s)
+{
+  string wrapper;
+  string result = "";
+  int len;
+  if(expectation)
+  {
+    wrapper = "copy (SELECT count(*) FROM agents.grid WHERE " 
+            + string_get_next_token(string_seek(s.c_str(), "WHERE"), "") 
+            + ") to STDOUT WITH CSV; copy (" 
+            + s 
+            + ") TO STDOUT WITH CSV; \\echo #\n";
+  }
+  else
+  {
+    wrapper = s + ";\n";
+  }
+  const char *c = wrapper.c_str();
+
+  log -> record(ME, (string)"Running query " + wrapper);
+  db_lock.lock();
+  write(socketid, c, strlen(c));
+  if(expectation)
+  {
+    len = read(socketid, answer_buf, DB_MAX_BUF - 1);
+    while(string_seek(answer_buf, "#") == 0)
+    {
+      std::this_thread::sleep_for(std::chrono::milliseconds(DB_DELAY));
+      len = len + read(socketid, answer_buf + len, DB_MAX_BUF - len);
+    }
+    result = string_get_next_token(answer_buf, "#");
+    memset(answer_buf, 0, sizeof(char) * len);
+  }
+  db_lock.unlock();
+  return result;
+}
+
+/*
 void *DB_conn::run_query(int expectation, string s)
 {
   string wrapper;
@@ -202,7 +248,7 @@ void DB_conn::update_db(Block *block)
     }
   }
 }
-
+*/
 void DB_conn::rewrite_db(const char *f)
 {
   FILE *file = fopen(f, "r");
@@ -229,9 +275,4 @@ void DB_conn::rewrite_db(const char *f)
       );
   }
   fclose(file);
-}
-
-String_container::String_container(string v)
-{
-  s = v;
 }

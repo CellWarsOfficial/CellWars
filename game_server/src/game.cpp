@@ -90,10 +90,10 @@ void *Game::start(FLAG_TYPE f, int gtc, int w)
   action = new Crank();
   if(!GFLAG_nodb)
   {
-    Block **blocks = db_info -> load_from_db(
+    Block **blocks = NULL;/*db_info -> load_from_db(
       compress_xy(MINX, MINY),
       compress_xy(MAXX, MAXY)
-      );
+      );*/
     for(int i = 0; blocks[i]; i++)
     {
       super_node[
@@ -276,7 +276,7 @@ void Game::up_db()
   std::map<uint64_t,Block*>::iterator i;
   for (i = super_node.begin(); i != super_node.end(); i++)
   {
-    db_info -> update_db(i -> second);
+    //db_info -> update_db(i -> second);
   }
   log -> record(ME, "Database updated");
 }
@@ -301,10 +301,8 @@ string Game::user_want(int px1, int py1, int px2, int py2)
                   std::to_string(py2);
   log -> record(ME, query);
   crank_lock.lock();
-  String_container *c = (String_container *) db_info->run_query(EXPECT_CLIENT, query);
+  string result = db_info->run_query(EXPECT_CLIENT, query);
   crank_lock.unlock();
-  string result = c -> s;
-  free(c);
   return result;
 }
 

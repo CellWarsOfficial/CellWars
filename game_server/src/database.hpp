@@ -18,12 +18,16 @@ class DB_conn
 {
   public:
   DB_conn(const char *a, Logger *l);
+  ~DB_conn();
+/*
   Block **load_from_db(uint64_t NW, uint64_t SE);
   void update_db(Block* block);
+*/
   void rewrite_db(const char *f);
   int safe;
-  void* run_query(int expectation, string s);
+  string run_query(int expectation, string s);
   private:
+  char *answer_buf;
   std::mutex db_lock;
   Logger *log;
   const char *address;
@@ -36,12 +40,5 @@ struct answer
   int col;
   CELL_TYPE t;
   struct answer *next;
-};
-
-class String_container
-{
-  public:
-  String_container(string v);
-  string s;
 };
 #endif
