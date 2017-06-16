@@ -53,7 +53,7 @@ DB_conn::DB_conn(const char *a, Logger *l)
     log -> record(ME, "Failed to connect to database");
     return;
   }
-  char *answer_buf = new char[DB_MAX_BUF];
+  answer_buf = new char[DB_MAX_BUF];
   check_malloc(answer_buf);
   log -> record(ME, "Connection successful");
 }
@@ -106,6 +106,7 @@ string DB_conn::run_query(int expectation, string s)
     }
     len = len + aux;
   }
+  log -> record(ME, (string)"Received " + to_string(len));
   string result = string_get_next_token(answer_buf, "#");
   memset(answer_buf, 0, sizeof(char) * len);
   db_lock.unlock();
