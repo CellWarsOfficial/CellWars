@@ -41,8 +41,6 @@ const WS_READY = 1;
 const UPDATE_FAIL = 1;
 const UPDATE_SUCCESS = 2;
 
-const uidToNameMap = ["Adam", "Bob", "Charles", "David", "Ellen", "Fred", "George", "Harry", "Igor", "Jake"];
-
 
 class App extends Component {
   constructor() {
@@ -257,7 +255,6 @@ class Grid extends Component {
       // cache: emptyGrid(width + LOOKAHEAD*2, height + LOOKAHEAD*2),
     }
     var url = "ws".concat(window.location.toString().substring(4));
-    // url = "ws://146.169.45.167:7777" // temp url used for local debugging
     ws = new WebSocket(url);
     ws.onopen = function() {
       console.log("Web socket opened : ".concat(url));
@@ -361,18 +358,41 @@ class Grid extends Component {
   renderScore(highscorePosition, player, score) {
     if (player === 0) { return; }
     if (score === 0 && player !== yourUserID) { return; }
+
+    var src = null;
+
+    if (this.state.displayMode === DISPLAYMODE.COLOURS.value) {
+      src = idle_cell;
+    } else if (this.state.displayMode === DISPLAYMODE.EMOJIS.value) {
+      src = VOL_IMAGES.concat('emojis/').concat((Number(player) + 1000).toString()).concat('.png');
+    }
+
+    if (player === 0) {
+      src = small_cell;
+    }
+
     var border = '0px solid white';
-    var playerDescription = uidToNameMap[player - 1];
     if (player === yourUserID) {
       border = '1px solid grey';
-      playerDescription = 'YOU';
     }
     var opacity = 1 - highscorePosition * 0.8 / players;
-    return (
-      <h6 key={player.toString()} style={{color: rainbow(player), border: border, opacity: opacity}}>
-      {playerDescription.concat(':').concat(score.toString()).concat(' ')}
-      </h6>
-      );
+
+
+  return (
+    <div key={player.toString()} style={{display: 'inline-block'}}>
+    <input 
+    type="image"
+    alt="cell"
+    src={src}
+    style={{width:20, height:20, backgroundColor:rainbow(player), border: border, opacity: opacity}}
+    className='cell'>
+    </input>
+    <h6  style={{color: rainbow(player), opacity: opacity}}>
+    {':'.concat(score.toString())}
+    </h6>
+    </div>
+  );
+
   }
 
   render() {
