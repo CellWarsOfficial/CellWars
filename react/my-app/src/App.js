@@ -369,9 +369,22 @@ class Grid extends Component {
     for (var i = 0; i < height; i++) {
       rows.push(this.renderRow(i));
     }
+
+    var biggestScore = 0;
+    var biggestPlayer = 0;
     var scores = '';
-    for (var j = 0; j < players; j++) {
-      scores = scores.concat('player').concat(j.toString()).concat(': ').concat(this.state.localHighscores[j]);
+    var localHighscoresClone = this.state.localHighscores.slice(0); //= [50, 45, 40, 35, 30, 25, 20, 15, 10, 0]; // for testing
+    for (var z = 0; z < players; z++) {
+      for (var y = 0; y < players; y++) {
+        if (localHighscoresClone[y] >= biggestScore) {
+          biggestScore = localHighscoresClone[y];
+          biggestPlayer = y;
+        }
+      }
+      scores = scores.concat('player').concat(biggestPlayer.toString()).concat(':').concat(biggestScore.toString()).concat(' ');
+      localHighscoresClone[biggestPlayer] = -1;
+      biggestScore = 0;
+      biggestPlayer = -1;
     }
 
     return (
