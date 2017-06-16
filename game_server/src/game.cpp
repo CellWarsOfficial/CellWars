@@ -271,11 +271,49 @@ void Game::sync_padding()
 
 void Game::up_db()
 {
+  std::map<uint64_t,Block*>::iterator blk_i;
+  int i, j, size = 0;
+  string ins_query;
+  Block *block;
   log -> record(ME, "Updating database");
-  std::map<uint64_t,Block*>::iterator i;
-  for (i = super_node.begin(); i != super_node.end(); i++)
+  db_info -> run_query(NO_READ, "DELETE FROM agents.grid"); // DANGER DANGER
+  for(blk_i = super_node.begin(); blk_i != super_node.end(); blk_i++)
   {
-    //db_info -> update_db(i -> second);
+    block = blk_i -> second;
+    for(i = BLOCK_PADDING; i < BLOCK_PADDING + BLOCK_SIZE; i++)
+    {
+      for(j = BLOCK_PADDING; j < BLOCK_PADDING + BLOCK_SIZE; j++)
+      {
+        if(block -> map[i][j])
+        {
+          if(size == 0)
+          {
+            ins_query = "INSERT INTO agents.grid(user_id, x, y) VALUES ("
+            + to_string(block -> map[i][j]) + ", "
+            + to_string(i + block -> originx - BLOCK_PADDING) + ", "
+            + to_string(j + block -> originy - BLOCK_PADDING) + ")";
+            size++;
+          }
+          else
+          {
+            ins_query = ", ("
+            + to_string(block -> map[i][j]) + ", "
+            + to_string(i + block -> originx - BLOCK_PADDING) + ", "
+            + to_string(j + block -> originy - BLOCK_PADDING) + ")";
+            size++;
+            if(size == 200)
+            {
+              db_info -> run_query(NO_READ, ins_query);
+              size = 0;
+            }
+          }
+        }
+      }
+    }
+  }
+  if(size)
+  {
+    db_info -> run_query(NO_READ, ins_query);
   }
   log -> record(ME, "Database updated");
 }
