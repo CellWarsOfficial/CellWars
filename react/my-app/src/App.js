@@ -4,10 +4,10 @@ import './App.css';
 const VOL = 'https://www.doc.ic.ac.uk/project/2016/271/g1627123/';
 const VOL_IMAGES = VOL.concat('images/');
 const idle_cell = VOL_IMAGES.concat('idle_cell.gif');
+const big_cell = VOL_IMAGES.concat('big_cell.png')
 const logo = VOL_IMAGES.concat('logo.gif');
 const small_cell = VOL_IMAGES.concat('small_cell.png');
 const arrow = VOL_IMAGES.concat('arrow.png');
-const owl = VOL_IMAGES.concat('owl.png');
 
 var ws;
 
@@ -211,16 +211,16 @@ class UserPicker extends Component {
     return (<div><h2>Pick your colour</h2><br></br><table width="100%">
       <tbody>
       <tr className = "textcenter">
-        <td onClick={() => this.handleClick(1)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(1)}}></img></td>    
-        <td onClick={() => this.handleClick(2)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(2)}}></img></td>    
-        <td onClick={() => this.handleClick(3)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(3)}}></img></td>    
-        <td onClick={() => this.handleClick(4)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(4)}}></img></td>    
-        <td onClick={() => this.handleClick(5)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(5)}}></img></td>    
-        <td onClick={() => this.handleClick(6)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(6)}}></img></td>    
-        <td onClick={() => this.handleClick(7)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(7)}}></img></td>    
-        <td onClick={() => this.handleClick(8)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(8)}}></img></td>    
-        <td onClick={() => this.handleClick(9)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(9)}}></img></td>    
-        <td onClick={() => this.handleClick(10)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(10)}}></img></td>    
+        <td onClick={() => this.handleClick(1)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(1)}}></img></td>    
+        <td onClick={() => this.handleClick(2)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(2)}}></img></td>    
+        <td onClick={() => this.handleClick(3)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(3)}}></img></td>    
+        <td onClick={() => this.handleClick(4)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(4)}}></img></td>    
+        <td onClick={() => this.handleClick(5)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(5)}}></img></td>    
+        <td onClick={() => this.handleClick(6)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(6)}}></img></td>    
+        <td onClick={() => this.handleClick(7)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(7)}}></img></td>    
+        <td onClick={() => this.handleClick(8)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(8)}}></img></td>    
+        <td onClick={() => this.handleClick(9)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(9)}}></img></td>    
+        <td onClick={() => this.handleClick(10)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(10)}}></img></td>    
       </tr>
       </tbody>
     </table></div>);
