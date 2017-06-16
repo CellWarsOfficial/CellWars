@@ -44,6 +44,7 @@ int main(int argc, char **argv)
 /* Initialising default information
  */
   DB_conn *db_info = NULL;
+  DB_conn *db_info2 = NULL;
   thread *game_thread = NULL;
   Server *server;
   FLAG_TYPE flags = 0;
@@ -89,6 +90,7 @@ int main(int argc, char **argv)
       i++;
       check_limit(i, argc);
       db_info = new DB_conn(argv[i], log);
+      db_info2 = new DB_conn(argv[i], log);
       if((db_info == 0) || !(db_info -> safe))
       {
         fprintf(stderr, "Database failure. Exiting\n");
@@ -156,7 +158,7 @@ int main(int argc, char **argv)
     fprintf(stderr, "Initialisation failure, missing database.\n");
     exit(EXIT_FAILURE);
   }
-  server = new Server(server_p, log);
+  server = new Server(server_p, db_info2, log);
   game = new Game(db_info, log);
   new thread(&Server::start, server, game);
   init_server_ui(log);
@@ -169,6 +171,10 @@ cleanup:
   if(server)
   {
     delete server;
+  }
+  if(db_info2)
+  {
+    delete db_info2;
   }
   if(game)
   {

@@ -2,6 +2,7 @@
 #define SERVER_H
 
 #include <game.hpp>
+#include <database.hpp>
 #include <log.hpp>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -12,13 +13,14 @@
 class Server
 {
   public:
-  Server(int port, Logger *l);
+  Server(int port, DB_conn *db, Logger *l);
   ~Server();
   void start(Game *game);
   private:
   void act(int s, int id);
   void hijack_ws(string this_con, int s, char *comm_buf);
   int socketid;
+  DB_conn *db_info;
   Game *game;
   Logger *log;
 };

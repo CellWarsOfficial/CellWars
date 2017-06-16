@@ -9,8 +9,9 @@
 
 #define ME "server"
 
-Server::Server(int port, Logger *l)
+Server::Server(int port, DB_conn *db, Logger *l)
 {
+  db_info = db;
   log = l;
   struct sockaddr_in serv_addr;
   socketid = socket(AF_INET, SOCK_STREAM, 0);

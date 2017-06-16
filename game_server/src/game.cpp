@@ -310,12 +310,15 @@ string Game::user_want(int px1, int py1, int px2, int py2)
 
 int Game::user_does(int x, int y, CELL_TYPE t)
 {
-  crank_lock.lock();
-  change_buffer.push(x);
-  change_buffer.push(y);
-  change_buffer.push((int) t);
-  crank_lock.unlock();
-  return 2;
+  if(crank_lock.try_lock())
+  {
+    change_buffer.push(x);
+    change_buffer.push(y);
+    change_buffer.push((int) t);
+    crank_lock.unlock();
+    return 2;
+  }
+  return 1;
 }
 
 /* clean_up assumes FR and database are in sync, as it is normally called
