@@ -363,9 +363,13 @@ class Grid extends Component {
 
   renderScore(highscorePosition, player, score) {
     if (player === 0) { return; }
+    var border = '0px solid white';
+    if (player === yourUserID) {
+      border = '1px solid powderblue';
+    }
     var opacity = 1 - highscorePosition / parseFloat(players);
     return (
-      <h6 style={{color: rainbow(player), opacity: opacity}}>
+      <h6 style={{color: rainbow(player), opacity: opacity, border: border}}>
       {'player'.concat(player.toString()).concat(':').concat(score.toString()).concat(' ')}
       </h6>
       );
