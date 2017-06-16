@@ -46,7 +46,7 @@ const WS_READY = 1;
 const UPDATE_FAIL = 1;
 const UPDATE_SUCCESS = 2;
 
-const uidToNameMap = [Adam, Bob, Charles, David, Ellen, Fred, George, Harry, Igor, Jake];
+const uidToNameMap = ["Adam", "Bob", "Charles", "David", "Ellen", "Fred", "George", "Harry", "Igor", "Jake"];
 
 
 class App extends Component {
