@@ -66,36 +66,46 @@ DB_conn::~DB_conn()
 string DB_conn::run_query(int expectation, string s)
 {
   string wrapper;
-  string result = "";
-  int len;
+  int len, aux;
   if(expectation)
   {
-    wrapper = "copy (SELECT count(*) FROM agents.grid WHERE " 
-            + string_get_next_token(string_seek(s.c_str(), "WHERE"), "") 
-            + ") to STDOUT WITH CSV; copy (" 
-            + s 
-            + ") TO STDOUT WITH CSV; \\echo #\n";
+    wrapper = "copy (SELECT count(*) FROM agents.grid";
+    const char *point = string_seek(s.c_str(), "WHERE");
+    if(point)
+    {
+      wrapper = wrapper + " WHERE " + string_get_next_token(point, "");
+    }
+    wrapper = wrapper + ") to STDOUT WITH CSV; copy (" + s 
+              + ") TO STDOUT WITH CSV; \\echo #\n";
   }
   else
   {
-    wrapper = s + ";\n";
+    wrapper = s + "; \\echo #\n";
   }
   const char *c = wrapper.c_str();
 
   log -> record(ME, (string)"Running query " + wrapper);
   db_lock.lock();
   write(socketid, c, strlen(c));
-  if(expectation)
+  len = read(socketid, answer_buf, DB_MAX_BUF - 1);
+  if(len < 0)
   {
-    len = read(socketid, answer_buf, DB_MAX_BUF - 1);
-    while(string_seek(answer_buf, "#") == 0)
-    {
-      std::this_thread::sleep_for(std::chrono::milliseconds(DB_DELAY));
-      len = len + read(socketid, answer_buf + len, DB_MAX_BUF - len);
-    }
-    result = string_get_next_token(answer_buf, "#");
-    memset(answer_buf, 0, sizeof(char) * len);
+    fprintf(stderr, "DB connection broken, PANIC!\n");
+    exit(0);
   }
+  while(string_seek(answer_buf, "#") == 0)
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(DB_DELAY));
+    aux = read(socketid, answer_buf + len, DB_MAX_BUF - len);
+    if(aux < 0)
+    {
+      fprintf(stderr, "DB connection broken, PANIC!\n");
+      exit(0);
+    }
+    len = len + aux;
+  }
+  string result = string_get_next_token(answer_buf, "#");
+  memset(answer_buf, 0, sizeof(char) * len);
   db_lock.unlock();
   return result;
 }

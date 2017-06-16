@@ -90,17 +90,7 @@ void *Game::start(FLAG_TYPE f, int gtc, int w)
   action = new Crank();
   if(!GFLAG_nodb)
   {
-    Block **blocks = NULL;/*db_info -> load_from_db(
-      compress_xy(MINX, MINY),
-      compress_xy(MAXX, MAXY)
-      );*/
-    for(int i = 0; blocks[i]; i++)
-    {
-      super_node[
-        compress_xy((blocks[i]) -> originx, (blocks[i]) -> originy)
-        ] = blocks[i];
-    }
-    delete[] blocks;
+    load_from_db();
     log -> record(ME, "Imported data from database for startup/resume.");
   }
   flags = flags | JUST_29_MASK; // set continue flag
@@ -147,6 +137,28 @@ void Game::plan_stage(int wait_time)
 void Game::crank_stage(int generations)
 {
   crank_lock.lock();
+  flush_buf();
+  if(!GFLAG_nodb)
+  {
+    up_db();
+  }
+  log -> record(ME, "Crank - start");
+  std::map<uint64_t,Block*>::iterator i;
+  for (i = super_node.begin(); i != super_node.end(); i++)
+  {
+    action -> crank_for(i -> second, gen_to_run);
+  }
+  sync_padding();
+  if(!GFLAG_nodb)
+  {
+    up_db();
+  }
+  log -> record(ME, "Crank - finish");
+  crank_lock.unlock();
+}
+
+void Game::flush_buf()
+{
   log -> record(ME, "Sending the change buffer");
   int x, y, o_x, o_y, updated_x, updated_y;
   CELL_TYPE t;
@@ -203,19 +215,6 @@ void Game::crank_stage(int generations)
     curr_block->set(curr_block->rectify_x(x), curr_block->rectify_y(y), t);
   }
   log -> record(ME, "Sent the change buffer");
-  log -> record(ME, "Crank - start");
-  std::map<uint64_t,Block*>::iterator i;
-  for (i = super_node.begin(); i != super_node.end(); i++)
-  {
-    action->crank_for(i -> second, gen_to_run);
-  }
-  sync_padding();
-  if(!GFLAG_nodb)
-  {
-    up_db();
-  }
-  log -> record(ME, "Crank - finish");
-  crank_lock.unlock();
 }
 
 void Game::sync_padding()
@@ -317,6 +316,27 @@ int Game::user_does(int x, int y, CELL_TYPE t)
     return 2;
   }
   return 1;
+}
+
+void Game::load_from_db()
+{
+  int x, y, i, n;
+  CELL_TYPE t;
+  string res = db_info -> run_query(EXPECT_READ, "SELECT * FROM agents.grid");
+  const char *point = res.c_str();
+  n = stoi(string_get_next_token(point, STR_WHITE));
+  point = string_seek(point, "\n"); // skip size;
+  for(i = 0; i < n; i++)
+  {
+    x = stoi(string_get_next_token(point, STR_WHITE));
+    point = string_seek(point, ",");
+    y = stoi(string_get_next_token(point, STR_WHITE));
+    point = string_seek(point, ",");
+    t = stoi(string_get_next_token(point, STR_WHITE));
+    point = string_seek(point, "\n");
+    user_does(x, y, t); // impersonate user, since he does a good job anyway
+  }
+  flush_buf();
 }
 
 /* clean_up assumes FR and database are in sync, as it is normally called
