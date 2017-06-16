@@ -361,6 +361,16 @@ class Grid extends Component {
     );
   }
 
+  renderScore(highscorePosition, player, score) {
+    if (player === 0) { return; }
+    var opacity = 1 - highscorePosition / parseFloat(players);
+    return (
+      <h6 style={{color: rainbow(player), opacity: opacity}}>
+      {'player'.concat(player.toString()).concat(':').concat(score.toString()).concat(' ')}
+      </h6>
+      );
+  }
+
   render() {
     if (this.props.currentPage !== GAME_PAGE) {
       return null;
@@ -370,10 +380,11 @@ class Grid extends Component {
       rows.push(this.renderRow(i));
     }
 
+    // clones the array of scores, on each iteration it finds the biggest player and score in the array, prints them and sets the clone score to 0
     var biggestScore = 0;
     var biggestPlayer = 0;
-    var scores = '';
-    var localHighscoresClone = this.state.localHighscores.slice(0); //= [50, 45, 40, 35, 30, 25, 20, 15, 10, 0]; // for testing
+    var scoresC = [];
+    var localHighscoresClone = this.state.localHighscores.slice(0); // [7, 5, 2, 10, 40, 0, 0, 0, 0, 0]; // for testing
     for (var z = 0; z < players; z++) {
       for (var y = 0; y < players; y++) {
         if (localHighscoresClone[y] >= biggestScore) {
@@ -381,7 +392,7 @@ class Grid extends Component {
           biggestPlayer = y;
         }
       }
-      scores = scores.concat('player').concat(biggestPlayer.toString()).concat(':').concat(biggestScore.toString()).concat(' ');
+      scoresC.push(this.renderScore(z, biggestPlayer, biggestScore));
       localHighscoresClone[biggestPlayer] = -1;
       biggestScore = 0;
       biggestPlayer = -1;
@@ -389,7 +400,7 @@ class Grid extends Component {
 
     return (
       <div>
-      {scores}
+      {scoresC}
       {rows}
       <MoveLeft onClick={() => this.get()}/>
       <MoveDown onClick={() => this.get()}/>
