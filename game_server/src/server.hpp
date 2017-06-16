@@ -36,6 +36,6 @@ FILE *get_file(string file);
 
 void catfile(FILE *f, int s, char *buf);
 
-int form_answer(string s, char *buf);
+int form_answer(uint8_t opcode, string s, char *buf);
 
 #endif
