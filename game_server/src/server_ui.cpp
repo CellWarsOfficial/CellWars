@@ -23,6 +23,11 @@ void signal_interpreter(int s)
     game -> slow_termination();
     return;
   }
+  if(s == SIGALRM)
+  {
+    return;
+  }
+  
   fprintf(stderr, "Unrecognised signal caught %d.\n", s);
 }
 
@@ -33,4 +38,5 @@ void init_server_ui(Logger *log)
   signal(SIGQUIT, signal_interpreter); // will pause game.
   signal(SIGINT, signal_interpreter); // will tell game to terminate slowly.
   signal(SIGTERM, signal_interpreter); // will tell game to terminate slowly.
+  signal(SIGALRM, signal_interpreter); // will gather statistics.
 }
