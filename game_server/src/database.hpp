@@ -24,21 +24,15 @@ class DB_conn
   int safe;
   string run_query(int expectation, string s);
   void insert_query_builder(CELL_TYPE t, int x, int y);
+  void demand_stat();
   private:
   char *answer_buf;
   std::mutex db_lock;
   Logger *log;
   const char *address;
   int socketid;
+  int q_count;
   int size;
   string constructed_query;
-};
-
-struct answer
-{
-  int row;
-  int col;
-  CELL_TYPE t;
-  struct answer *next;
 };
 #endif

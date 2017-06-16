@@ -16,6 +16,7 @@
 
 DB_conn::DB_conn(const char *a, Logger *l)
 {
+  q_count = 0;
   safe = 1;
   address = a;
   log = l;
@@ -86,6 +87,7 @@ string DB_conn::run_query(int expectation, string s)
   const char *c = wrapper.c_str();
 
   db_lock.lock();
+  q_count++;
   write(socketid, c, strlen(c));
   len = read(socketid, answer_buf, DB_MAX_BUF - 1);
   if(len < 0)
@@ -167,4 +169,10 @@ void DB_conn::rewrite_db(const char *f)
       );
   }
   fclose(file);
+}
+
+void DB_conn::demand_stat()
+{
+  log -> record(ME, (string)"Connected to " + address);
+  log -> record(ME, "Sent " + to_string(q_count) + " since starting");
 }

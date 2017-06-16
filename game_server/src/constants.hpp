@@ -48,10 +48,6 @@
 
 /* Game limit related constants
  */
-#define MINX -500
-#define MINY -500
-#define MAXX 499
-#define MAXY 499
 #define DEFAULT_GTC 1
 #define DEFAULT_WAIT_TIME 30
 #define LOG_MAX_BUFFER_DEFAULT 500

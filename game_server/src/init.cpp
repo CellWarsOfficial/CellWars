@@ -160,7 +160,7 @@ int main(int argc, char **argv)
     exit(EXIT_FAILURE);
   }
   server = new Server(server_p, db_info2, log);
-  game = new Game(db_info, log);
+  game = new Game(db_info, server, log);
   new thread(&Server::start, server, game);
   init_server_ui(log);
   game_thread = new thread(&Game::start, game, flags, gtc, wait_time);

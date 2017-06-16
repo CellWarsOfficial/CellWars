@@ -10,12 +10,15 @@
 #include <netdb.h> 
 #include <string>
 
+class Game;
+
 class Server
 {
   public:
   Server(int port, DB_conn *db, Logger *l);
   ~Server();
   void start(Game *game);
+  void demand_stat();
   private:
   void act(int s, int id);
   void hijack_ws(string this_con, int s, char *comm_buf);
@@ -23,6 +26,8 @@ class Server
   DB_conn *db_info;
   Game *game;
   Logger *log;
+  int live_conns;
+  int conns;
 };
 
 FILE *get_404();

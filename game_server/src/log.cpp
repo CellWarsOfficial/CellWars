@@ -8,6 +8,7 @@
 
 Logger::Logger(int max_buf, int reaction_time)
 {
+  printed_msg = 0;
   buffer_size = max_buf;
   react_time = reaction_time;
   buffer_read = 0;
@@ -133,7 +134,7 @@ void Logger::parse_buffer()
         fprintf(file, "%s", buffer[buffer_write].c_str());
       }
       logger_lock.lock();
-      buffer_write++;
+      buffer_write++; printed_msg++;
       if(buffer_write == buffer_size)
       {
         buffer_write = 0;
@@ -142,4 +143,10 @@ void Logger::parse_buffer()
     }
     logger_lock.unlock();
   }
+}
+
+void Logger::demand_stat()
+{
+  record(ME, "Semper Vigilo, Semper Paratus!");
+  record(ME, "Printed " + to_string(printed_msg) + " so far.");
 }

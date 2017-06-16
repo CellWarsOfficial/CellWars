@@ -32,6 +32,7 @@ class Logger
   int add_file(char *f);
   int record(string message);
   int record(string process, string message);
+  void demand_stat();
   private:
   void parse_buffer();
   mutex logger_lock;
@@ -43,6 +44,7 @@ class Logger
   FILE *file;
   FLAG_TYPE flags;
   thread *parser_thread;
+  int printed_msg;
 };
 
 #endif

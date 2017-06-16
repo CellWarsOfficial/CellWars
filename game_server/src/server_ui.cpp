@@ -25,6 +25,7 @@ void signal_interpreter(int s)
   }
   if(s == SIGALRM)
   {
+    game -> demand_stat();
     return;
   }
   

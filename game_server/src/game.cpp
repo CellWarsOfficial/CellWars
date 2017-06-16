@@ -9,9 +9,10 @@
 /* Note that Game has default destructor, as clean_up takes care of memory.
  */
 
-Game::Game(DB_conn* db, Logger *log)
+Game::Game(DB_conn* db, Server *server, Logger *log)
 {
   this -> log = log;
+  this -> server = server;
   db_info = db;
   execution_lock.lock();
   flags = 0; // Important because it unsets running flag
@@ -81,6 +82,7 @@ void *Game::start(FLAG_TYPE f, int gtc, int w)
 /* Initialise the game
  */
   flag_protection.lock();
+  curr_gen = 0; 
   log -> record(ME,
       "Creating new game with gtc " + to_string(gtc) + " and w" + to_string(w)
       );
@@ -148,6 +150,7 @@ void Game::crank_stage(int generations)
   {
     action -> crank_for(i -> second, gen_to_run);
   }
+  curr_gen += gen_to_run;
   sync_padding();
   if(!GFLAG_nodb)
   {
@@ -374,4 +377,15 @@ void Game::clean_up()
  */
   execution_lock.lock();
   flags = 0; // Important because it unsets running flag
+}
+
+void Game::demand_stat()
+{
+  log -> demand_stat();
+  log -> record(ME, "Game is progressing quite nicely!");
+  log -> record(ME, "We are currently at generation " + to_string(curr_gen));
+  log -> record(ME, "Using " + to_string(super_node.size()) + " blocks");
+  log -> record(ME, "Here's my database report");
+  db_info -> demand_stat();
+  server -> demand_stat();
 }

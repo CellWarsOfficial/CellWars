@@ -13,6 +13,8 @@ Server::Server(int port, DB_conn *db, Logger *l)
 {
   db_info = db;
   log = l;
+  live_conns = 0;
+  conns = 0;
   struct sockaddr_in serv_addr;
   socketid = socket(AF_INET, SOCK_STREAM, 0);
   if(socketid < 0)
@@ -55,6 +57,7 @@ void Server::start(Game *game)
       continue;
     }
     con_id++;
+    conns++;
     new thread(&Server::act, this, news, con_id);
   }
 }
@@ -114,7 +117,10 @@ void Server::act(int s, int id)
       point = response.c_str();
       write(s, point, strlen(point));
       memset(comm_buf, 0, len);
+      live_conns++;
       hijack_ws(this_con, s, comm_buf);
+      live_conns--;
+      close(s);
       return;
     }
 
@@ -366,4 +372,16 @@ int form_answer(string to_send, char *comm_buf)
   to_send.copy(comm_buf + delta, len, 0);
   len += delta;
   return len;
+}
+
+void Server::demand_stat()
+{
+  log -> record(ME, "currently serving " 
+               + to_string(live_conns) 
+               + " websockets.");
+  log -> record(ME, "Total serves " 
+               + to_string(conns) 
+               + " and counting! ;)");
+  log -> record(ME, "Below is info about my own little database.");
+  db_info -> demand_stat();
 }
