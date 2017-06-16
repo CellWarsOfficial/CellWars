@@ -237,10 +237,24 @@ class UserPicker extends Component {
 
 }
 
+function calculateLocalHighscores(board) {
+  var ret = new Array(players);
+  ret.fill(0);
+  for (var i = 0; i < height; i++) {
+    for (var j = 0; j < width; j++) {
+      ret[board[i][j]]++;
+    }
+  }
+  return ret;
+}
+
 class Grid extends Component {
   constructor() {
     super();
+    var localHighscores = new Array(players);
+    localHighscores.fill(0);
     this.state = {
+      localHighscores: localHighscores,
       displayMode: 0,
       board: emptyGrid(width, height),
       // cache: emptyGrid(width + LOOKAHEAD*2, height + LOOKAHEAD*2),
@@ -286,7 +300,9 @@ class Grid extends Component {
 
           board[row][col] = uid;
         }
+        var localHighscores = calculateLocalHighscores(board);
         this.setState({
+          localHighscores: localHighscores,
           board: board
         });
         console.log("Parse info : successfully parsed query")
@@ -353,9 +369,14 @@ class Grid extends Component {
     for (var i = 0; i < height; i++) {
       rows.push(this.renderRow(i));
     }
+    var scores = '';
+    for (var j = 0; j < players; j++) {
+      scores = scores.concat('player').concat(j.toString()).concat(': ').concat(this.state.localHighscores[j]);
+    }
 
     return (
       <div>
+      {scores}
       {rows}
       <MoveLeft onClick={() => this.get()}/>
       <MoveDown onClick={() => this.get()}/>
