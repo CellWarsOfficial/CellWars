@@ -238,7 +238,7 @@ class UserPicker extends Component {
 }
 
 function calculateLocalHighscores(board) {
-  var ret = new Array(players);
+  var ret = new Array(players + 1);
   ret.fill(0);
   for (var i = 0; i < height; i++) {
     for (var j = 0; j < width; j++) {
@@ -251,7 +251,7 @@ function calculateLocalHighscores(board) {
 class Grid extends Component {
   constructor() {
     super();
-    var localHighscores = new Array(players);
+    var localHighscores = new Array(players + 1);
     localHighscores.fill(0);
     this.state = {
       localHighscores: localHighscores,
@@ -363,14 +363,17 @@ class Grid extends Component {
 
   renderScore(highscorePosition, player, score) {
     if (player === 0) { return; }
+    if (score === 0 && player != yourUserID) { return; }
     var border = '0px solid white';
+    var playerDescription = 'player'.concat(player.toString());
     if (player === yourUserID) {
-      border = '1px solid powderblue';
+      border = '1px solid grey';
+      playerDescription = 'you';
     }
-    var opacity = 1 - highscorePosition / parseFloat(players);
+    var opacity = 1 - highscorePosition * 0.8 / players;
     return (
-      <h6 style={{color: rainbow(player), opacity: opacity, border: border}}>
-      {'player'.concat(player.toString()).concat(':').concat(score.toString()).concat(' ')}
+      <h6 style={{color: rainbow(player), border: border, opacity: opacity}}>
+      {playerDescription.concat(':').concat(score.toString()).concat(' ')}
       </h6>
       );
   }
@@ -388,9 +391,9 @@ class Grid extends Component {
     var biggestScore = 0;
     var biggestPlayer = 0;
     var scoresC = [];
-    var localHighscoresClone = this.state.localHighscores.slice(0); // [7, 5, 2, 10, 40, 0, 0, 0, 0, 0]; // for testing
-    for (var z = 0; z < players; z++) {
-      for (var y = 0; y < players; y++) {
+    var localHighscoresClone = [7, 5, 2, 10, 40, 0, 0, 0, 0, 0, 5]; // for testing
+    for (var z = 0; z < players + 1; z++) {
+      for (var y = 0; y < players + 1; y++) {
         if (localHighscoresClone[y] >= biggestScore) {
           biggestScore = localHighscoresClone[y];
           biggestPlayer = y;
