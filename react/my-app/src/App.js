@@ -1,23 +1,19 @@
 import React, { Component } from 'react';
 import './App.css';
 
-const VOL = 'https://www.doc.ic.ac.uk/project/2016/271/g1627123/images/';
-const idle_cell = VOL.concat('idle_cell.gif');
-const big_cell = VOL.concat('big_cell.png')
-const logo = VOL.concat('logo.gif');
-const small_cell = VOL.concat('small_cell.png');
-const arrow = VOL.concat('arrow.png');
+const VOL = 'https://www.doc.ic.ac.uk/project/2016/271/g1627123/';
+const VOL_IMAGES = VOL.concat('images/');
+const idle_cell = VOL_IMAGES.concat('idle_cell.gif');
+const big_cell = VOL_IMAGES.concat('big_cell.png')
+const logo = VOL_IMAGES.concat('logo.gif');
+const small_cell = VOL_IMAGES.concat('small_cell.png');
+const arrow = VOL_IMAGES.concat('arrow.png');
+const owl = VOL_IMAGES.concat('owl.png');
 
 var ws;
 
 var width = 20;
 var height = 20; //dimensions of the board
-
-const LOOKAHEAD = 20;
-var last_px1 = 0;
-var last_px2 = height - 1;
-var last_py1 = 0;
-var last_py2 = width - 1;
 
 var offsetWidth = 0;
 var offsetHeight = 0;
@@ -142,7 +138,7 @@ function ImgSquare(props) {
   if (props.displayMode === DISPLAYMODE.COLOURS.value) {
     src = idle_cell;
   } else if (props.displayMode === DISPLAYMODE.EMOJIS.value) {
-    src = VOL.concat('emojis/').concat((props.userID).toString()).concat('.png');
+    src = VOL_IMAGES.concat('emojis/').concat((Number(props.userID) + 1000).toString()).concat('.png');
   }
 
   if (props.userID === 0) {
@@ -216,16 +212,16 @@ class UserPicker extends Component {
     return (<div><h2>Pick your colour</h2><br></br><table width="100%">
       <tbody>
       <tr className = "textcenter">
-        <td onClick={() => this.handleClick(1)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(1)}}></img></td>    
-        <td onClick={() => this.handleClick(2)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(2)}}></img></td>    
-        <td onClick={() => this.handleClick(3)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(3)}}></img></td>    
-        <td onClick={() => this.handleClick(4)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(4)}}></img></td>    
-        <td onClick={() => this.handleClick(5)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(5)}}></img></td>    
-        <td onClick={() => this.handleClick(6)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(6)}}></img></td>    
-        <td onClick={() => this.handleClick(7)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(7)}}></img></td>    
-        <td onClick={() => this.handleClick(8)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(8)}}></img></td>    
-        <td onClick={() => this.handleClick(9)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(9)}}></img></td>    
-        <td onClick={() => this.handleClick(10)}><img alt="pacman" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(10)}}></img></td>    
+        <td onClick={() => this.handleClick(1)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(1)}}></img></td>    
+        <td onClick={() => this.handleClick(2)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(2)}}></img></td>    
+        <td onClick={() => this.handleClick(3)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(3)}}></img></td>    
+        <td onClick={() => this.handleClick(4)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(4)}}></img></td>    
+        <td onClick={() => this.handleClick(5)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(5)}}></img></td>    
+        <td onClick={() => this.handleClick(6)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(6)}}></img></td>    
+        <td onClick={() => this.handleClick(7)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(7)}}></img></td>    
+        <td onClick={() => this.handleClick(8)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(8)}}></img></td>    
+        <td onClick={() => this.handleClick(9)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(9)}}></img></td>    
+        <td onClick={() => this.handleClick(10)}><img alt="owl" src={owl} className={'tableImage'} style={{backgroundColor:rainbow(10)}}></img></td>    
       </tr>
       </tbody>
     </table></div>);
@@ -262,7 +258,7 @@ class Grid extends Component {
       // cache: emptyGrid(width + LOOKAHEAD*2, height + LOOKAHEAD*2),
     }
     var url = "ws".concat(window.location.toString().substring(4));
-    url = "ws://89.122.28.235:7777/" // temp url used for local debugging
+    // url = "ws://146.169.45.167:7777" // temp url used for local debugging
     ws = new WebSocket(url);
     ws.onopen = function() {
       console.log("Web socket opened : ".concat(url));
@@ -365,7 +361,7 @@ class Grid extends Component {
 
   renderScore(highscorePosition, player, score) {
     if (player === 0) { return; }
-    if (score === 0 && player != yourUserID) { return; }
+    if (score === 0 && player !== yourUserID) { return; }
     var border = '0px solid white';
     var playerDescription = uidToNameMap[player - 1];
     if (player === yourUserID) {
@@ -374,7 +370,7 @@ class Grid extends Component {
     }
     var opacity = 1 - highscorePosition * 0.8 / players;
     return (
-      <h6 style={{color: rainbow(player), border: border, opacity: opacity}}>
+      <h6 key={player.toString()} style={{color: rainbow(player), border: border, opacity: opacity}}>
       {playerDescription.concat(':').concat(score.toString()).concat(' ')}
       </h6>
       );
@@ -439,10 +435,10 @@ class Grid extends Component {
     var px2 = height - 1 + offsetHeight;
     var py2 = width - 1 + offsetWidth;
 
-    if (px1 > last_px1 && py1 > last_py1 && px2 < last_px2 && py2 < last_py2) {
-      // update board with cache
+/*    if (px1 > last_px1 && py1 > last_py1 && px2 < last_px2 && py2 < last_py2) {
+      // update board
 
-    } else {
+    } else {*/
       var queryRequest = "QUERY px1="
                   .concat(px1)
                   .concat(" py1=")
@@ -458,7 +454,7 @@ class Grid extends Component {
       } else {
         ws.send(queryRequest);
       }
-    }
+    // }
 
   }
 }
@@ -475,7 +471,7 @@ class MoveRight extends Component {
   }
 
   handleClick() {
-    offsetWidth += 1;
+    offsetWidth += Math.floor(width/4);
     this.props.onClick();
   }
 }
@@ -491,7 +487,7 @@ class MoveLeft extends Component {
   }
 
   handleClick() {
-    offsetWidth -= 1;
+    offsetWidth -= Math.floor(width/4);
     this.props.onClick();
   }
 }
@@ -507,7 +503,7 @@ class MoveUp extends Component {
   }
 
   handleClick() {
-    offsetHeight -= 1;
+    offsetHeight -= Math.floor(height/4);
     this.props.onClick();
   }
 }
@@ -523,7 +519,7 @@ class MoveDown extends Component {
   }
 
   handleClick() {
-    offsetHeight += 1;
+    offsetHeight += Math.floor(height/4);
     this.props.onClick();
   }
 }
