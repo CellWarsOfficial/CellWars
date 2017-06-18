@@ -42,4 +42,6 @@ int get_y(uint64_t origin);
 
 void dump(Block *b);
 
+int find_block_origin(int position);
+
 #endif

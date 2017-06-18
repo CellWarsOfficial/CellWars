@@ -53,7 +53,8 @@ DB_conn::DB_conn(const char *a, Logger *l)
     log -> record(ME, "Failed to connect to database");
     return;
   }
-  answer_buf = new char[DB_MAX_BUF];
+  answer_buf = new char[DB_MAX_BUF + BUF_PROCESS_ERROR];
+  memset(answer_buf, 0, (DB_MAX_BUF + BUF_PROCESS_ERROR) * sizeof(char));
   check_malloc(answer_buf);
   log -> record(ME, "Connection successful");
 }
@@ -68,7 +69,7 @@ string DB_conn::run_query(int expectation, string s)
 {
   log -> record(ME, (string)"Running query " + s);
   string wrapper;
-  int len, aux;
+  int len, aux, tlen = 0;
   if(expectation)
   {
     wrapper = "copy (SELECT count(*) FROM agents.grid";
@@ -87,8 +88,14 @@ string DB_conn::run_query(int expectation, string s)
   const char *c = wrapper.c_str();
 
   db_lock.lock();
+  string result = "";
   q_count++;
-  write(socketid, c, strlen(c));
+  len = write(socketid, c, strlen(c));
+  if(len < 0)
+  {
+    fprintf(stderr, "DB connection broken, PANIC!\n");
+    exit(0);
+  }
   len = read(socketid, answer_buf, DB_MAX_BUF - 1);
   if(len < 0)
   {
@@ -98,6 +105,12 @@ string DB_conn::run_query(int expectation, string s)
   while(string_seek(answer_buf, "#") == 0)
   {
     std::this_thread::sleep_for(std::chrono::milliseconds(DB_DELAY));
+    if(DB_MAX_BUF - len < BUF_THRESHOLD)
+    { // refresh the buffer
+      result = result + string_get_next_token(answer_buf, "#");
+      memset(answer_buf, 0, sizeof(char) * len);
+      len = 0;
+    }
     aux = read(socketid, answer_buf + len, DB_MAX_BUF - len);
     if(aux < 0)
     {
@@ -106,8 +119,9 @@ string DB_conn::run_query(int expectation, string s)
     }
     len = len + aux;
   }
-  log -> record(ME, (string)"Received " + to_string(len));
-  string result = string_get_next_token(answer_buf, "#");
+  tlen += len;
+  log -> record(ME, (string)"Received " + to_string(tlen));
+  result = result + string_get_next_token(answer_buf, "#");
   memset(answer_buf, 0, sizeof(char) * len);
   db_lock.unlock();
   return result;

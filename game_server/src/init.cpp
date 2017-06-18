@@ -46,7 +46,7 @@ int main(int argc, char **argv)
   DB_conn *db_info = NULL;
   DB_conn *db_info2 = NULL;
   thread *game_thread = NULL;
-  Server *server;
+  Server *server = NULL;
   FLAG_TYPE flags = 0;
   int gtc = DEFAULT_GTC;
   int server_p = SV_DEF_PORT;
@@ -128,7 +128,7 @@ int main(int argc, char **argv)
       i++;
       check_limit(i, argc);
       wait_time = atoi(argv[i]);
-      if(wait_time <= 0)
+      if(wait_time < 0)
       {
         fprintf(stderr, "Wait time unreasonable. Defaulting.\n");
         wait_time = DEFAULT_WAIT_TIME;
@@ -149,7 +149,18 @@ int main(int argc, char **argv)
     }
     if(equ(argv[i], "-fast_kill", "-fk"))
     {
+      flags = flags | JUST_26_MASK; // set no server flag
       flags = flags | JUST_27_MASK; // set no database flag
+      continue;
+    }
+    if(equ(argv[i], "-no_db", "-nd"))
+    {
+      flags = flags | JUST_27_MASK; // set no database flag
+      continue;
+    }
+    if(equ(argv[i], "-no_server", "-ns"))
+    {
+      flags = flags | JUST_26_MASK; // set no server flag
       continue;
     }
     fprintf(stderr, "Unrecognised argument \"%s\"\nIgnoring.\n", argv[i]);
@@ -159,11 +170,17 @@ int main(int argc, char **argv)
     fprintf(stderr, "Initialisation failure, missing database.\n");
     exit(EXIT_FAILURE);
   }
-  server = new Server(server_p, db_info2, log);
+  if(!GFLAG_nosv)
+  {
+    server = new Server(server_p, db_info2, log);
+  }
   game = new Game(db_info, server, log);
-  new thread(&Server::start, server, game);
-  init_server_ui(log);
   game_thread = new thread(&Game::start, game, flags, gtc, wait_time);
+  if(!GFLAG_nosv)
+  {
+    new thread(&Server::start, server, game);
+  }
+  init_server_ui(log);
 
   /* main terminating kills process.
    */

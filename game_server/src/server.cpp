@@ -44,6 +44,7 @@ Server::~Server()
 
 void Server::start(Game *game)
 {
+  log -> record(ME, "Server starting.");
   this -> game = game;
   struct sockaddr_in cli_addr;
   socklen_t clilen = sizeof(cli_addr);
@@ -65,7 +66,8 @@ void Server::start(Game *game)
 void Server::act(int s, int id)
 {
   int len;
-  string this_con = (string)"conn " + to_string(id);
+  bool disable_body = false;
+  string this_con = (string)"conn " + to_string(id), response = "";
   char *comm_buf = new char[SV_MAX_BUF];
   const char *point, *key;
   memset(comm_buf, 0, SV_MAX_BUF * sizeof(char));
@@ -73,11 +75,16 @@ void Server::act(int s, int id)
   len = read(s, comm_buf, SV_MAX_BUF - 1);
   log -> record(this_con, "new connection");
   point = string_seek(comm_buf, "GET");
+  if(!point)
+  {
+    point = string_seek(comm_buf, "HEAD");
+    disable_body = true;
+  }
 
-  if(point) // Expect HTTP protocol
+  if(point) // Expect HTTP get or head
   {
     key = string_seek(comm_buf, "Sec-WebSocket-Key:");
-    if(key)
+    if(key) // It's a websocket
     {
       log -> record(this_con, "Executing websocket handshakira");
       string token = string_get_next_token(key, STR_WHITE);
@@ -85,15 +92,14 @@ void Server::act(int s, int id)
       string answer = encode(token);
       log -> record(this_con, "responding with:" + answer);
 
-      string response = (string)SV_HTTP_SWITCH + '\n';
-      response = response + "Connection: Upgrade, keep-alive\n";
+      response = response + SV_HTTP_SWITCH + SV_HTTP_UP_CON;
       point = string_seek(comm_buf, "Upgrade:");
       if(point)
       {
         response = response
                  + "Upgrade: "
                  + string_get_next_token(point, STR_WHITE)
-                 + '\n';
+                 + SV_HTTP_CRLF;
       }
       point = string_seek(comm_buf, "Sec-WebSocket-Version:");
       if(point)
@@ -101,18 +107,18 @@ void Server::act(int s, int id)
         response = response
                  + "Sec-WebSocket-Version: "
                  + string_get_next_token(point, STR_WHITE)
-                 + '\n';
+                 + SV_HTTP_CRLF;
       }
-      response = response + "Sec-WebSocket-Accept: " + answer + '\n';
+      response = response + "Sec-WebSocket-Accept: " + answer + SV_HTTP_CRLF;
       point = string_seek(comm_buf, "Sec-WebSocket-Protocol:");
       if(point)
       {
         response = response
                  + "Sec-WebSocket-Protocol: "
                  + string_get_next_token(point, STR_WHITE)
-                 + '\n';
+                 + SV_HTTP_CRLF;
       }
-      response = response + SV_HTTP_END;
+      response = response + SV_HTTP_CRLF;
 
       point = response.c_str();
       write(s, point, strlen(point));
@@ -120,6 +126,7 @@ void Server::act(int s, int id)
       live_conns++;
       hijack_ws(this_con, s, comm_buf);
       live_conns--;
+      delete comm_buf;
       close(s);
       return;
     }
@@ -138,18 +145,29 @@ void Server::act(int s, int id)
     if(expect == 200)
     {
       log -> record(this_con, "200 HIT");
-      write(s, SV_HTTP_OK, strlen(SV_HTTP_OK));
-      catfile(f, s, comm_buf);
+      response = response + SV_HTTP_OK + SV_HTTP_SERVER_NAME + SV_HTTP_CLOSE_CON;
+      response = response + SV_HTTP_CRLF;
     }
     if(expect == 404)
     {
       log -> record(this_con, "404 MISS");
-      write(s, SV_HTTP_NOT_FOUND, strlen(SV_HTTP_NOT_FOUND));
+      response = response + SV_HTTP_NOT_FOUND + SV_HTTP_SERVER_NAME + SV_HTTP_CLOSE_CON;
+      response = response + SV_HTTP_CRLF;
+    }
+    write(s, response.c_str(), response.length());
+    if(!disable_body)
+    {
       catfile(f, s, comm_buf);
     }
   }
-
-  write(s, SV_HTTP_END, 2);
+  else
+  {
+    log -> record(this_con, "405 METHOD NOT ALLOWED");
+    response = response + SV_HTTP_ILLEGAL + SV_HTTP_ALLOWED + SV_HTTP_SERVER_NAME;
+    response = response + SV_HTTP_CLOSE_CON + SV_HTTP_CRLF;
+    write(s, response.c_str(), response.length());
+  }
+  log -> record(this_con, "Ending");
   delete comm_buf;
   close(s);
   return;
@@ -164,12 +182,12 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
   uint8_t opcode;
   long size_desc;
   log -> record(this_con, "Websocket started");
-  while((len = read(s, comm_buf, SV_MAX_BUF - SV_PROCESS_ERROR)))
+  while((len = read(s, comm_buf, SV_MAX_BUF - BUF_PROCESS_ERROR)))
   {
     mask = 0;
     while(len < 2)
     {
-      len = len + read(s, comm_buf + len, SV_MAX_BUF - SV_PROCESS_ERROR - len);
+      len = len + read(s, comm_buf + len, SV_MAX_BUF - BUF_PROCESS_ERROR - len);
     }
     opcode = comm_buf[0];
     if(!(opcode & 128))
@@ -212,7 +230,7 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
     {
       while(len < 4)
       {
-        len = len + read(s, comm_buf + len, SV_MAX_BUF - SV_PROCESS_ERROR - len);
+        len = len + read(s, comm_buf + len, SV_MAX_BUF - BUF_PROCESS_ERROR - len);
       }
       size_desc = (long)(*((uint16_t *)(comm_buf + delta)));
       delta += 2; // 2 more bytes for size
@@ -223,19 +241,19 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
       {
         while(len < 10)
         {
-          len = len + read(s, comm_buf + len, SV_MAX_BUF - SV_PROCESS_ERROR - len);
+          len = len + read(s, comm_buf + len, SV_MAX_BUF - BUF_PROCESS_ERROR - len);
         }
         size_desc = (long)(*((uint64_t *)(comm_buf + delta)));
         delta += 8; // 8 more bytes for size
       }
     }
-    if(size_desc + delta > SV_MAX_BUF - SV_PROCESS_ERROR)
+    if(size_desc + delta > SV_MAX_BUF - BUF_PROCESS_ERROR)
     {
       log -> record(this_con, "Whoa buddy, buffer overflow, risky.");
     }
     while(len < size_desc + delta)
     {
-      len = len + read(s, comm_buf + len, SV_MAX_BUF - SV_PROCESS_ERROR - len);
+      len = len + read(s, comm_buf + len, SV_MAX_BUF - BUF_PROCESS_ERROR - len);
     }
     if(mask)
     {
@@ -244,7 +262,7 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
     }
     virtual_buf = comm_buf + delta;
     xormask((uint32_t *)virtual_buf, mask);
-    memset(comm_buf + len, 0, SV_PROCESS_ERROR);
+    memset(comm_buf + len, 0, BUF_PROCESS_ERROR);
     virtual_buf = comm_buf + delta;
     if(opcode == 10)
     {

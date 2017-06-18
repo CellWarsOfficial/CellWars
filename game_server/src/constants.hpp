@@ -38,11 +38,13 @@
 #define NO_29_MASK 0xfffffffb
 #define NO_28_MASK 0xfffffff7
 #define NO_27_MASK 0xffffffef
+#define NO_26_MASK 0xffffffdf
 #define JUST_31_MASK 1
 #define JUST_30_MASK 2
 #define JUST_29_MASK 4
 #define JUST_28_MASK 8
 #define JUST_27_MASK 16
+#define JUST_26_MASK 32
 #define FULL_MASK 0xffffffff
 #define NO_MSB_X4_MASK 0x7f7f7f7f
 
@@ -75,16 +77,22 @@
 #define SV_MAX_PORT 65535
 #define SV_MAX_LISTEN 5
 #define SV_MAX_BUF 5000
-#define SV_PROCESS_ERROR 10
 #define SV_HTML_PATH "../client/html"
 #define SV_HTML_MISSING "../client/html/not_found.html"
-#define SV_HTTP_OK "HTTP/1.1 200 OK\n\n"
-#define SV_HTTP_NOT_FOUND "HTTP/1.1 404 Not Found\n\n"
-#define SV_HTTP_SWITCH "HTTP/1.1 101 Switching Protocols"
-#define SV_HTTP_END "\r\n"
+#define SV_HTTP_SWITCH "HTTP/1.1 101 Switching Protocols\r\n"
+#define SV_HTTP_OK "HTTP/1.1 200 OK\r\n"
+#define SV_HTTP_NOT_FOUND "HTTP/1.1 404 Not Found\r\n"
+#define SV_HTTP_ILLEGAL "HTTP/1.1 405 Method Not Allowed\r\n"
+#define SV_HTTP_CLOSE_CON "Connection: close\r\n"
+#define SV_HTTP_UP_CON "Connection: Upgrade, keep-alive\r\n"
+#define SV_HTTP_SERVER_NAME "Server: CellWars Server UNIX\r\n"
+#define SV_HTTP_ALLOWED "Allow: GET, HEAD\r\n"
+#define SV_HTTP_CRLF "\r\n"
 
 /* String related constants
  */
 #define STR_WHITE " \f\n\r\t\v"
+#define BUF_THRESHOLD 500
+#define BUF_PROCESS_ERROR 10
 
 #endif

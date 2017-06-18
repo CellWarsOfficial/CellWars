@@ -163,7 +163,7 @@ void Game::crank_stage(int generations)
 void Game::flush_buf()
 {
   log -> record(ME, "Sending the change buffer");
-  int x, y, o_x, o_y, updated_x, updated_y;
+  int x, y, o_x, o_y;
   CELL_TYPE t;
   Block *curr_block;
   std::map<uint64_t,Block*>::iterator find_res;
@@ -175,36 +175,8 @@ void Game::flush_buf()
     change_buffer.pop();
     t = (CELL_TYPE) change_buffer.front();
     change_buffer.pop();
-    updated_x = 0;
-    updated_y = 0;
-    if(x < 0)
-    {
-      x = x * (-1);
-      updated_x = 1;
-    }
-    if(y < 0)
-    {
-      y = y * (-1);
-      updated_y = 1;
-    }
-    o_x = x - x % 1000;
-    o_y = y - y % 1000;
-    if(!(o_x % 1000) && updated_x)
-    {
-      o_x = o_x + 1000;
-    }
-    if(!(o_y % 1000) && updated_y)
-    {
-      o_y = o_y + 1000;
-    }
-    if(updated_x)
-    {
-      o_x = o_x * (-1);
-    }
-    if(updated_y)
-    {
-      o_y = o_y * (-1);
-    }
+    o_x = find_block_origin(x);
+    o_y = find_block_origin(y);
     find_res = super_node.find(compress_xy(o_x, o_y));
     if(find_res != super_node.end())
     {
@@ -217,6 +189,7 @@ void Game::flush_buf()
     }
     curr_block->set(curr_block->rectify_x(x), curr_block->rectify_y(y), t);
   }
+  sync_padding();
   log -> record(ME, "Sent the change buffer");
 }
 
@@ -267,6 +240,7 @@ void Game::sync_padding()
   }
   for(; new_blocks; new_blocks = b -> duck)
   {
+    b -> duck = 0;
     b = (Block*) new_blocks;
     super_node[compress_xy(b -> originx, b -> originy)] = b;
   }
@@ -386,6 +360,21 @@ void Game::demand_stat()
   log -> record(ME, "We are currently at generation " + to_string(curr_gen));
   log -> record(ME, "Using " + to_string(super_node.size()) + " blocks");
   log -> record(ME, "Here's my database report");
-  db_info -> demand_stat();
-  server -> demand_stat();
+  if(server)
+  {
+    log -> record(ME, "Here's my database report");
+    db_info -> demand_stat();
+  }
+  else
+  {
+    log -> record(ME, "Running without a database!");
+  }
+  if(server)
+  {
+    server -> demand_stat();
+  }
+  else
+  {
+    log -> record(ME, "Running without a server!");
+  }
 }

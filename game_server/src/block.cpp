@@ -268,6 +268,21 @@ int get_y(uint64_t origin)
   return (int)(origin & FULL_MASK);
 }
 
+int find_block_origin(int position)
+{ 
+  if(position < 0)
+  {
+    position = position * (-1) + BLOCK_SIZE - 1;
+    position = position - position % BLOCK_SIZE;
+    position = position * (-1);
+  }
+  else
+  {
+    position = position - position % BLOCK_SIZE;
+  }
+  return position;
+}
+
 /* Rectify transforms absolute x and/or y into relative x/y.
  * Generally, it's abs(x/y) - block.originx/y + BLOCK_PADDING
  * However, block.originx/y should always be a multiple of BLOCK_SIZE
