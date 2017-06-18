@@ -637,7 +637,7 @@ int Server::serve_score(WS_info *w, string taskid, const char *virtual_buf, char
     log -> record(w -> this_con, "will show score of " 
                             + to_string(t)
                             );
-    string query = "SELECT null FROM agents.grid WHERE t=" + to_string(t);
+    string query = "SELECT null FROM agents.grid WHERE user_id=" + to_string(t);
     to_send = to_send + db_info -> run_query(EXPECT_CLIENT, query);
   }
   else
