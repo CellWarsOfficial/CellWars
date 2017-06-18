@@ -226,7 +226,7 @@ void Game::sync_padding()
 /* Can't add the block straight away without breaking/trashing iterator.
  */
             ans = new Block(b -> get_x_relative(dx)
-                           ,b -> get_x_relative(dy)
+                           ,b -> get_y_relative(dy)
                            );
             ans -> sync_with(b, region);
             ans -> duck = new_blocks;
