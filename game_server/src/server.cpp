@@ -131,7 +131,7 @@ void Server::act(int s, int id)
 
       point = response.c_str();
       aux = write(s, point, response.length());
-      if(aux == (int)response.length())
+      if(aux < (int)response.length())
       {
         fprintf(stderr, "Write failed1. PANIC\n");
         exit(0);
