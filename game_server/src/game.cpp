@@ -322,9 +322,9 @@ void Game::load_from_db()
   point = string_seek(point, "\n"); // skip size;
   for(i = 0; i < n; i++)
   {
-    x = stoi(string_get_next_token(point, STR_WHITE));
+    x = stoi(string_get_next_token(point, ","));
     point = string_seek(point, ",");
-    y = stoi(string_get_next_token(point, STR_WHITE));
+    y = stoi(string_get_next_token(point, ","));
     point = string_seek(point, ",");
     t = stoi(string_get_next_token(point, STR_WHITE));
     point = string_seek(point, "\n");
