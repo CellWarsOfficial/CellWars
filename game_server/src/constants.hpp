@@ -84,7 +84,7 @@
 #define SV_HTTP_NOT_FOUND "HTTP/1.1 404 Not Found\r\n"
 #define SV_HTTP_ILLEGAL "HTTP/1.1 405 Method Not Allowed\r\n"
 #define SV_HTTP_CLOSE_CON "Connection: close\r\n"
-#define SV_HTTP_UP_CON "Connection: Upgrade, keep-alive\r\n"
+#define SV_HTTP_UP_CON "Connection: Upgrade\r\n"
 #define SV_HTTP_SERVER_NAME "Server: CellWars Server UNIX\r\n"
 #define SV_HTTP_ALLOWED "Allow: GET, HEAD\r\n"
 #define SV_HTTP_CRLF "\r\n"

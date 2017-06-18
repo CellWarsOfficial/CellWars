@@ -101,7 +101,7 @@ void Server::act(int s, int id)
       string answer = encode(token);
       log -> record(this_con, "responding with:" + answer);
 
-      response = response + SV_HTTP_SWITCH + SV_HTTP_UP_CON;
+      response = response + SV_HTTP_SWITCH;
       point = string_seek(comm_buf, "Upgrade:");
       if(point)
       {
@@ -110,6 +110,7 @@ void Server::act(int s, int id)
                  + string_get_next_token(point, STR_WHITE)
                  + SV_HTTP_CRLF;
       }
+      response = response + SV_HTTP_UP_CON;
       point = string_seek(comm_buf, "Sec-WebSocket-Version:");
       if(point)
       {
