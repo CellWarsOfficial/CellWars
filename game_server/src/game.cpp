@@ -238,9 +238,8 @@ void Game::sync_padding()
       }
     }
   }
-  for(; new_blocks; new_blocks = b -> duck)
+  for(; new_blocks; new_blocks = b -> duck, b -> duck = 0)
   {
-    b -> duck = 0;
     b = (Block*) new_blocks;
     super_node[compress_xy(b -> originx, b -> originy)] = b;
   }
@@ -319,15 +318,15 @@ void Game::load_from_db()
   string res = db_info -> run_query(EXPECT_READ, "SELECT * FROM agents.grid");
   const char *point = res.c_str();
   n = stoi(string_get_next_token(point, STR_WHITE));
-  point = string_seek(point, "\n"); // skip size;
+  point = string_seek(point, STR_WHITE); // skip size;
   for(i = 0; i < n; i++)
   {
-    x = stoi(string_get_next_token(point, ","));
-    point = string_seek(point, ",");
-    y = stoi(string_get_next_token(point, ","));
-    point = string_seek(point, ",");
+    x = stoi(string_get_next_token(point, STR_WHITE));
+    point = string_seek(point, STR_WHITE);
+    y = stoi(string_get_next_token(point, STR_WHITE));
+    point = string_seek(point, STR_WHITE);
     t = stoi(string_get_next_token(point, STR_WHITE));
-    point = string_seek(point, "\n");
+    point = string_seek(point, STR_WHITE);
     user_does(x, y, t); // impersonate user, since he does a good job anyway
   }
   flush_buf();
