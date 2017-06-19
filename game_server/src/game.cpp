@@ -356,13 +356,25 @@ void Game::clean_up()
   flags = 0; // Important because it unsets running flag
 }
 
+void Game::ping_round()
+{
+  log -> record(ME, "Running pings on the slackers.");
+  if(server)
+  {
+    server -> check_clients(9);
+  }
+  else
+  {
+    log -> record(ME, "No server to ping with.");
+  }
+}
+
 void Game::demand_stat()
 {
   log -> demand_stat();
   log -> record(ME, "Game is progressing quite nicely!");
   log -> record(ME, "We are currently at generation " + to_string(curr_gen));
   log -> record(ME, "Using " + to_string(super_node.size()) + " blocks");
-  log -> record(ME, "Here's my database report");
   if(server)
   {
     log -> record(ME, "Here's my database report");

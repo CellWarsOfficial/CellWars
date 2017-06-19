@@ -219,7 +219,7 @@ void Server::act(int s, int id)
       }
       memset(comm_buf, 0, len);
       server_lock.lock();
-      live_conns++;
+      live_conns--;
       server_lock.unlock();
       hijack_ws(this_con, s, comm_buf);
       delete comm_buf;
@@ -283,7 +283,7 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
   string aux;
   log -> record(this_con, "Websocket started");
   server_lock.lock();
-  live_conns++; next_ws++; my_id = live_conns;
+  live_conns++; next_ws++; my_id = next_ws;
   server_lock.unlock();
   WS_info *w = new WS_info(this_con, my_id, s);
   string msg;
@@ -836,6 +836,9 @@ void Server::demand_stat()
 {
   log -> record(ME, "currently serving " 
                + to_string(live_conns) 
+               + " websockets.");
+  log -> record(ME, "Have server a total of " 
+               + to_string(next_ws) 
                + " websockets.");
   log -> record(ME, "Total serves " 
                + to_string(conns) 

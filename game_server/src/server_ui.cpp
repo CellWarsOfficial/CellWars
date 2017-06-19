@@ -23,9 +23,14 @@ void signal_interpreter(int s)
     game -> slow_termination();
     return;
   }
-  if(s == SIGALRM)
+  if(s == SIGUSR1)
   {
     game -> demand_stat();
+    return;
+  }
+  if(s == SIGALRM)
+  {
+    game -> ping_round();
     return;
   }
   
@@ -39,5 +44,6 @@ void init_server_ui(Logger *log)
   signal(SIGQUIT, signal_interpreter); // will pause game.
   signal(SIGINT, signal_interpreter); // will tell game to terminate slowly.
   signal(SIGTERM, signal_interpreter); // will tell game to terminate slowly.
-  signal(SIGALRM, signal_interpreter); // will gather statistics.
+  signal(SIGALRM, signal_interpreter); // will ping clients.
+  signal(SIGUSR1, signal_interpreter); // will gather statistics.
 }

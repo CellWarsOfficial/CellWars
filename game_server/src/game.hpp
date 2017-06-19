@@ -36,6 +36,7 @@ class Game
   void resume_running();
   void stop_running();
   void slow_termination();
+  void ping_round();
   void demand_stat();
   Action *action;
   private:
