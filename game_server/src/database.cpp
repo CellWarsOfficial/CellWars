@@ -130,9 +130,12 @@ string DB_conn::run_query(int expectation, string s)
 
 void DB_conn::insert_query_builder(CELL_TYPE t, int x, int y)
 {
-  if((t == 0) && (size != 0))
+  if(t == 0)
   { // t = 0 means flush whatever you have
-    run_query(NO_READ, constructed_query);
+    if(size)
+    {
+      run_query(NO_READ, constructed_query);
+    }
     size = 0;
     return;
   }
