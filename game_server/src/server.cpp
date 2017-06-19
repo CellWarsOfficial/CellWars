@@ -301,7 +301,7 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
     }
     else
     {
-      msg_id = stoi(aux) + my_id;
+      msg_id = stoi(aux);
       if(msg_id == 0)
       {
         // act based on pong
@@ -310,7 +310,8 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
       if(msg_id > 100)
       {
         w -> write_lock.lock();
-        if(w -> expectation.find(msg_id) == w -> expectation.end())
+        log -> record(this_con, "Client responding to " + to_string(msg_id));
+        if((w -> expectation.find(msg_id)) == (w -> expectation.end()))
         {
           log -> record(this_con, "Unexpected message received, dropping");
           w -> drop(this);
