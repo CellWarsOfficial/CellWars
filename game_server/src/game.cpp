@@ -318,15 +318,15 @@ void Game::load_from_db()
   string res = db_info -> run_query(EXPECT_READ, "SELECT * FROM agents.grid");
   const char *point = res.c_str();
   n = stoi(string_get_next_token(point, STR_WHITE));
-  point = string_seek(point, STR_WHITE); // skip size;
+  point = string_seek(point, "\n"); // skip size;
   for(i = 0; i < n; i++)
   {
     x = stoi(string_get_next_token(point, STR_WHITE));
-    point = string_seek(point, STR_WHITE);
+    point = string_seek(point, " ");
     y = stoi(string_get_next_token(point, STR_WHITE));
-    point = string_seek(point, STR_WHITE);
+    point = string_seek(point, " ");
     t = stoi(string_get_next_token(point, STR_WHITE));
-    point = string_seek(point, STR_WHITE);
+    point = string_seek(point, "\n");
     user_does(x, y, t); // impersonate user, since he does a good job anyway
   }
   flush_buf();

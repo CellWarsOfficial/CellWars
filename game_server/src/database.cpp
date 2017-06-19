@@ -78,8 +78,8 @@ string DB_conn::run_query(int expectation, string s)
     {
       wrapper = wrapper + " WHERE " + string_get_next_token(point, "");
     }
-    wrapper = wrapper + ") to STDOUT; copy (" + s 
-              + ") TO STDOUT; \\echo #\n";
+    wrapper = wrapper + ") to STDOUT DELIMITER ' '; copy (" + s 
+              + ") TO STDOUT DELIMITER ' '; \\echo #\n";
   }
   else
   {
