@@ -231,6 +231,27 @@ int strings_tests()
   if((tok = string_get_next_token(STR_WHITE, "")).compare(STR_WHITE)){fails++; fprintf(stderr, "mismatch token null separator\n got \"%s\" expected whitespace\n", tok.c_str());}
   tests++;
   if((tok = string_get_next_token("", "")).compare("")){fails++; fprintf(stderr, "mismatch token empty insanity\n got \"%s\" expected nothing\n", tok.c_str());}
+  // is_num tests
+  tests++;
+  if(!is_num("0")){fails++; fprintf(stderr, "0 not detected as numeric\n");}
+  tests++;
+  if(!is_num("-0")){fails++; fprintf(stderr, "-0 not detected as numeric\n");}
+  tests++;
+  if(!is_num("-12312312312312321321321321312")){fails++; fprintf(stderr, "-long not detected as numeric\n");}
+  tests++;
+  if(is_num("-----123")){fails++; fprintf(stderr, "multiple negation detected as numeric\n");}
+  tests++;
+  if(is_num("       ")){fails++; fprintf(stderr, "space detected as numeric\n");}
+  tests++;
+  if(is_num("-")){fails++; fprintf(stderr, "Just minus detected as numeric\n");}
+  tests++;
+  if(is_num("-asd123")){fails++; fprintf(stderr, "minus string detected as numeric\n");}
+  tests++;
+  if(is_num("asdqwe")){fails++; fprintf(stderr, "text detected as numeric\n");}
+  tests++;
+  if(!is_num("1asdqwe")){fails++; fprintf(stderr, "number prefix not detected as numeric\n");}
+  tests++;
+  if(!is_num("-4asdqwe")){fails++; fprintf(stderr, "negative number prefix not detected as numeric\n");}
   // combination tests
   tests++;
   if((tok = string_get_next_token(string_seek("HTTP1/1 GET /\nws_key:    asdqwemihai", "ws_key:"), STR_WHITE)).compare("asdqwemihai")){fails++; fprintf(stderr, "failed key detection\n");}
@@ -289,6 +310,10 @@ int strings_tests()
   if(string_get_next_token(FIXED_STRING, NULL).compare(FIXED_STRING)){fails++; fprintf(stderr, "Null propagation failing for tokenizer when it should work\n");}
   tests++;
   if(string_get_next_token(NULL, FIXED_STRING).compare("")){fails++; fprintf(stderr, "Null propagation failing for tokenizer when it should fail\n");}
+  tests++;
+  if(is_num("")){fails++; fprintf(stderr, "empty detected as numeric\n");}
+  tests++;
+  if(is_num(NULL)){fails++; fprintf(stderr, "null detected as numeric\n");}
   // results and finish
   fprintf(stderr, "%d/%d tests passed - strings\n", tests - fails, tests);
   return fails;
