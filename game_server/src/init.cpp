@@ -61,6 +61,11 @@ int main(int argc, char **argv)
     {
       goto cleanup;
     }
+    if(equ(argv[i], "-erase"))
+    {
+      log -> record(ME, "Erasing database.");
+      db_info->clean_db();
+    }
     if(equ(argv[i], "-load"))
     {
       i++;
@@ -71,7 +76,6 @@ int main(int argc, char **argv)
         fprintf(stderr, "Database missing when loading.\n");
         exit(EXIT_FAILURE);
       }
-      db_info->clean_db();
       for(int k = 1; k <= no_files; k++)
       {
         if(equ(argv[i + k], "-o"))
