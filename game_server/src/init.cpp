@@ -65,6 +65,7 @@ int main(int argc, char **argv)
     {
       log -> record(ME, "Erasing database.");
       db_info->clean_db();
+      continue;
     }
     if(equ(argv[i], "-load"))
     {
