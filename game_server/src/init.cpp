@@ -61,16 +61,43 @@ int main(int argc, char **argv)
     {
       goto cleanup;
     }
+    if(equ(argv[i], "-erase"))
+    {
+      log -> record(ME, "Erasing database.");
+      db_info->clean_db();
+      continue;
+    }
     if(equ(argv[i], "-load"))
     {
+      i++;
+      check_limit(i, argc);
+      int no_files = std::stoi(argv[i]);
       if(db_info == 0)
       {
         fprintf(stderr, "Database missing when loading.\n");
         exit(EXIT_FAILURE);
       }
-      i++;
-      check_limit(i, argc);
-      db_info -> rewrite_db(argv[i]);
+      for(int k = 1; k <= no_files; k++)
+      {
+        if(equ(argv[i + k], "-o"))
+        {
+          i++;
+          check_limit(i + k, argc);
+          int ofx = stoi(argv[i + k]);
+          i++;
+          check_limit(i+k, argc);
+          int ofy = stoi(argv[i + k]);
+          i++;
+          check_limit(i+k, argc);
+          db_info->rewrite_db(argv[i + k], ofx, ofy);
+        }
+        else
+        {
+          check_limit(i + k, argc);
+          db_info->rewrite_db(argv[k + i]);
+        }
+      }
+      i += no_files;
       continue;
     }
     if(equ(argv[i], "-no_safe"))
@@ -208,4 +235,3 @@ cleanup:
   }
   return 0;
 }
-

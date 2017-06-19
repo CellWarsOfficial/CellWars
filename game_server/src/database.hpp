@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <netdb.h> 
+#include <netdb.h>
 #include <spp.hpp>
 #include <mutex>
 
@@ -20,11 +20,13 @@ class DB_conn
   public:
   DB_conn(const char *a, Logger *l);
   ~DB_conn();
+  void rewrite_db(const char *f, int ofx, int ofy);
   void rewrite_db(const char *f);
   int safe;
   string run_query(int expectation, string s);
   void insert_query_builder(CELL_TYPE t, int x, int y);
   void demand_stat();
+  void clean_db();
   private:
   char *answer_buf;
   std::mutex db_lock;
