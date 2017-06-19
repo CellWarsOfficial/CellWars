@@ -16,7 +16,7 @@ WS_info::WS_info(string this_con, int id, int socketid)
 {
   this -> this_con = this_con;
   this -> id = id;
-  this -> s = s;
+  this -> s = socketid;
   this -> agent = 0;
 }
 
@@ -306,7 +306,7 @@ string Server::get_ws_msg(WS_info *w, char *comm_buf)
       aux = read(w -> s, comm_buf + len, 2 - len);
       if(aux < 0)
       {
-        log -> record(w -> this_con, "Failed read");
+        log -> record(w -> this_con, "Failed read length");
         return "";
       }
       len = len + aux;
@@ -350,7 +350,7 @@ string Server::get_ws_msg(WS_info *w, char *comm_buf)
       aux = read(w -> s, comm_buf + len, size_desc + delta - len);
       if(aux < 0)
       {
-        log -> record(w -> this_con, "Failed read");
+        log -> record(w -> this_con, "Failed read more");
         return "";
       }
       len = len + aux;
@@ -365,6 +365,7 @@ string Server::get_ws_msg(WS_info *w, char *comm_buf)
       delta = 10;
       size_desc = (long)(*((uint64_t *)(comm_buf + delta)));
     }
+    tsize = size_desc + delta;
     if(mask)
     {
       mask = *((uint32_t *)(comm_buf + delta));
@@ -372,7 +373,6 @@ string Server::get_ws_msg(WS_info *w, char *comm_buf)
     }
     virtual_buf = comm_buf + delta;
     tlen = len;
-    tsize = size_desc + delta;
     while(tlen < tsize)
     {
       if(SV_MAX_BUF - len < BUF_THRESHOLD)
@@ -387,14 +387,17 @@ string Server::get_ws_msg(WS_info *w, char *comm_buf)
       aux = read(w -> s, comm_buf + len, min(SV_MAX_BUF - len, tlen - tsize));
       if(aux < 0)
       {
-        log -> record(w -> this_con, "Failed read");
+        log -> record(w -> this_con, "Failed read all");
         return "";
       }
       len = len + aux;
       tlen = tlen + aux;
     }
+    printf("finished reading!");
     xormask((uint32_t *)virtual_buf, mask);
+    printf("unmasking");
     memset(comm_buf + len, 0, BUF_PROCESS_ERROR);
+    printf("clean_up");
     res = res + virtual_buf;
     memset(comm_buf, 0, sizeof(char) * len);
     len = 0;
