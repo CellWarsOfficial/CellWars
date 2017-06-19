@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <chrono>
 #include <ctime>
-#include <all.hpp> 
+#include <all.hpp>
 
 // TODO all functions in here.
 
@@ -39,13 +39,13 @@ DB_conn::DB_conn(const char *a, Logger *l)
 
   bzero((char *) &server_address, sizeof(server_address));
   server_address.sin_family = AF_INET;
-  bcopy((char *)server->h_addr, 
+  bcopy((char *)server->h_addr,
        (char *)&server_address.sin_addr.s_addr,
        server->h_length);
   server_address.sin_port = htons(DB_PORT);
   if(connect(
-     socketid, 
-     (struct sockaddr *)&server_address, 
+     socketid,
+     (struct sockaddr *)&server_address,
      sizeof(server_address)
      ) < 0)
   {
@@ -78,7 +78,7 @@ string DB_conn::run_query(int expectation, string s)
     {
       wrapper = wrapper + " WHERE " + string_get_next_token(point, "");
     }
-    wrapper = wrapper + ") to STDOUT; copy (" + s 
+    wrapper = wrapper + ") to STDOUT; copy (" + s
               + ") TO STDOUT; \\echo #\n";
   }
   else
@@ -158,7 +158,17 @@ void DB_conn::insert_query_builder(CELL_TYPE t, int x, int y)
   }
 }
 
+void DB_conn::clean_db()
+{
+  run_query(NO_READ, "DELETE FROM agents.grid");
+}
+
 void DB_conn::rewrite_db(const char *f)
+{
+  rewrite_db(f, 0, 0);
+}
+
+void DB_conn::rewrite_db(const char *f, int ofx, int ofy)
 {
   FILE *file = fopen(f, "r");
   check_malloc(file);
@@ -167,7 +177,6 @@ void DB_conn::rewrite_db(const char *f)
     return;
   }
   log -> record(ME, (string)"Loading database with values defined in " + f);
-  run_query(NO_READ, "DELETE FROM agents.grid");
   int n, x, y, i, k;
   CELL_TYPE c;
   fscanf(file, "%d", &n);
@@ -175,7 +184,10 @@ void DB_conn::rewrite_db(const char *f)
   for(i = 1; i <= n; i++)
   {
     fscanf(file, "%d %d %d", &x, &y, &k);
-    log -> record(ME, (string)"Loading " + to_string(x) + ' ' + to_string(y) + ' ' + to_string(k));
+    x += ofx;
+    y += ofy;
+    log -> record(ME, (string)"Loading " + to_string(x) + ' ' +
+                  to_string(y) + ' ' + to_string(k));
     c = CELL_TYPE(k);
     insert_query_builder(c, x, y);
   }
