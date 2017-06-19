@@ -20,7 +20,7 @@ var offsetHeight = 0;
 const headerHeight = 230;
 
 const players = 10; //determines how colours are split between userID's
-var yourUserID = 1;
+var yourUserID = 0;
 
 var DISPLAYMODE = {
   COLOURS: {value: 0, name: "colours"},
@@ -237,6 +237,7 @@ class UserPicker extends Component {
 
   handleClick(uid) {
     yourUserID = uid;
+    requestColor(yourUserID);
     this.props.onClick();
   }
 
@@ -302,23 +303,23 @@ function completeHeader(header) {
   return false;
 }
 
-class Grid extends Component {
+function requestColor(yourUserID) {
+  console.log("Requesting color ".concat(yourUserID));
+  var header = generateUniqueHeader(PICK_REQUEST);
+  var pickRequest = header.toString()
+                    .concat(": PICK t=")
+                    .concat(yourUserID)
+  console.log("WS_SEND : '".concat(pickRequest).concat("'"));
 
-  requestColor(yourUserID) {
-    console.log("Requesting color ".concat(yourUserID));
-    var header = generateUniqueHeader(PICK_REQUEST);
-    var pickRequest = header.toString()
-                      .concat(": PICK t=")
-                      .concat(yourUserID)
-    console.log("WS_SEND : '".concat(pickRequest).concat("'"));
-
-    if (ws.readyState !== WS_READY) {
-      console.log("ABORT: Websocket is not ready!");
-      ws.close();
-    } else {
-      ws.send(pickRequest);
-    }
+  if (ws.readyState !== WS_READY) {
+    console.log("ABORT: Websocket is not ready!");
+    ws.close();
+  } else {
+    ws.send(pickRequest);
   }
+}
+
+class Grid extends Component {
 
   constructor() {
     super();
@@ -335,8 +336,7 @@ class Grid extends Component {
     ws = new WebSocket(url);
     ws.onopen = function() {
       console.log("Web socket opened : ".concat(url));
-      this.requestColor(yourUserID);
-    }.bind(this);
+    };
     ws.onclose = function() {
       console.log("Web socket closed : ".concat(url));
     }
@@ -442,6 +442,7 @@ class Grid extends Component {
     }
     uniqueID = Number(lines[0]);
     console.log("ParsePick : uid received ".concat(lines[0]));
+    this.get();
   }
 
   parseQuery(lines) {
