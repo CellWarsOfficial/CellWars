@@ -365,13 +365,13 @@ string Server::get_ws_msg(WS_info *w, char *comm_buf)
       delta = 10;
       size_desc = (long)(*((uint64_t *)(comm_buf + delta)));
     }
-    tsize = size_desc + delta;
     if(mask)
     {
       mask = *((uint32_t *)(comm_buf + delta));
       delta += sizeof(uint32_t); // skip mask
     }
     virtual_buf = comm_buf + delta;
+    tsize = size_desc + delta;
     tlen = len;
     while(tlen < tsize)
     {
@@ -384,7 +384,7 @@ string Server::get_ws_msg(WS_info *w, char *comm_buf)
         len = 0;
         virtual_buf = comm_buf;
       }
-      aux = read(w -> s, comm_buf + len, min(SV_MAX_BUF - len, tlen - tsize));
+      aux = read(w -> s, comm_buf + len, min(SV_MAX_BUF - len, tsize - tlen));
       if(aux < 0)
       {
         log -> record(w -> this_con, "Failed read all");
@@ -393,11 +393,8 @@ string Server::get_ws_msg(WS_info *w, char *comm_buf)
       len = len + aux;
       tlen = tlen + aux;
     }
-    printf("finished reading!");
     xormask((uint32_t *)virtual_buf, mask);
-    printf("unmasking");
     memset(comm_buf + len, 0, BUF_PROCESS_ERROR);
-    printf("clean_up");
     res = res + virtual_buf;
     memset(comm_buf, 0, sizeof(char) * len);
     len = 0;
@@ -431,6 +428,7 @@ int Server::handle_ws_write(WS_info *w, char *comm_buf, uint8_t opcode, string t
   w -> write_lock.lock();
   while(sofar < len)
   {
+    delta = 0;
     if(SV_MAX_BUF >= len - sofar + BUF_PROCESS_ERROR)
     {
       opcode = 128 + opcode; // fin
@@ -676,7 +674,7 @@ int Server::serve_pick(WS_info *w, string taskid, const char *virtual_buf, char 
     gf = false;
   }
   string to_send = taskid + ": ";
-  if(gf)
+  if((gf) && (t != 0))
   {
     log -> record(w -> this_con, "player is picking agent " 
                             + to_string(t)

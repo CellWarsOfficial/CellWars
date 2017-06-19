@@ -306,9 +306,9 @@ int Game::user_does(int x, int y, CELL_TYPE t)
     change_buffer.push(y);
     change_buffer.push((int) t);
     crank_lock.unlock();
-    return 2;
+    return 1; // success
   }
-  return 1;
+  return 0; // fail
 }
 
 void Game::load_from_db()

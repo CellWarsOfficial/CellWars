@@ -109,6 +109,7 @@ string DB_conn::run_query(int expectation, string s)
     { // refresh the buffer
       result = result + string_get_next_token(answer_buf, "#");
       memset(answer_buf, 0, sizeof(char) * len);
+      tlen += len;
       len = 0;
     }
     aux = read(socketid, answer_buf + len, DB_MAX_BUF - len);
