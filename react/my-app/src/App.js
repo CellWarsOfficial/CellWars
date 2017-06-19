@@ -38,8 +38,8 @@ const RULE_PAGE_4 = 6
 
 const WS_READY = 1;
 
-const UPDATE_FAIL = 1;
-const UPDATE_SUCCESS = 2;
+const UPDATE_FAIL = 0;
+const UPDATE_SUCCESS = 1;
 
 var requests = [];
 const QUERY_REQUEST = 1;
@@ -255,19 +255,19 @@ function calculateLocalHighscores(board) {
 }
 
 function generateUniqueHeader(requestType) {
-  var header = Number(Math.floor((Math.random() * 100) + 1)); 
+  var header = (Math.floor((Math.random() * 100) + 1)); 
   var notUnique = true;
   while (notUnique) {
-    header = Number(Math.floor((Math.random() * 100) + 1));
+    header = (Math.floor((Math.random() * 100) + 1));
     notUnique = false;
     for (let i = 0; i < requests.length; i++) {
-      if (getHeader(requests[i]) === header && getType(requests[i]) !== Number(FINISHED_REQUEST)) {
+      if (getHeader(requests[i]) === header && getType(requests[i]) !== (FINISHED_REQUEST)) {
         notUnique = true;
         break;
       }
     }
   }
-  var newRequest = [header, Number(requestType)];
+  var newRequest = [header, (requestType)];
   requests.push(newRequest);
   return header;
 }
@@ -281,12 +281,12 @@ function getType(entry) {
 }
 
 function setType(entry, type) {
-  entry[1] = Number(type);
+  entry[1] = (type);
 }
 
 function findType(header) {
   for (let i = 0; i < requests.length; i++) {
-    if (getHeader(requests[i]) === Number(header)) {
+    if (getHeader(requests[i]) === (header)) {
       return getType(requests[i]);
     }
   }
@@ -295,7 +295,7 @@ function findType(header) {
 
 function completeHeader(header) {
   for (let i = 0; i < requests.length; i++) {
-    if (getHeader(requests[i]) === Number(header)) {
+    if (getHeader(requests[i]) === (header)) {
       setType(requests[i], FINISHED_REQUEST);
       return true;
     }
@@ -391,6 +391,7 @@ class Grid extends Component {
   respondCrankFin(header) {
     console.log("Responding to CRANKFIN");
     this.respondOne(header);
+    this.get();
   }
 
   respondTimeout(header) {
@@ -457,10 +458,10 @@ class Grid extends Component {
 
     var board = emptyGrid(width, height);
 
-    for (let i = 1; i <= numberOfLines; i+= 3) {
-      var row = lines[i + 0] - offsetHeight;
-      var col = lines[i + 1] - offsetWidth;
-      var uid = lines[i + 2];
+    for (let i = 0; i < numberOfLines; i++) {
+      var row = lines[i*3 + 1] - offsetHeight;
+      var col = lines[i*3 + 2] - offsetWidth;
+      var uid = lines[i*3 + 3];
 
       if (row < 0 || row >= height || col < 0 || col >= width) {
         console.log("ParseQuery : cell out of bounds");
