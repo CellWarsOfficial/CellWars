@@ -18,11 +18,15 @@ WS_info::WS_info(string this_con, int id, int socketid)
   this -> id = id;
   this -> s = socketid;
   this -> agent = 0;
+  this -> task = 101;
 }
 
-void WS_info::drop()
+void WS_info::drop(Server *server)
 {
   close(s);
+  server -> erase(id);
+  expectation.clear();
+  delete this;
 }
 
 Server::Server(int port, DB_conn *db, Logger *l)
@@ -30,6 +34,7 @@ Server::Server(int port, DB_conn *db, Logger *l)
   db_info = db;
   log = l;
   live_conns = 0;
+  next_ws = 0;
   conns = 0;
   struct sockaddr_in serv_addr;
   socketid = socket(AF_INET, SOCK_STREAM, 0);
@@ -55,8 +60,68 @@ Server::Server(int port, DB_conn *db, Logger *l)
 
 Server::~Server()
 {
+  check_clients(8); // close all open websockets
   close(socketid);
   log -> record(ME, "Server closed");
+}
+
+void Server::erase(int id)
+{
+  server_lock.lock();
+  live_conns--;
+  monitor.erase(id);
+  server_lock.unlock();
+}
+
+void Server::forget(int id)
+{
+  server_lock.lock();
+  monitor.erase(id);
+  server_lock.unlock();
+}
+
+void Server::bcast_message(string message)
+{
+  server_lock.lock();
+  std::map<int, WS_info *>::iterator it;
+  for(it = monitor.begin(); it != monitor.end(); it++)
+  {
+    new thread(&Server::broadcaster, this, it->second, 1, message);
+  }
+  server_lock.unlock();
+}
+
+void Server::check_clients(uint8_t opcode)
+{
+  server_lock.lock();
+  std::map<int, WS_info *>::iterator it;
+  for(it = monitor.begin(); it != monitor.end(); it++)
+  {
+    new thread(&Server::broadcaster, this, it->second, opcode, "Standard msg");
+  }
+  server_lock.unlock();
+}
+
+void Server::broadcaster(WS_info *w, uint8_t opcode, string to_send)
+{
+  char *comm_buf = new char[SV_MAX_BUF + 2 * BUF_PROCESS_ERROR];
+  int tid;
+  w -> write_lock.lock();
+  tid = w -> task;
+  w -> task += 1;
+  if(w -> task == 201)
+  {
+    w -> task = 101;
+  }
+  w -> expectation.insert(tid);
+  w -> write_lock.unlock();
+  log -> record(w -> this_con, "Server sending msg: " + to_string(tid));
+  if(handle_ws_write(w, comm_buf, opcode, to_string(tid) + ": " + to_send))
+  {
+    close(w -> s);
+    forget(w -> id);
+  }
+  delete[] comm_buf;
 }
 
 void Server::start(Game *game)
@@ -157,9 +222,6 @@ void Server::act(int s, int id)
       live_conns++;
       server_lock.unlock();
       hijack_ws(this_con, s, comm_buf);
-      server_lock.lock();
-      live_conns--;
-      server_lock.unlock();
       delete comm_buf;
       return;
     }
@@ -221,7 +283,7 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
   string aux;
   log -> record(this_con, "Websocket started");
   server_lock.lock();
-  live_conns++; my_id = live_conns;
+  live_conns++; next_ws++; my_id = live_conns;
   server_lock.unlock();
   WS_info *w = new WS_info(this_con, my_id, s);
   string msg;
@@ -234,7 +296,7 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
     if((aux == "") || (!is_num(aux)))
     {
       log -> record(this_con, "Protocol violation or closure, dropping");
-      w -> drop();
+      w -> drop(this);
       return;
     }
     else
@@ -245,13 +307,25 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
         // act based on pong
         continue;
       }
+      if(msg_id > 100)
+      {
+        w -> write_lock.lock();
+        if(w -> expectation.find(msg_id) == w -> expectation.end())
+        {
+          log -> record(this_con, "Unexpected message received, dropping");
+          w -> drop(this);
+          return;
+        }
+        w -> write_lock.unlock();
+        continue;
+      }
       point = string_seek(virtual_buf, "QUERY");
       if(point)
       {
         log -> record(this_con, "Query received");
         if(serve_query(w, aux, point, comm_buf))
         {
-          w -> drop();
+          w -> drop(this);
           return;
         }
       }
@@ -260,7 +334,7 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
       {
         if(serve_update(w, aux, point, comm_buf))
         {
-          w -> drop();
+          w -> drop(this);
           return;
         }
       }
@@ -269,7 +343,7 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
       {
         if(serve_score(w, aux, point, comm_buf))
         {
-          w -> drop();
+          w -> drop(this);
           return;
         }
       }
@@ -278,15 +352,17 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
       {
         if(serve_pick(w, aux, point, comm_buf))
         {
-          w -> drop();
+          w -> drop(this);
           return;
         }
-        // TODO attach w to server monitor
+        server_lock.lock();
+        monitor[my_id] = w;
+        server_lock.unlock();
       }
     }
   }
   log -> record(this_con, "Websocket terminating");
-  w -> drop();
+  w -> drop(this);
   return;
 }
 

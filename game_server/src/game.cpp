@@ -114,8 +114,10 @@ void *Game::start(FLAG_TYPE f, int gtc, int w)
 
 void Game::plan_stage(int wait_time)
 {
-  // TODO instruct network manager to receive changes from users
-
+  if(server)
+  {
+    server -> bcast_message("CRANKFIN");
+  }
   if(GFLAG_stepped_tick)
   {
     log -> record(ME, "Planning time - debug step - waiting for UI");
@@ -128,8 +130,10 @@ void Game::plan_stage(int wait_time)
     std::this_thread::sleep_for(std::chrono::seconds(wait_time));
   }
   log -> record(ME, "Planning time - timeout ");
-
-  // TODO instruct network manager to ignore changes from users
+  if(server)
+  {
+    server -> bcast_message("TIMEOUT");
+  }
   if(!GFLAG_nodb)
   {
     up_db();
