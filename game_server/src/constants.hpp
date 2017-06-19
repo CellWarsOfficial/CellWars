@@ -94,6 +94,7 @@
 /* String related constants
  */
 #define STR_WHITE " \f\n\r\t\v"
+#define STR_DIGITS "0123456789"
 #define BUF_THRESHOLD 500
 #define BUF_PROCESS_ERROR 10
 

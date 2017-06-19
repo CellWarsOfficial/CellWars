@@ -231,9 +231,9 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
     msg = get_ws_msg(w, comm_buf);
     virtual_buf = msg.c_str();
     aux = string_get_next_token(virtual_buf, ":");
-    if(aux == "")
+    if((aux == "") || (!is_num(aux)))
     {
-      log -> record(this_con, "Protocol violation, dropping");
+      log -> record(this_con, "Protocol violation or closure, dropping");
       w -> drop();
       return;
     }
@@ -488,10 +488,12 @@ int Server::serve_query(WS_info *w, string taskid, const char *virtual_buf, char
   const char *point;
   bool gf = true;
   int px1 = 0, py1 = 0, px2 = 0, py2 = 0;
+  string tok;
   point = string_seek(virtual_buf, "px1=");
-  if(point)
+  tok = string_get_next_token(point, STR_WHITE);
+  if(is_num(tok))
   {
-    px1 = stoi(string_get_next_token(point, STR_WHITE));
+    px1 = stoi(tok);
   }
   else
   {
@@ -499,9 +501,10 @@ int Server::serve_query(WS_info *w, string taskid, const char *virtual_buf, char
     gf = false;
   }
   point = string_seek(virtual_buf, "py1=");
-  if(point)
+  tok = string_get_next_token(point, STR_WHITE);
+  if(is_num(tok))
   {
-    py1 = stoi(string_get_next_token(point, STR_WHITE));
+    py1 = stoi(tok);
   }
   else
   {
@@ -509,9 +512,10 @@ int Server::serve_query(WS_info *w, string taskid, const char *virtual_buf, char
     gf = false;
   }
   point = string_seek(virtual_buf, "px2=");
-  if(point)
+  tok = string_get_next_token(point, STR_WHITE);
+  if(is_num(tok))
   {
-    px2 = stoi(string_get_next_token(point, STR_WHITE));
+    px2 = stoi(tok);
   }
   else
   {
@@ -519,9 +523,10 @@ int Server::serve_query(WS_info *w, string taskid, const char *virtual_buf, char
     gf = false;
   }
   point = string_seek(virtual_buf, "py2=");
-  if(point)
+  tok = string_get_next_token(point, STR_WHITE);
+  if(is_num(tok))
   {
-    py2 = stoi(string_get_next_token(point, STR_WHITE));
+    py2 = stoi(tok);
   }
   else
   {
@@ -558,17 +563,19 @@ int Server::serve_update(WS_info *w, string taskid, const char *virtual_buf, cha
 {
   if(w -> agent == 0)
   {
-    log -> record(w -> this_con, "Protocol violation");
+    log -> record(w -> this_con, "Protocol violation, not picked");
     return 1;
   }
   const char *point;
   bool gf = true;
   int px = 1000000000, py = 1000000000;
   CELL_TYPE t = 0;
+  string tok;
   point = string_seek(virtual_buf, "px=");
-  if(point)
+  tok = string_get_next_token(point, STR_WHITE);
+  if(is_num(tok))
   {
-    px = stoi(string_get_next_token(point, STR_WHITE));
+    px = stoi(tok);
   }
   else
   {
@@ -576,9 +583,10 @@ int Server::serve_update(WS_info *w, string taskid, const char *virtual_buf, cha
     gf = false;
   }
   point = string_seek(virtual_buf, "py=");
-  if(point)
+  tok = string_get_next_token(point, STR_WHITE);
+  if(is_num(tok))
   {
-    py = stoi(string_get_next_token(point, STR_WHITE));
+    py = stoi(tok);
   }
   else
   {
@@ -586,9 +594,10 @@ int Server::serve_update(WS_info *w, string taskid, const char *virtual_buf, cha
     gf = false;
   }
   point = string_seek(virtual_buf, "t=");
-  if(point)
+  tok = string_get_next_token(point, STR_WHITE);
+  if(is_num(tok))
   {
-    t = (CELL_TYPE)stoi(string_get_next_token(point, STR_WHITE));
+    t = (CELL_TYPE)stoi(tok);
   }
   else
   {
@@ -622,10 +631,12 @@ int Server::serve_score(WS_info *w, string taskid, const char *virtual_buf, char
   const char *point;
   bool gf = true;
   CELL_TYPE t;
+  string tok;
   point = string_seek(virtual_buf, "t=");
-  if(point)
+  tok = string_get_next_token(point, STR_WHITE);
+  if(is_num(tok))
   {
-    t = (CELL_TYPE)stoi(string_get_next_token(point, STR_WHITE));
+    t = (CELL_TYPE)stoi(tok);
   }
   else
   {
@@ -657,16 +668,18 @@ int Server::serve_pick(WS_info *w, string taskid, const char *virtual_buf, char 
 {
   if(w -> agent != 0)
   {
-    log -> record(w -> this_con, "Protocol violation");
+    log -> record(w -> this_con, "Protocol violation, repicking");
     return 1;
   }
   const char *point;
   bool gf = true;
   CELL_TYPE t;
+  string tok;
   point = string_seek(virtual_buf, "t=");
-  if(point)
+  tok = string_get_next_token(point, STR_WHITE);
+  if(is_num(tok))
   {
-    t = (CELL_TYPE)stoi(string_get_next_token(point, STR_WHITE));
+    t = (CELL_TYPE)stoi(tok);
   }
   else
   {
