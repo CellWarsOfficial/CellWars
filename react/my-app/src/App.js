@@ -260,8 +260,10 @@ function generateUniqueHeader(requestType) {
     header = Number(Math.floor((Math.random() * 100) + 1));
     notUnique = false;
     for (let i = 0; i < requests.length; i++) {
-      if (getHeader(requests[i]) === header && getType(requests[i]) !== Number(FINISHED_REQUEST))
+      if (getHeader(requests[i]) === header && getType(requests[i]) !== Number(FINISHED_REQUEST)) {
         notUnique = true;
+        break;
+      }
     }
   }
   var newRequest = [header, Number(requestType)];
