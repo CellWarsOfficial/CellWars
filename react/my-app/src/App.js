@@ -308,7 +308,7 @@ class Grid extends Component {
     var pickRequest = header.toString()
                       .concat(": PICK t=")
                       .concat(yourUserID)
-    console.log("Sending query : ".concat(pickRequest));
+    console.log("WS_SEND : '".concat(pickRequest).concat("'"));
 
     if (ws.readyState !== WS_READY) {
       console.log("ABORT: Websocket is not ready!");
@@ -345,7 +345,7 @@ class Grid extends Component {
     {
       var received_msg = evt.data;
 
-      console.log("Web socket message received: ".concat(received_msg));
+      console.log("WS_RECEIVE : '".concat(received_msg).concat("'"));
       var split_msg = received_msg.trim().split(':');
 
       if (split_msg.length !== 2) {
@@ -392,15 +392,15 @@ class Grid extends Component {
   }
 
   respondTimeout(header) {
-    this.respondOne(header);
     console.log("Responding to TIMEOUT");
+    this.respondOne(header);
   }
 
   respondOne(header) {
     if (uniqueID === null)
       return;
     var response = header.toString().concat(": 1");
-    console.log("Sending query : ".concat(response));
+    console.log("WS_SEND : '".concat(response).concat("'"));
 
     if (ws.readyState !== WS_READY) {
       console.log("ABORT: Websocket is not ready!");
@@ -486,7 +486,7 @@ class Grid extends Component {
                 .concat(col + offsetWidth)
                 .concat(" t=")
                 .concat(board[row][col]);
-    console.log("Sending query : ".concat(updateRequest));
+    console.log("WS_SEND : '".concat(updateRequest).concat("'"));
 
     if (ws.readyState !== WS_READY) {
       console.log("ABORT: Websocket is not ready!");
@@ -634,7 +634,7 @@ class Grid extends Component {
                 .concat(px2)
                 .concat(" py2=")
                 .concat(py2);
-    console.log("Sending query : ".concat(queryRequest));
+    console.log("WS_SEND : '".concat(queryRequest).concat("'"));
 
     if (ws.readyState !== WS_READY) {
       console.log("ABORT: Websocket is not ready!");
