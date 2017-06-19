@@ -261,13 +261,17 @@ function generateUniqueHeader(requestType) {
     header = (Math.floor((Math.random() * 100) + 1));
     notUnique = false;
     for (let i = 0; i < requests.length; i++) {
-      if (getHeader(requests[i]) === header && getType(requests[i]) !== (FINISHED_REQUEST)) {
+      if (getHeader(requests[i]) === header) {
+        if (getType(requests[i]) === (FINISHED_REQUEST)) {
+          setType(requests[i], requestType);
+          return header;
+        }
         notUnique = true;
         break;
       }
     }
   }
-  var newRequest = [header, (requestType)];
+  var newRequest = [header, requestType];
   requests.push(newRequest);
   return header;
 }
@@ -360,13 +364,14 @@ class Grid extends Component {
       var lines = data.match(/\S+/g) || [];
 
       if (header > 0 && header <= 100) {
-        switch (findType(header)) {
+        var type = findType(header);
+        switch (type) {
           case UPDATE_REQUEST: this.parseUpdate(lines); break;
           case SCORE_REQUEST: this.parseScore(lines); break;
           case PICK_REQUEST: this.parsePick(lines); break;
           case QUERY_REQUEST: this.parseQuery(lines); break;
           case INVALID_REQUEST: console.log("Parse error : Header not found"); break;
-          default: console.log("Parse error : Invalid type of header");
+          default: console.log("Parse error : Invalid header type (".concat(header).concat(" - ").concat(type).concat(")"));
         }
         if (!completeHeader(header)) {
           console.log("Fatal error: cannot find header which we just had!");
