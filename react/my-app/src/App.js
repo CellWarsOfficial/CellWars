@@ -49,6 +49,8 @@ const SCORE_REQUEST = 4;
 const INVALID_REQUEST = -1;
 const FINISHED_REQUEST = 0;
 
+const CRANKFIN = "CRANKFIN";
+const TIMEOUT = "TIMEOUT"
 var uniqueID;
 
 
@@ -342,9 +344,7 @@ class Grid extends Component {
     ws.onmessage = function (evt)
     {
       var received_msg = evt.data;
-      // requests.push([23, QUERY_REQUEST]); // DEBUG
 
-      // var received_msg = "23: 2 1 2 3 4 5 6 \n";
       console.log("Web socket message received: ".concat(received_msg));
       var split_msg = received_msg.trim().split(':');
 
@@ -366,16 +366,48 @@ class Grid extends Component {
           case INVALID_REQUEST: console.log("Parse error : Header not found"); break;
           default: console.log("Parse error : Invalid type of header");
         }
+        if (!completeHeader(header)) {
+          console.log("Fatal error: cannot find header which we just had!");
+        }
       } else if (header > 100 && header <= 200) {
-
+        if (lines.length !== 1) {
+          console.log("Parse error(101 - 200): unexpected number of lines");
+        }
+        switch (lines[0]) {
+          case CRANKFIN: this.respondCrankFin(header); break;
+          case TIMEOUT: this.respondTimeout(header); break;
+          default: console.log("Parse error(101-200): unknown method");
+        }
+      } else {
+        console.log("Error : Header out of bounds!");
       }
 
 
-      if (!completeHeader(header)) {
-        console.log("Fatal error: cannot find header which we just had!");
-      }
     }.bind(this);
   }
+
+  respondCrankFin(header) {
+    console.log("Responding to CRANKFIN");
+    this.respondOne(header);
+  }
+
+  respondTimeout(header) {
+    this.respondOne(header);
+    console.log("Responding to TIMEOUT");
+  }
+
+  respondOne(header) {
+    if (uniqueID === null)
+      return;
+    var response = header.toString().concat(": 1");
+    console.log("Sending query : ".concat(response));
+
+    if (ws.readyState !== WS_READY) {
+      console.log("ABORT: Websocket is not ready!");
+    } else {
+      ws.send(response);
+    }
+}
 
   parseUpdate(lines) {
     if (lines.length !== 1) {
