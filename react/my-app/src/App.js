@@ -407,7 +407,7 @@ class Grid extends Component {
     } else {
       ws.send(response);
     }
-}
+  }
 
   parseUpdate(lines) {
     if (lines.length !== 1) {
@@ -466,13 +466,17 @@ class Grid extends Component {
       board[row][col] = uid;
     }
 
+    this.updateHighScores(board);
+
+    console.log("ParseQuery: successfully parsed query");
+  }
+
+  updateHighScores(board) {
     var localHighscores = calculateLocalHighscores(board);
     this.setState({
       localHighscores: localHighscores,
       board: board
     });
-
-    console.log("ParseQuery: successfully parsed query");
   }
 
   submit(board, row, col) {
