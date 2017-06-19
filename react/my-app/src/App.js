@@ -41,6 +41,7 @@ const WS_READY = 1;
 const UPDATE_FAIL = 1;
 const UPDATE_SUCCESS = 2;
 
+const INTERACTIVE_EXAMPLE_GRID_SIZE = 5;
 
 class App extends Component {
   constructor() {
@@ -171,8 +172,13 @@ class Row extends Component {
   }
 
   render() {
+    var squaresInARow = INTERACTIVE_EXAMPLE_GRID_SIZE;
+    if (this.props.boardType == 'online') {
+      squaresInARow = width;
+    }
+
     var renderedSquares = [];
-    for (var i = 0; i < width; i++) {
+    for (var i = 0; i < squaresInARow; i++) {
       renderedSquares.push(this.renderSquare(this.props.squares[i], this.props.row, i));
     }
     return (
@@ -242,6 +248,128 @@ function calculateLocalHighscores(board) {
   }
   return ret;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class InteractiveExample extends Component {
+  constructor() {
+    super();
+    this.state = {
+      preBoard: emptyGrid(width, height), // TODO: randomly fill this with ~10 cells of different colour initially
+      infobox: ''
+    }
+  }
+
+  addNeighbour(neighbours, p1, p2) {
+    if (p1 < 0 || p1 >= INTERACTIVE_EXAMPLE_GRID_SIZE || p2 < 0 || p2 >= INTERACTIVE_EXAMPLE_GRID_SIZE) {
+      return;
+    }
+    neighbours.push(this.state.preBoard[p1][p2]);
+  }
+
+  crankCell(i, j) {
+    var neighbours = [];
+    for (var x = -1; x <= 1; x++) {
+      for (var y = -1; y <= 1; y++) {
+        this.addNeighbour(neighbours, i + x, j + y);
+      }
+    }
+
+    if (neighbours.length < 2 || neighbours.length > 3) {
+      return 0;
+    }
+  }
+
+  handleMouseOver(row, col) {
+
+  }
+
+  handleClick(row, col) {
+    /*
+    if (row == 0 || row == INTERACTIVE_EXAMPLE_GRID_SIZE || col == 0 || col == INTERACTIVE_EXAMPLE_GRID_SIZE) { // disallows toggling border cells
+      return;
+    }
+    */
+    const preBoard = this.state.preBoard.slice(); //Clones the preBoard
+    preBoard[row][col] = (this.state.preBoard[row][col] === 0) ? yourUserID : 0; // TODO: need a way of picking your colour for the example, stop using yourUserID
+    this.setState({
+      preBoard: preBoard
+    });
+  }
+
+  renderRow(row, boardType) {
+    return (
+      <div key={row.toString()}>
+        <Row
+          boardType={boardType}
+          squares={this.state.board[row]}
+          row={row}
+          onClick={(r, c) => this.handleClick(r, c)}
+          displayMode={this.state.displayMode}
+        />
+      </div>
+    );
+  }
+  
+  render() {
+    if (this.props.currentPage !== GAME_PAGE) { // this will change
+      return null;
+    }
+    var preRows = [];
+    for (var i = 0; i < INTERACTIVE_EXAMPLE_GRID_SIZE; i++) {
+      preRows.push(this.renderRow(i, 'preBoard'));
+    }
+    var postRows = [];
+    for (var j = 0; j < INTERACTIVE_EXAMPLE_GRID_SIZE; j++) {
+      postRows.push(this.renderRow(j, 'postBoard'));
+    }
+
+    return (
+      <div>
+        <h1> {this.state.infobox} </h1>
+        {preRows}
+        {postRows}
+      </div>
+    );
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 class Grid extends Component {
   constructor() {
@@ -346,6 +474,7 @@ class Grid extends Component {
     return (
       <div key={row.toString()}>
         <Row
+          boardType={'online'}
           squares={this.state.board[row]}
           row={row}
           onClick={(r, c) => this.handleClick(r, c)}
