@@ -41,6 +41,16 @@ const WS_READY = 1;
 const UPDATE_FAIL = 1;
 const UPDATE_SUCCESS = 2;
 
+var requests = [];
+const QUERY_REQUEST = 1;
+const UPDATE_REQUEST = 2;
+const PICK_REQUEST = 3;
+const SCORE_REQUEST = 4;
+const INVALID_REQUEST = -1;
+const FINISHED_REQUEST = 0;
+
+var uniqueID;
+
 
 class App extends Component {
   constructor() {
@@ -189,9 +199,7 @@ function emptyGrid(width, height) { // Generates an example board fitting to the
   for (var i = 0; i < height; i++) {
     var row = [];
     for (var j = 0; j < width; j++) {
-      // TEMP DEBUG
       row.push(0);
-      // row.push(i*width + j);
     }
     ret.push(row);
   }
@@ -243,7 +251,71 @@ function calculateLocalHighscores(board) {
   return ret;
 }
 
+function generateUniqueHeader(requestType) {
+  var header = Number(Math.floor((Math.random() * 100) + 1)); 
+  var notUnique = true;
+  while (notUnique) {
+    header = Number(Math.floor((Math.random() * 100) + 1));
+    notUnique = false;
+    for (let i = 0; i < requests.length; i++) {
+      if (getHeader(requests[i]) === header && getType(requests[i]) !== Number(FINISHED_REQUEST))
+        notUnique = true;
+    }
+  }
+  var newRequest = [header, Number(requestType)];
+  requests.push(newRequest);
+  return header;
+}
+
+function getHeader(entry) {
+  return entry[0];
+}
+
+function getType(entry) {
+  return entry[1];
+}
+
+function setType(entry, type) {
+  entry[1] = Number(type);
+}
+
+function findType(header) {
+  for (let i = 0; i < requests.length; i++) {
+    if (getHeader(requests[i]) === Number(header)) {
+      return getType(requests[i]);
+    }
+  }
+  return INVALID_REQUEST;
+}
+
+function completeHeader(header) {
+  for (let i = 0; i < requests.length; i++) {
+    if (getHeader(requests[i]) === Number(header)) {
+      setType(requests[i], FINISHED_REQUEST);
+      return true;
+    }
+  }
+  return false;
+}
+
 class Grid extends Component {
+
+  requestColor(yourUserID) {
+    console.log("Requesting color ".concat(yourUserID));
+    var header = generateUniqueHeader(PICK_REQUEST);
+    var pickRequest = header.toString()
+                      .concat(": PICK t=")
+                      .concat(yourUserID)
+    console.log("Sending query : ".concat(pickRequest));
+
+    if (ws.readyState !== WS_READY) {
+      console.log("ABORT: Websocket is not ready!");
+      ws.close();
+    } else {
+      ws.send(pickRequest);
+    }
+  }
+
   constructor() {
     super();
     var localHighscores = new Array(players + 1);
@@ -255,10 +327,11 @@ class Grid extends Component {
       // cache: emptyGrid(width + LOOKAHEAD*2, height + LOOKAHEAD*2),
     }
     var url = "ws".concat(window.location.toString().substring(4));
+    // url = "ws://89.122.28.235:7777/"; // DEBUG
     ws = new WebSocket(url);
     ws.onopen = function() {
       console.log("Web socket opened : ".concat(url));
-      this.get();
+      this.requestColor(yourUserID);
     }.bind(this);
     ws.onclose = function() {
       console.log("Web socket closed : ".concat(url));
@@ -268,66 +341,114 @@ class Grid extends Component {
     }
     ws.onmessage = function (evt)
     {
-      width = Math.floor(window.innerWidth / 30);
-      height = Math.floor((window.innerHeight - headerHeight) / 30);
       var received_msg = evt.data;
+      // requests.push([23, QUERY_REQUEST]); // DEBUG
+
+      // var received_msg = "23: 2 1 2 3 4 5 6 \n";
       console.log("Web socket message received: ".concat(received_msg));
+      var split_msg = received_msg.trim().split(':');
 
-      var lines = received_msg.trim().split('\n');
+      if (split_msg.length !== 2) {
+        console.log("Parse error : Invalid number of ':'");
+      }
 
-      if ((lines.length - 1) === Number(lines[0])) { // QUERY
-        var board = emptyGrid(width, height);
-        for (let i = 1; i <= lines[0]; i++) { // filling grid with received information
-          var data = lines[i].trim().split(',');
-          if (data.length !== 3) {
-            console.log("Parse error : unexpected number of commas");
-            break;
-          }
-          var row = data[0] - offsetHeight;
-          var col = data[1] - offsetWidth;
-          var uid = data[2];
+      var header = Number(split_msg[0].trim());
+      var data = split_msg[1].trim();
 
-          if (row < 0 || row >= height || col < 0 || col >= width) {
-            console.log("Parse error : cell out of bounds");
-            break;
-          }
+      var lines = data.match(/\S+/g) || [];
 
-          board[row][col] = uid;
+      if (header > 0 && header <= 100) {
+        switch (findType(header)) {
+          case UPDATE_REQUEST: this.parseUpdate(lines); break;
+          case SCORE_REQUEST: this.parseScore(lines); break;
+          case PICK_REQUEST: this.parsePick(lines); break;
+          case QUERY_REQUEST: this.parseQuery(lines); break;
+          case INVALID_REQUEST: console.log("Parse error : Header not found"); break;
+          default: console.log("Parse error : Invalid type of header");
         }
-        var localHighscores = calculateLocalHighscores(board);
-        this.setState({
-          localHighscores: localHighscores,
-          board: board
-        });
-        console.log("Parse info : successfully parsed query")
-      } else if (lines.length === 1) { // SUBMIT
-        switch(Number(lines[0])) {
-          case UPDATE_FAIL:
-            console.log("Submit request responsed : FAIL");
-            window.alert("Submit request responsed : FAIL");
-            this.get();
-          break;
-          case UPDATE_SUCCESS:
-            console.log("Submit request responsed : SUCCESS");
-            break;
-          default: console.log("Parse error : unexpected submit response (value)");
-        }
-      } else { // ERROR
-        console.log("Parse error : unexpected response task");
+      } else if (header > 100 && header <= 200) {
+
+      }
+
+
+      if (!completeHeader(header)) {
+        console.log("Fatal error: cannot find header which we just had!");
       }
     }.bind(this);
   }
 
+  parseUpdate(lines) {
+    if (lines.length !== 1) {
+      console.log("ParseUpdate: unexpected length");
+      return;
+    }
+    switch (Number(lines[0])) {
+      case UPDATE_FAIL:
+        console.log("ParseUpdate : response FAIL");
+        this.get();
+        break;
 
-  handleClick(row, col) {
-    const board = this.state.board.slice(); //Clones the board
+      case UPDATE_SUCCESS:
+        console.log("ParseUpdate : response SUCCESS");
+        break;
 
-    board[row][col] = (board[row][col] === 0) ? yourUserID : 0;
+      default:
+        console.log("ParseUpdate: unexpected response value");
+    }
+  }
+
+  parseScore(lines) {
+    // TODO
+    console.log("ParseScore: currently ignoring score response");
+  }
+
+  parsePick(lines) {
+    if (Number(lines[0]) === 0) {
+      console.log("ParsePick : uid failed");
+    }
+    uniqueID = Number(lines[0]);
+    console.log("ParsePick : uid received ".concat(lines[0]));
+  }
+
+  parseQuery(lines) {
+    width = Math.floor(window.innerWidth / 30);
+    height = Math.floor((window.innerHeight - headerHeight) / 30);
+
+    var numberOfLines = Number(lines[0]);
+    if (numberOfLines !== ((lines.length - 1)/3)) {
+      console.log("ParseQuery: number of lines do not match up");
+      return;
+    }
+
+    var board = emptyGrid(width, height);
+
+    for (let i = 1; i <= numberOfLines; i+= 3) {
+      var row = lines[i + 0] - offsetHeight;
+      var col = lines[i + 1] - offsetWidth;
+      var uid = lines[i + 2];
+
+      if (row < 0 || row >= height || col < 0 || col >= width) {
+        console.log("ParseQuery : cell out of bounds");
+        return;
+      }
+      board[row][col] = uid;
+    }
+
+    var localHighscores = calculateLocalHighscores(board);
     this.setState({
+      localHighscores: localHighscores,
       board: board
     });
 
-    var updateRequest = "UPDATE px="
+    console.log("ParseQuery: successfully parsed query");
+  }
+
+  submit(board, row, col) {
+    if (uniqueID === null)
+      return;
+    var header = generateUniqueHeader(UPDATE_REQUEST);
+    var updateRequest = header.toString()
+                .concat(": UPDATE px=")
                 .concat(row + offsetHeight)
                 .concat(" py=")
                 .concat(col + offsetWidth)
@@ -340,6 +461,17 @@ class Grid extends Component {
     } else {
       ws.send(updateRequest);
     }
+  }
+
+
+  handleClick(row, col) {
+    const board = this.state.board.slice(); //Clones the board
+
+    board[row][col] = (board[row][col] === 0) ? yourUserID : 0;
+    this.setState({
+      board: board
+    });
+    this.submit(board, row, col);
   }
 
   renderRow(row) {
@@ -447,6 +579,11 @@ class Grid extends Component {
   }
 
   get() {
+    if (uniqueID === null)
+      return;
+
+    var header = generateUniqueHeader(QUERY_REQUEST);
+
     var width = Math.floor(window.innerWidth / 30);
     var height = Math.floor((window.innerHeight - headerHeight) / 30);
     var px1 = offsetHeight;
@@ -454,26 +591,24 @@ class Grid extends Component {
     var px2 = height - 1 + offsetHeight;
     var py2 = width - 1 + offsetWidth;
 
-/*    if (px1 > last_px1 && py1 > last_py1 && px2 < last_px2 && py2 < last_py2) {
-      // update board
 
-    } else {*/
-      var queryRequest = "QUERY px1="
-                  .concat(px1)
-                  .concat(" py1=")
-                  .concat(py1)
-                  .concat(" px2=")
-                  .concat(px2)
-                  .concat(" py2=")
-                  .concat(py2);
-      console.log("Sending query : ".concat(queryRequest));
 
-      if (ws.readyState !== WS_READY) {
-        console.log("ABORT: Websocket is not ready!");
-      } else {
-        ws.send(queryRequest);
-      }
-    // }
+    var queryRequest = header.toString()
+                .concat(": QUERY px1=")
+                .concat(px1)
+                .concat(" py1=")
+                .concat(py1)
+                .concat(" px2=")
+                .concat(px2)
+                .concat(" py2=")
+                .concat(py2);
+    console.log("Sending query : ".concat(queryRequest));
+
+    if (ws.readyState !== WS_READY) {
+      console.log("ABORT: Websocket is not ready!");
+    } else {
+      ws.send(queryRequest);
+    }
 
   }
 }
