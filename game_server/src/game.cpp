@@ -156,7 +156,7 @@ void Game::crank_stage(int generations)
   {
     action -> crank_for(i -> second, gen_to_run);
   }
-  std::map<uint64_t, CELL_TYPE>::iterator i_c;
+  std::map<CELL_TYPE, uint64_t>::iterator i_c;
   curr_gen += gen_to_run;
   sync_padding();
   if(!GFLAG_nodb)
@@ -166,12 +166,12 @@ void Game::crank_stage(int generations)
   capitals_lock.lock();
   for(i_c = capitals.begin(); i_c != capitals.end(); i_c++)
   {
-    int x = get_x(i_c->first);
-    int y = get_y(i_c->first);
+    int x = get_x(i_c->second);
+    int y = get_y(i_c->second);
     Block *b = get_curr_block(x, y);
     if(b->map[b->rectify_x(x)][b->rectify_y(y)] == DEAD_CELL)
     {
-      user_loses(i_c->second);
+      user_loses(i_c->first);
     }
   }
   capitals_lock.unlock();
@@ -218,7 +218,8 @@ void Game::flush_buf()
   int x, y;
   CELL_TYPE t;
   Block *curr_block;
-  std::map<uint64_t, CELL_TYPE>::iterator buff_it, i_c;
+  std::map<uint64_t, CELL_TYPE>::iterator buff_it;
+  std::map<CELL_TYPE, uint64_t>::iterator i_c;
   for(buff_it = change_buffer.begin(); buff_it != change_buffer.end(); buff_it++)
   {
     x = get_x(buff_it->first);
@@ -227,10 +228,10 @@ void Game::flush_buf()
     if(GFLAG_running)
     {
       capitals_lock.lock();
-      i_c = capitals.find(compress_xy(x, y));
+      i_c = capitals.find(t);
       if(i_c == capitals.end())
       {
-        capitals[compress_xy(x, y)] = t;
+        capitals[t] = compress_xy(x, y);
       }
       capitals_lock.unlock();
     }
@@ -464,14 +465,14 @@ string Game::getcaps()
 {
   capitals_lock.lock();
   string res = to_string(capitals.size()) + "\n";
-  std::map<uint64_t, CELL_TYPE>::iterator i_c;
+  std::map<CELL_TYPE, uint64_t>::iterator i_c;
   for(i_c = capitals.begin(); i_c != capitals.end(); i_c++)
   {
-    int x = get_x(i_c->first);
-    int y = get_y(i_c->first);
-    res = res + to_string(x) + " " 
-              + to_string(y) + " " 
-              + to_string(i_c -> second) + "\n";
+    int x = get_x(i_c->second);
+    int y = get_y(i_c->second);
+    res = res + to_string(x) + " "
+              + to_string(y) + " "
+              + to_string(i_c -> first) + "\n";
   }
   capitals_lock.unlock();
   return res;
