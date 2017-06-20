@@ -52,7 +52,9 @@ const INVALID_REQUEST = -1;
 const FINISHED_REQUEST = 0;
 
 const CRANKFIN = "CRANKFIN";
-const TIMEOUT = "TIMEOUT"
+const TIMEOUT = "TIMEOUT";
+const LOST = "LOST";
+
 var uniqueID = 0;
 
 
@@ -422,6 +424,7 @@ class Grid extends Component {
         switch (lines[0]) {
           case CRANKFIN: this.respondCrankFin(header); break;
           case TIMEOUT: this.respondTimeout(header); break;
+          case LOST: this.respondLost(header); break;
           default: console.log("Parse error(101-200): unknown method");
         }
       } else {
@@ -450,6 +453,15 @@ class Grid extends Component {
   respondTimeout(header) {
     console.log("Responding to TIMEOUT");
     this.respondOne(header);
+  }
+
+  respondLost(header) {
+    console.log("USER HAS LOST!");
+    ws.close();
+    var userResponse = window.confirm("You have lost!\n Do you wish to refresh?");
+    if (userResponse) {
+      window.location.reload();
+    }
   }
 
   respondOne(header) {
@@ -587,8 +599,7 @@ class Grid extends Component {
       var uid = lines[i*3 + 3];
 
       if (row < 0 || row >= height || col < 0 || col >= width) {
-        console.log("ParseCapital : cell out of bounds");
-        return;
+        continue;
       }
 
       board[row][col] = -uid;
@@ -747,22 +758,8 @@ class Grid extends Component {
       return;
 
     var header = generateUniqueHeader(CAPITAL_REQUEST);
-    var width = Math.floor(window.innerWidth / 30);
-    var height = Math.floor((window.innerHeight - headerHeight) / 30);
-    var px1 = offsetHeight;
-    var py1 = offsetWidth;
-    var px2 = height - 1 + offsetHeight;
-    var py2 = width - 1 + offsetWidth;
-
     var capitalRequest = header.toString()
-                        .concat(": CAPITAL px1=")
-                        .concat(px1)
-                        .concat(" py1=")
-                        .concat(py1)
-                        .concat(" px2=")
-                        .concat(px2)
-                        .concat(" py2=")
-                        .concat(py2);
+                        .concat(": CAPITAL");
     send(capitalRequest);
   }
 
