@@ -39,6 +39,7 @@ class Game
   void ping_round();
   void demand_stat();
   int compute_m_cost(int x, int y, CELL_TYPE t);
+  string getdets();
   Action *action;
   private:
   Logger *log;

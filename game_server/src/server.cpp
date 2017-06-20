@@ -377,6 +377,15 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
           return;
         }
       }
+      point = string_seek(virtual_buf, "DETAILS");
+      if(point)
+      {
+        if(serve_details(w, aux, point, comm_buf))
+        {
+          w -> drop(this);
+          return;
+        }
+      }
       point = string_seek(virtual_buf, "PICK");
       if(point)
       {
@@ -774,6 +783,22 @@ int Server::serve_score(WS_info *w, string taskid, const char *virtual_buf, char
   {
     to_send = to_send + "0";
   }
+  if(handle_ws_write(w, comm_buf, 1, to_send))
+  {
+    log -> record(w -> this_con, "Websocket failure, terminating");
+    return 1;
+  }
+  return 0;
+}
+
+int Server::serve_details(WS_info *w, string taskid, const char *virtual_buf, char *comm_buf)
+{
+  const char *point;
+  bool gf = true;
+  string to_send = taskid + ": ";
+  log -> record(w -> this_con, "Showing details.");
+  to_send = to_send + "1 ";
+  to_send = to_sent + game -> getdets();
   if(handle_ws_write(w, comm_buf, 1, to_send))
   {
     log -> record(w -> this_con, "Websocket failure, terminating");

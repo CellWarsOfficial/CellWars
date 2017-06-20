@@ -376,6 +376,11 @@ void Game::ping_round()
   }
 }
 
+string Game::getdets()
+{
+  return "";
+}
+
 void Game::demand_stat()
 {
   log -> demand_stat();
