@@ -172,11 +172,13 @@ void Game::crank_stage(int generations)
     if(b->map[b->rectify_x(x)][b->rectify_y(y)] == DEAD_CELL)
     {
       user_loses(i_c->first);
+      log -> record(ME, "User lost with capital at: " + to_string(x) + " " + to_string(y));
     }
     rips[i_c -> first] = i_c -> second;
   }
   for(i_c = rips.begin(); i_c != rips.end(); i_c++)
   {
+    log -> record(ME, "Deleting the cells of kill user");
     capitals.erase(i_c -> first);
   }
   rips.clear();
@@ -238,6 +240,7 @@ void Game::flush_buf()
       if(i_c == capitals.end())
       {
         capitals[t] = compress_xy(x, y);
+        log -> record(ME, "Added the capital at: " + to_string(x) + " " + to_string(y));
       }
       capitals_lock.unlock();
     }
