@@ -320,10 +320,9 @@ int Game::user_does(int x, int y, CELL_TYPE t, CELL_TYPE user_type)
   if(crank_lock.try_lock())
   {
     uint64_t complessed_coord = compress_xy(x, y);
-    if(user_type != DEAD_CELL)
+    if(user_type == DEAD_CELL)
     {
       change_buffer[complessed_coord] = t;
-      log -> record("Move analyser", "failed check 0");
       crank_lock.unlock();
       return 0;
     }
