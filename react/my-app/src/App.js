@@ -51,7 +51,7 @@ const FINISHED_REQUEST = 0;
 
 const CRANKFIN = "CRANKFIN";
 const TIMEOUT = "TIMEOUT"
-var uniqueID;
+var uniqueID = 0;
 
 
 class App extends Component {
@@ -307,6 +307,15 @@ function completeHeader(header) {
   return false;
 }
 
+function send(request) {
+  if (ws.readyState !== WS_READY) {
+    console.log("ABORT: Websocket is not ready!");
+    ws.close();
+  } else {
+    ws.send(request);
+  }
+}
+
 function requestColor(yourUserID) {
   console.log("Requesting color ".concat(yourUserID));
   var header = generateUniqueHeader(PICK_REQUEST);
@@ -314,13 +323,7 @@ function requestColor(yourUserID) {
                     .concat(": PICK t=")
                     .concat(yourUserID)
   console.log("WS_SEND : '".concat(pickRequest).concat("'"));
-
-  if (ws.readyState !== WS_READY) {
-    console.log("ABORT: Websocket is not ready!");
-    ws.close();
-  } else {
-    ws.send(pickRequest);
-  }
+  send(pickRequest);
 }
 
 class Grid extends Component {
@@ -333,7 +336,6 @@ class Grid extends Component {
       localHighscores: localHighscores,
       displayMode: 0,
       board: emptyGrid(width, height),
-      // cache: emptyGrid(width + LOOKAHEAD*2, height + LOOKAHEAD*2),
     }
     var url = "ws".concat(window.location.toString().substring(4));
     // url = "ws://89.122.28.235:7777/"; // DEBUG
@@ -405,16 +407,11 @@ class Grid extends Component {
   }
 
   respondOne(header) {
-    if (uniqueID === null)
+    if (uniqueID === 0)
       return;
     var response = header.toString().concat(": 1");
     console.log("WS_SEND : '".concat(response).concat("'"));
-
-    if (ws.readyState !== WS_READY) {
-      console.log("ABORT: Websocket is not ready!");
-    } else {
-      ws.send(response);
-    }
+    send(response);
   }
 
   parseUpdate(lines) {
@@ -489,7 +486,7 @@ class Grid extends Component {
   }
 
   submit(board, row, col) {
-    if (uniqueID === null)
+    if (uniqueID === 0)
       return;
     var header = generateUniqueHeader(UPDATE_REQUEST);
     var updateRequest = header.toString()
@@ -500,12 +497,7 @@ class Grid extends Component {
                 .concat(" t=")
                 .concat(board[row][col]);
     console.log("WS_SEND : '".concat(updateRequest).concat("'"));
-
-    if (ws.readyState !== WS_READY) {
-      console.log("ABORT: Websocket is not ready!");
-    } else {
-      ws.send(updateRequest);
-    }
+    send(updateRequest);
   }
 
 
@@ -624,7 +616,7 @@ class Grid extends Component {
   }
 
   get() {
-    if (uniqueID === null)
+    if (uniqueID === 0)
       return;
 
     var header = generateUniqueHeader(QUERY_REQUEST);
@@ -648,13 +640,7 @@ class Grid extends Component {
                 .concat(" py2=")
                 .concat(py2);
     console.log("WS_SEND : '".concat(queryRequest).concat("'"));
-
-    if (ws.readyState !== WS_READY) {
-      console.log("ABORT: Websocket is not ready!");
-    } else {
-      ws.send(queryRequest);
-    }
-
+    send(queryRequest);
   }
 }
 
