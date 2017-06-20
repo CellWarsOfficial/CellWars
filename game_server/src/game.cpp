@@ -327,7 +327,7 @@ int Game::user_does(int x, int y, CELL_TYPE t, CELL_TYPE user_type)
       return 0;
     }
     //FIRST check for type
-    if(t != user_type || t != DEAD_CELL)
+    if(t != user_type && t != DEAD_CELL)
     {
       crank_lock.unlock();
       log -> record("Move analyser", "failed check 1");
