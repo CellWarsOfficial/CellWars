@@ -9,6 +9,7 @@
 #include <csignal>
 #include <chrono>
 #include <ctime>
+#include <cmath>
 
 #define ME "server"
 
@@ -19,6 +20,7 @@ WS_info::WS_info(string this_con, int id, int socketid)
   this -> s = socketid;
   this -> agent = 0;
   this -> task = 101;
+  this -> ms = 0;
 }
 
 void WS_info::drop(Server *server)
@@ -91,6 +93,33 @@ void Server::bcast_message(string message)
   server_lock.unlock();
 }
 
+void Server::inform(int task, int value)
+{
+  std::map<int, WS_info *>::iterator it;
+  WS_info *w;
+  server_lock.lock();
+  switch(task)
+  {
+  case INFORM_UPDATE_MOVES:
+    for(it = monitor.begin(); it != monitor.end(); it++)
+    {
+      w = it -> second;
+      w -> ms = value + ((int) trunc(sqrt(w -> ms))) + get_score(w ->agent);
+    }
+    break;
+  default:
+    break;
+  }
+  server_lock.unlock();
+}
+
+int Server::get_score(CELL_TYPE t)
+{
+  string query = "SELECT null FROM agents.grid WHERE user_id=" + to_string(t);
+  string result = db_info -> run_query(EXPECT_COUNT, query);
+  return stoi(string_get_next_token(result.c_str(), STR_WHITE));
+}
+
 void Server::check_clients(uint8_t opcode)
 {
   server_lock.lock();
@@ -134,7 +163,7 @@ void Server::start(Game *game)
   int con_id = 0;
   while(true){
     news = accept(socketid, (struct sockaddr *) &cli_addr, &clilen);
-    if (news < 0) 
+    if (news < 0)
     {
       log -> record(ME, "Failed to accept client.");
       continue;
@@ -348,6 +377,15 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
           return;
         }
       }
+      point = string_seek(virtual_buf, "DETAILS");
+      if(point)
+      {
+        if(serve_details(w, aux, point, comm_buf))
+        {
+          w -> drop(this);
+          return;
+        }
+      }
       point = string_seek(virtual_buf, "PICK");
       if(point)
       {
@@ -391,7 +429,7 @@ string Server::get_ws_msg(WS_info *w, char *comm_buf)
     opcode = comm_buf[0];
     fin = (opcode & 128);
     opcode = opcode & 31; // 00001111
-    switch(opcode) 
+    switch(opcode)
     {
     case 0 :
     case 1 :
@@ -613,10 +651,10 @@ int Server::serve_query(WS_info *w, string taskid, const char *virtual_buf, char
   string to_send = taskid + ": ";
   if(gf)
   {
-    log -> record(w -> this_con, "will query " 
-                            + to_string(px1) + " " 
-                            + to_string(py1) + " " 
-                            + to_string(px2) + " " 
+    log -> record(w -> this_con, "will query "
+                            + to_string(px1) + " "
+                            + to_string(py1) + " "
+                            + to_string(px2) + " "
                             + to_string(py2)
                             );
     string query = "SELECT * FROM agents.grid WHERE x>=" + to_string(px1)
@@ -684,12 +722,25 @@ int Server::serve_update(WS_info *w, string taskid, const char *virtual_buf, cha
   string to_send = taskid + ": ";
   if(gf)
   {
-    log -> record(w -> this_con, "will update " 
-                            + to_string(px) + " " 
-                            + to_string(py) + " " 
-                            + to_string(t)
-                            );
-    to_send = to_send + to_string(game -> user_does(px, py, t));
+    int move_cost = game -> compute_m_cost(px, py, t);
+    if(move_cost > w -> ms)
+    {
+      log -> record(w -> this_con, "expensive move "
+                              + to_string(px) + " "
+                              + to_string(py) + " "
+                              + to_string(t)
+                              );
+      to_send = to_send + "0";
+    }
+    else
+    {
+      log -> record(w -> this_con, "will update "
+                              + to_string(px) + " "
+                              + to_string(py) + " "
+                              + to_string(t)
+                              );
+      to_send = to_send + to_string(game -> user_does(px, py, t, w -> agent));
+    }
   }
   else
   {
@@ -723,16 +774,29 @@ int Server::serve_score(WS_info *w, string taskid, const char *virtual_buf, char
   string to_send = taskid + ": ";
   if(gf)
   {
-    log -> record(w -> this_con, "will show score of " 
+    log -> record(w -> this_con, "will show score of "
                             + to_string(t)
                             );
-    string query = "SELECT null FROM agents.grid WHERE user_id=" + to_string(t);
-    to_send = to_send + db_info -> run_query(EXPECT_CLIENT, query);
+    to_send = to_send + to_string(get_score(t));
   }
   else
   {
     to_send = to_send + "0";
   }
+  if(handle_ws_write(w, comm_buf, 1, to_send))
+  {
+    log -> record(w -> this_con, "Websocket failure, terminating");
+    return 1;
+  }
+  return 0;
+}
+
+int Server::serve_details(WS_info *w, string taskid, const char *virtual_buf, char *comm_buf)
+{
+  string to_send = taskid + ": ";
+  log -> record(w -> this_con, "Showing details.");
+  to_send = to_send + "1 ";
+  to_send = to_send + game -> getdets();
   if(handle_ws_write(w, comm_buf, 1, to_send))
   {
     log -> record(w -> this_con, "Websocket failure, terminating");
@@ -766,7 +830,7 @@ int Server::serve_pick(WS_info *w, string taskid, const char *virtual_buf, char 
   string to_send = taskid + ": ";
   if((gf) && (t != 0))
   {
-    log -> record(w -> this_con, "player is picking agent " 
+    log -> record(w -> this_con, "player is picking agent "
                             + to_string(t)
                             );
     w -> agent = t;
@@ -809,7 +873,7 @@ FILE *get_file(string file)
   // add index.html default
   if(file.back() == '/')
   {
-    file = file + "index.html"; 
+    file = file + "index.html";
   }
   // use path to file
   file = (string)SV_HTML_PATH + file;
@@ -835,14 +899,14 @@ void catfile(FILE *f, int s, char *buf)
 
 void Server::demand_stat()
 {
-  log -> record(ME, "currently serving " 
-               + to_string(live_conns) 
+  log -> record(ME, "currently serving "
+               + to_string(live_conns)
                + " websockets.");
-  log -> record(ME, "Have server a total of " 
-               + to_string(next_ws) 
+  log -> record(ME, "Have server a total of "
+               + to_string(next_ws)
                + " websockets.");
-  log -> record(ME, "Total serves " 
-               + to_string(conns) 
+  log -> record(ME, "Total serves "
+               + to_string(conns)
                + " and counting! ;)");
   log -> record(ME, "Below is info about my own little database.");
   db_info -> demand_stat();

@@ -202,7 +202,7 @@ int main(int argc, char **argv)
     server = new Server(server_p, db_info2, log);
   }
   game = new Game(db_info, server, log);
-  game_thread = new thread(&Game::start, game, flags, gtc, wait_time);
+  game_thread = new thread(&Game::start, game, flags, gtc, wait_time, 25);
   if(!GFLAG_nosv)
   {
     new thread(&Server::start, server, game);

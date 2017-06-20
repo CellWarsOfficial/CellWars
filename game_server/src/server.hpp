@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <netdb.h> 
+#include <netdb.h>
 #include <string>
 #include <mutex>
 #include <map>
@@ -27,6 +27,7 @@ class WS_info
   int id;
   int s;
   CELL_TYPE agent;
+  int ms;
   std::set<int> expectation;
 };
 
@@ -40,6 +41,8 @@ class Server
   void check_clients(uint8_t opcode);
   void erase(int id);
   void demand_stat();
+  void inform(int task, int value);
+  int get_score(CELL_TYPE t);
   private:
   void act(int s, int id);
   void hijack_ws(string this_con, int s, char *comm_buf);
@@ -51,6 +54,7 @@ class Server
   int serve_update(WS_info *w, string taskid, const char *point, char *comm_buf);
   int serve_score(WS_info *w, string taskid, const char *point, char *comm_buf);
   int serve_pick(WS_info *w, string taskid, const char *point, char *comm_buf);
+  int serve_details(WS_info *w, string taskid, const char *point, char *comm_buf);
   int socketid;
   DB_conn *db_info;
   Game *game;

@@ -29,7 +29,7 @@ class Game
 {
   public:
   Game(DB_conn* db, Server *server, Logger *log);
-  void *start(FLAG_TYPE f, int gtc, int w);
+  void *start(FLAG_TYPE f, int gtc, int w, int bm);
   int get_status();
   string user_want(int px1, int py1, int px2, int py2);
   int user_does(int x, int y, CELL_TYPE t, CELL_TYPE user_type);
@@ -38,6 +38,8 @@ class Game
   void slow_termination();
   void ping_round();
   void demand_stat();
+  int compute_m_cost(int x, int y, CELL_TYPE t);
+  string getdets();
   Action *action;
   Block *get_curr_block(int x, int y);
   private:
@@ -51,6 +53,7 @@ class Game
   int gen_to_run;
   int curr_gen;
   int plan_time;
+  int base_moves;
   std::map <uint64_t, Block*> super_node;
   Block *get_block(int x, int y);
   void check_run();
