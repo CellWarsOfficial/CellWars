@@ -189,26 +189,12 @@ void Game::flush_buf()
   int x, y;
   CELL_TYPE t;
   Block *curr_block;
-  // std::map<uint64_t, Block*>::iterator find_res;
   std::map<uint64_t, CELL_TYPE>::iterator buff_it;
-  //while(change_buffer.size() > 0)
   for(buff_it = change_buffer.begin(); buff_it != change_buffer.end(); buff_it++)
   {
     x = get_x(buff_it->first);
     y = get_y(buff_it->first);
     t = buff_it->second;
-    // o_x = find_block_origin(x);
-    // o_y = find_block_origin(y);
-    // find_res = super_node.find(compress_xy(o_x, o_y));
-    // if(find_res != super_node.end())
-    // {
-    //   curr_block = find_res->second;
-    // }
-    // else
-    // {
-    //   curr_block = new Block(o_x, o_y);
-    //   super_node[compress_xy(o_x, o_y)] = curr_block;
-    // }
     curr_block = get_curr_block(x, y);
     curr_block->set(curr_block->rectify_x(x), curr_block->rectify_y(y), t);
   }
