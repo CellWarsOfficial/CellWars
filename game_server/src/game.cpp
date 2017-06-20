@@ -312,21 +312,43 @@ int Game::user_does(int x, int y, CELL_TYPE t, CELL_TYPE user_type)
 {
   if(crank_lock.try_lock())
   {
-    //FIRST check for type
-
-    if(user_type != t || t != DEAD_CELL)
-    {
-      return 1;
-    }
+    uint64_t complessed_coord = compress_xy(x, y);
     if(user_type == DEAD_CELL)
     {
-      uint64_t complessed_coord = compress_xy(x, y);
       change_buffer[complessed_coord] = t;
+      crank_lock.unlock();
+      return 0;
+    }
+    //FIRST check for type
+    if(t != user_type || t != DEAD_CELL)
+    {
+      crank_lock.unlock();
+      return 0;
+    }
+    //Second check
+    Block *curr_block = get_curr_block(x, y);
+    if(curr_block->map[curr_block->rectify_x(x)][curr_block->rectify_y(y)] + t != user_type)
+    {
+      crank_lock.unlock();
+      return 0;
+    }
+    // Third check for n_neighbours
+    if(!curr_block->can_place_here(t, curr_block->rectify_x(x), curr_block->rectify_y(y)))
+    {
+      crank_lock.unlock();
+      return 0;
+    }
+    //Fourth check
+    std::map<uint64_t, CELL_TYPE>::iterator i;
+    i = change_buffer.find(complessed_coord);
+    if(i != change_buffer.end())
+    {
+      change_buffer.erase(complessed_coord);
+      change_buffer[complessed_coord] = DEAD_CELL;
+      crank_lock.unlock();
       return 1;
     }
-    uint64_t complessed_coord = compress_xy(x, y);
     change_buffer[complessed_coord] = t;
-
     crank_lock.unlock();
     return 1; // success
   }

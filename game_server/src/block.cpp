@@ -123,7 +123,7 @@ void Block::set(int x, int y, CELL_TYPE cell)
 /* BLOCK_SIZE and BLOCK_SIZE + BLOCK_PADDING are notation abuse, they should be
  * BLOCK_FULL - 2 * BLOCK_PADDING and BLOCK_FULL - BLOCK_PADDING, notation
  * similar to w and n. Notation abuse is a result of BLOCK_FULL's definition.
- */ 
+ */
   bool s = (x >= BLOCK_SIZE) && (x < BLOCK_SIZE + BLOCK_PADDING);
   bool e = (y >= BLOCK_SIZE) && (y < BLOCK_SIZE + BLOCK_PADDING);
   if(n)
@@ -269,7 +269,7 @@ int get_y(uint64_t origin)
 }
 
 int find_block_origin(int position)
-{ 
+{
   if(position < 0)
   {
     position = position * (-1) + BLOCK_SIZE - 1;
@@ -281,6 +281,24 @@ int find_block_origin(int position)
     position = position - position % BLOCK_SIZE;
   }
   return position;
+}
+
+int Block::can_place_here(CELL_TYPE input_type, int x, int y)
+{
+  for(int i = -1; i < 2; i++)
+  {
+    for(int j = -1; j < 2; j++)
+    {
+      if(this->map[x + i][y + j] != DEAD_CELL && !(i == 0 && j == 0))
+      {
+        if(this->map[x + i][y + j] != input_type)
+        {
+          return 0;
+        }
+      }
+    }
+  }
+  return 1;
 }
 
 /* Rectify transforms absolute x and/or y into relative x/y.

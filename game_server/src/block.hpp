@@ -10,6 +10,7 @@ class Block
   CELL_TYPE **map;
   int originx, originy;
   uint8_t border_changes[8];
+  int can_place_here(CELL_TYPE input_type, int x, int y);
   //std::bitset<BITMAP_SIZE> *bitmap;
 /* Constructor, copy constructor and destructor
  */
