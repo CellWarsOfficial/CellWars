@@ -228,8 +228,9 @@ void Game::flush_buf()
   Block *curr_block;
   std::map<uint64_t, CELL_TYPE>::iterator buff_it;
   std::map<CELL_TYPE, uint64_t>::iterator i_c;
-  for(buff_it = change_buffer.begin(); buff_it != change_buffer.end(); buff_it++)
+  for(; !buff_order.empty(); buff_order.pop())
   {
+    buff_it = change_buffer.find(buff_order.front());
     x = get_x(buff_it->first);
     y = get_y(buff_it->first);
     t = buff_it->second;
@@ -367,6 +368,7 @@ int Game::user_does(int x, int y, CELL_TYPE t, CELL_TYPE user_type)
     if(user_type == DEAD_CELL)
     {
       change_buffer[complessed_coord] = t;
+      buff_order.push(complessed_coord);
       crank_lock.unlock();
       return 0;
     }
@@ -403,6 +405,7 @@ int Game::user_does(int x, int y, CELL_TYPE t, CELL_TYPE user_type)
       return 1;
     }
     change_buffer[complessed_coord] = t;
+    buff_order.push(complessed_coord);
     crank_lock.unlock();
     log -> record("Move analyser", "success: simple");
     return 1; // success

@@ -66,9 +66,9 @@ class Game
   void up_db();
   void load_from_db();
   void clean_up();
-  //std::queue<int> change_buffer;
   std::map<uint64_t, CELL_TYPE> change_buffer;
   std::map<CELL_TYPE, uint64_t> capitals;
+  std::queue<uint64_t> buff_order;
   std::map<CELL_TYPE, uint64_t> rips;
   std::mutex capitals_lock;
 };
