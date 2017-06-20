@@ -21,6 +21,7 @@ const headerHeight = 230;
 
 const players = 10; //determines how colours are split between userID's
 var yourUserID = 1;
+var InteractiveExampleID = 1;
 
 var DISPLAYMODE = {
   COLOURS: {value: 0, name: "colours"},
@@ -115,6 +116,16 @@ class DisplayModeAdvancer extends Component {
     return (
       <button onClick={this.props.onClick} className={'roundButton'}>
       Alternative Display
+      </button>
+    );
+  }
+}
+
+class ColourSwatcher extends Component {
+  render() {
+    return (
+      <button onClick={this.props.onClick} className={'roundButton'}>
+      Change Colour
       </button>
     );
   }
@@ -338,6 +349,11 @@ class InteractiveExample extends Component {
       displayMode: 0
     }
   }
+
+  advanceColour() {
+    window.alert("here");
+    InteractiveExampleID =  (InteractiveExampleID + 1) % players
+  }
   
   advanceDisplayMode() {
     this.setState({
@@ -352,7 +368,7 @@ class InteractiveExample extends Component {
     }
     */
     const preBoard = this.state.preBoard.slice(); //Clones the preBoard
-    preBoard[row][col] = (this.state.preBoard[row][col] === 0) ? yourUserID : 0; // TODO: need a way of picking your colour for the example, stop using yourUserID
+    preBoard[row][col] = (this.state.preBoard[row][col] === 0) ? InteractiveExampleID : 0; // TODO: need a way of picking your colour for the example, stop using yourUserID
     this.setState({
       preBoard: preBoard
     });
@@ -407,6 +423,7 @@ class InteractiveExample extends Component {
         <br></br>
         {postRows}
         <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()}/> &nbsp;
+        <ColourSwatcher onClick={() => this.advanceColour()}/>
       </div>
     );
   }
