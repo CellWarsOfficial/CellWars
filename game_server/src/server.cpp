@@ -63,7 +63,6 @@ Server::Server(int port, DB_conn *db, Logger *l)
 Server::~Server()
 {
   check_clients(8); // close all open websockets
-  close(socketid);
   log -> record(ME, "Server closed");
 }
 
@@ -108,7 +107,7 @@ void Server::inform(int task, int value)
     }
     break;
   case INFORM_USER_DIES:
-    it = monitor.find((CELL_TYPE)value);
+    for(it = monitor.begin(); it -> second -> agent != (CELL_TYPE)value; it++);
     broadcaster(it -> second, 1, "LOST");
     break;
   default:

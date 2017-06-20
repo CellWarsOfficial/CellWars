@@ -175,7 +175,7 @@ void Game::crank_stage(int generations)
       log -> record(ME, "User lost with capital at: " + to_string(x) + " " + to_string(y));
       rips[i_c -> first] = i_c -> second;
     }
-  }
+  } 
   for(i_c = rips.begin(); i_c != rips.end(); i_c++)
   {
     log -> record(ME, "Deleting the cells of kill user");
@@ -192,9 +192,7 @@ void Game::user_loses(CELL_TYPE user_type)
   log -> record(ME, "Mama, i just killed a capital cell.");
   if(server)
   {
-    printf("damn, %d, he ded", user_type);
     server -> inform(INFORM_USER_DIES, (int)user_type);
-    printf("killed him");
   }
 }
 
