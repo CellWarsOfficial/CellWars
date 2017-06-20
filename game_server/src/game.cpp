@@ -82,7 +82,7 @@ void *Game::start(FLAG_TYPE f, int gtc, int w)
 /* Initialise the game
  */
   flag_protection.lock();
-  curr_gen = 0; 
+  curr_gen = 0;
   log -> record(ME,
       "Creating new game with gtc " + to_string(gtc) + " and w" + to_string(w)
       );
@@ -170,15 +170,23 @@ void Game::flush_buf()
   int x, y, o_x, o_y;
   CELL_TYPE t;
   Block *curr_block;
-  std::map<uint64_t,Block*>::iterator find_res;
-  while(!change_buffer.empty())
+  std::map<uint64_t, Block*>::iterator find_res;
+  std::map<uint64_t, CELL_TYPE>::iterator buff_it;
+  //while(change_buffer.size() > 0)
+  for(buff_it = change_buffer.begin(); buff_it != change_buffer.end(); buff_it++)
   {
-    x = change_buffer.front();
-    change_buffer.pop();
-    y = change_buffer.front();
-    change_buffer.pop();
-    t = (CELL_TYPE) change_buffer.front();
-    change_buffer.pop();
+    // x = change_buffer.front();
+    // change_buffer.pop();
+    // y = change_buffer.front();
+    // change_buffer.pop();
+    // t = (CELL_TYPE) change_buffer.front();
+    // change_buffer.pop();
+
+    x = get_x(buff_it->first);
+    y = get_y(buff_it->first);
+    t = buff_it->second;
+    change_buffer.erase(buff_it);
+
     o_x = find_block_origin(x);
     o_y = find_block_origin(y);
     find_res = super_node.find(compress_xy(o_x, o_y));
@@ -302,13 +310,27 @@ string Game::user_want(int px1, int py1, int px2, int py2)
   return result;
 }
 
-int Game::user_does(int x, int y, CELL_TYPE t)
+int Game::user_does(int x, int y, CELL_TYPE t, CELL_TYPE user_type)
 {
   if(crank_lock.try_lock())
   {
-    change_buffer.push(x);
-    change_buffer.push(y);
-    change_buffer.push((int) t);
+    // change_buffer.push(x);
+    // change_buffer.push(y);
+    // change_buffer.push((int) t);
+    //FIRST check
+    if(user_type != t)
+    {
+      return 1;
+    }
+    if(user_type == DEAD_CELL)
+    {
+      uint64_t complessed_coord = compress_xy(x, y);
+      change_buffer[complessed_coord] = t;
+      return 1;
+    }
+    uint64_t complessed_coord = compress_xy(x, y);
+    change_buffer[complessed_coord] = t;
+
     crank_lock.unlock();
     return 1; // success
   }
@@ -331,7 +353,9 @@ void Game::load_from_db()
     point = string_seek(point, " ");
     t = stoi(string_get_next_token(point, STR_WHITE));
     point = string_seek(point, "\n");
-    user_does(x, y, t); // impersonate user, since he does a good job anyway
+    //TODO: place user_type
+    CELL_TYPE user_type = 0;
+    user_does(x, y, t, user_type); // impersonate user, since he does a good job anyway
   }
   flush_buf();
 }
