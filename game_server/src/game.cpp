@@ -118,6 +118,7 @@ void Game::plan_stage(int wait_time)
   if(server)
   {
     server -> bcast_message("CRANKFIN");
+    server -> inform(INFORM_UPDATE_MOVES, base_moves);
   }
   if(GFLAG_stepped_tick)
   {
@@ -138,7 +139,6 @@ void Game::plan_stage(int wait_time)
   if(server)
   {
     server -> bcast_message("TIMEOUT");
-    server -> inform(INFORM_UPDATE_MOVES, base_moves);
   }
 }
 
@@ -425,7 +425,7 @@ void Game::ping_round()
 
 string Game::getdets()
 {
-  return "";
+  return "gtc=" + to_string(gen_to_run) + " wait=" + to_string(plan_time);
 }
 
 void Game::demand_stat()
