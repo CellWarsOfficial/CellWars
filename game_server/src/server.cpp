@@ -728,7 +728,8 @@ int Server::serve_update(WS_info *w, string taskid, const char *virtual_buf, cha
       log -> record(w -> this_con, "expensive move "
                               + to_string(px) + " "
                               + to_string(py) + " "
-                              + to_string(t)
+                              + to_string(t) + ", user only has "
+                              + to_string(w -> ms)
                               );
       to_send = to_send + "0";
     }
@@ -737,9 +738,18 @@ int Server::serve_update(WS_info *w, string taskid, const char *virtual_buf, cha
       log -> record(w -> this_con, "will update "
                               + to_string(px) + " "
                               + to_string(py) + " "
-                              + to_string(t)
+                              + to_string(t) + " "
+                              + to_string(w -> agent)
                               );
-      to_send = to_send + to_string(game -> user_does(px, py, t, w -> agent));
+      if(game -> user_does(px, py, t, w -> agent))
+      {
+        to_send = to_send + "1";
+        w -> ms -= move_cost;
+      }
+      else
+      {
+        to_send = to_send + "0";
+      }
     }
   }
   else
