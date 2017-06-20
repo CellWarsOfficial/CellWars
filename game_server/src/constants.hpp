@@ -102,5 +102,6 @@
 /* Game sync/API related constants
  */
 #define INFORM_UPDATE_MOVES 1
+#define INFORM_USER_DIES 2
 
 #endif

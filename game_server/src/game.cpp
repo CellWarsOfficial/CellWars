@@ -179,7 +179,10 @@ void Game::crank_stage(int generations)
 
 void Game::user_loses(CELL_TYPE user_type)
 {
-
+  if(server)
+  {
+    server -> inform(INFORM_USER_DIES, user_type);
+  }
 }
 
 Block *Game::get_curr_block(int x, int y)
@@ -447,6 +450,21 @@ void Game::ping_round()
 string Game::getdets()
 {
   return "";
+}
+
+string Game::getcaps()
+{
+  string res = to_string(capitals.size()) + "\n";
+  std::map<uint64_t, CELL_TYPE>::iterator i_c;
+  for(i_c = capitals.begin(); i_c != capitals.end(); i_c++)
+  {
+    int x = get_x(i_c->first);
+    int y = get_y(i_c->first);
+    res = res + to_string(x) + " " 
+              + to_string(y) + " " 
+              + to_string(i_c -> second) + "\n";
+  }
+  return res;
 }
 
 void Game::demand_stat()
