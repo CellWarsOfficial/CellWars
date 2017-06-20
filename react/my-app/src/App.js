@@ -47,6 +47,7 @@ const UPDATE_REQUEST = 2;
 const PICK_REQUEST = 3;
 const SCORE_REQUEST = 4;
 const DETAILS_REQUEST = 5;
+const CAPITAL_REQUEST = 6;
 const INVALID_REQUEST = -1;
 const FINISHED_REQUEST = 0;
 
@@ -71,6 +72,7 @@ class App extends Component {
       page = RULE_PAGE_1;
     }
     this.setState({currentPage: page});
+    this.forceUpdate();
   }
 
   render() {
@@ -142,17 +144,31 @@ function rainbow(n) {
 
 function ImgSquare(props) {
   var src = null;
+  var user = props.userID;
+  var isCapital = false;
 
-  if (props.displayMode === DISPLAYMODE.COLOURS.value) {
-    src = idle_cell;
-  } else if (props.displayMode === DISPLAYMODE.EMOJIS.value) {
-    src = VOL_IMAGES.concat('emojis/').concat((Number(props.userID) + 1000).toString()).concat('.png');
+  if (user < 0) {
+    user = -user;
+    isCapital = true;
   }
 
-  if (props.userID === 0) {
+  if (user === 0) {
     src = small_cell;
+  } else if (props.displayMode === DISPLAYMODE.COLOURS.value) {
+    if (isCapital) {
+      // TODO add capital iamge and set it as src
+      src = VOL_IMAGES.concat('emojis/').concat((Number(user) + 1000).toString()).concat('.png');
+    } else {
+      src = idle_cell;
+    }
+  } else if (props.displayMode === DISPLAYMODE.EMOJIS.value) {
+    if (isCapital) {
+      // TODO add capital iamge and set it as src
+      src = VOL_IMAGES.concat('emojis/').concat((Number(user) + 1000).toString()).concat('.png');
+    } else {
+      src = VOL_IMAGES.concat('emojis/').concat((Number(user) + 1000).toString()).concat('.png');
+    }
   }
-
   return (
     <div style={{display: 'inline-block'}}>
     <input
@@ -160,7 +176,7 @@ function ImgSquare(props) {
     alt="cell"
     src={src}
     onClick={props.onClick}
-    style={{width:20, height:20, backgroundColor:rainbow(props.userID)}}
+    style={{width:20, height:20, backgroundColor:rainbow(user)}}
     className='cell'>
     </input>
     </div>
@@ -326,12 +342,17 @@ function requestColor(yourUserID) {
 }
 
 class Grid extends Component {
+  shouldComponentUpdate(nextProps, nextState) {
+    return false;
+  }
+
   decrementTime() {
     var newTime = Math.max(this.state.timeLeft - 1, 0);
     this.setState({
       timeLeft: newTime,
     });
-  }
+    this.forceUpdate();
+   }
 
   componentDidMount() {
     var intervalId = setInterval(() => {this.decrementTime()}, 1000);
@@ -349,6 +370,7 @@ class Grid extends Component {
       board: emptyGrid(width, height),
       timePerRound: 10,
       timeLeft: 30,
+      capital: [],
     }
     var url = "ws".concat(window.location.toString().substring(4));
     // url = "ws://89.122.28.235:7777/"; // DEBUG
@@ -386,6 +408,7 @@ class Grid extends Component {
           case PICK_REQUEST: this.parsePick(lines); break;
           case QUERY_REQUEST: this.parseQuery(lines); break;
           case DETAILS_REQUEST: this.parseDetails(lines); break;
+          case CAPITAL_REQUEST: this.parseCapital(lines); break;
           case INVALID_REQUEST: console.log("Parse error : Header not found"); break;
           default: console.log("Parse error : Invalid header type (".concat(header).concat(" - ").concat(type).concat(")"));
         }
@@ -412,7 +435,8 @@ class Grid extends Component {
   restartTimer() {
     this.setState({
       timeLeft: this.state.timePerRound,
-    })
+    });
+    this.forceUpdate();
   }
 
 
@@ -543,8 +567,35 @@ class Grid extends Component {
     }
 
     this.updateHighScores(board);
+    this.requestCapitals();
 
     console.log("ParseQuery: successfully parsed query");
+  }
+
+  parseCapital(lines) {
+    var numberOfLines = Number(lines[0]);
+    if (numberOfLines !== ((lines.length - 1)/ 3)) {
+      console.log("ParseCapital: number of lines do not match up");
+      return;
+    }
+
+    const board = this.state.board;
+
+    for (let i = 0; i < numberOfLines; i++) {
+      var row = lines[i*3 + 1] - offsetHeight;
+      var col = lines[i*3 + 2] - offsetWidth;
+      var uid = lines[i*3 + 3];
+
+      if (row < 0 || row >= height || col < 0 || col >= width) {
+        console.log("ParseCapital : cell out of bounds");
+        return;
+      }
+
+      board[row][col] = -uid;
+    }
+
+    this.forceUpdate();
+    console.log("ParseCapital: successfully parsed query");
   }
 
   updateHighScores(board) {
@@ -577,6 +628,7 @@ class Grid extends Component {
     this.setState({
       board: board
     });
+    this.forceUpdate();
     this.submit(board, row, col);
   }
 
@@ -677,7 +729,7 @@ class Grid extends Component {
       <MoveDown onClick={() => this.get()}/>
       <MoveUp onClick={() => this.get()}/>
       <MoveRight onClick={() => this.get()}/>
-      <MoveReset onClick={() => this.get()}/>
+      <MoveReset onClick={() => this.get()}/> &nbsp;
       <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()}/> &nbsp;
       <GetButton onClick={() => this.get()}/> &nbsp;
       </div>);
@@ -687,6 +739,31 @@ class Grid extends Component {
     this.setState({
       displayMode: (this.state.displayMode + 1) % 2
     });
+    this.forceUpdate();
+  }
+
+  requestCapitals() {
+    if (uniqueID === 0)
+      return;
+
+    var header = generateUniqueHeader(CAPITAL_REQUEST);
+    var width = Math.floor(window.innerWidth / 30);
+    var height = Math.floor((window.innerHeight - headerHeight) / 30);
+    var px1 = offsetHeight;
+    var py1 = offsetWidth;
+    var px2 = height - 1 + offsetHeight;
+    var py2 = width - 1 + offsetWidth;
+
+    var capitalRequest = header.toString()
+                        .concat(": CAPITAL px1=")
+                        .concat(px1)
+                        .concat(" py1=")
+                        .concat(py1)
+                        .concat(" px2=")
+                        .concat(px2)
+                        .concat(" py2=")
+                        .concat(py2);
+    send(capitalRequest);
   }
 
   get() {
