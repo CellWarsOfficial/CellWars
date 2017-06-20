@@ -323,6 +323,7 @@ int Game::user_does(int x, int y, CELL_TYPE t, CELL_TYPE user_type)
     if(user_type == DEAD_CELL)
     {
       change_buffer[complessed_coord] = t;
+      log -> record("Move analyser", "failed check 0");
       crank_lock.unlock();
       return 0;
     }
@@ -330,6 +331,7 @@ int Game::user_does(int x, int y, CELL_TYPE t, CELL_TYPE user_type)
     if(t != user_type || t != DEAD_CELL)
     {
       crank_lock.unlock();
+      log -> record("Move analyser", "failed check 1");
       return 0;
     }
     //Second check
@@ -337,12 +339,14 @@ int Game::user_does(int x, int y, CELL_TYPE t, CELL_TYPE user_type)
     if(curr_block->map[curr_block->rectify_x(x)][curr_block->rectify_y(y)] + t != user_type)
     {
       crank_lock.unlock();
+      log -> record("Move analyser", "failed check 2");
       return 0;
     }
     // Third check for n_neighbours
     if(!curr_block->can_place_here(t, curr_block->rectify_x(x), curr_block->rectify_y(y)))
     {
       crank_lock.unlock();
+      log -> record("Move analyser", "failed check 3");
       return 0;
     }
     //Fourth check
@@ -353,10 +357,12 @@ int Game::user_does(int x, int y, CELL_TYPE t, CELL_TYPE user_type)
       change_buffer.erase(complessed_coord);
       change_buffer[complessed_coord] = DEAD_CELL;
       crank_lock.unlock();
+      log -> record("Move analyser", "success: repeated");
       return 1;
     }
     change_buffer[complessed_coord] = t;
     crank_lock.unlock();
+    log -> record("Move analyser", "success: simple");
     return 1; // success
   }
   return 0; // fail
