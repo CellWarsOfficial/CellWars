@@ -372,7 +372,6 @@ class Grid extends Component {
       board: emptyGrid(width, height),
       timePerRound: 10,
       timeLeft: 30,
-      capital: [],
     }
     var url = "ws".concat(window.location.toString().substring(4));
     // url = "ws://89.122.28.235:7777/"; // DEBUG
