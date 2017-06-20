@@ -173,7 +173,13 @@ void Game::crank_stage(int generations)
     {
       user_loses(i_c->first);
     }
+    rips[i_c -> first] = i_c -> second;
   }
+  for(i_c = rips.begin(); i_c != rips.end(); i_c++)
+  {
+    capitals.erase(i_c -> first);
+  }
+  rips.clear();
   capitals_lock.unlock();
   log -> record(ME, "Crank - finish");
   crank_lock.unlock();

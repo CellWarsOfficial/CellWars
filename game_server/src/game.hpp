@@ -69,6 +69,7 @@ class Game
   //std::queue<int> change_buffer;
   std::map<uint64_t, CELL_TYPE> change_buffer;
   std::map<CELL_TYPE, uint64_t> capitals;
+  std::map<CELL_TYPE, uint64_t> rips;
   std::mutex capitals_lock;
 };
 
