@@ -42,6 +42,7 @@ class Game
   string getdets();
   Action *action;
   Block *get_curr_block(int x, int y);
+  void user_loses(CELL_TYPE user_type);
   private:
   Logger *log;
   Server *server;
@@ -66,6 +67,7 @@ class Game
   void clean_up();
   //std::queue<int> change_buffer;
   std::map<uint64_t, CELL_TYPE> change_buffer;
+  std::map<uint64_t, CELL_TYPE> capitals;
 };
 
 #endif

@@ -156,14 +156,30 @@ void Game::crank_stage(int generations)
   {
     action -> crank_for(i -> second, gen_to_run);
   }
+  std::map<uint64_t, CELL_TYPE>::iterator i_c;
   curr_gen += gen_to_run;
   sync_padding();
   if(!GFLAG_nodb)
   {
     up_db();
   }
+  for(i_c = capitals.begin(); i_c != capitals.end(); i_c++)
+  {
+    int x = get_x(i_c->first);
+    int y = get_y(i_c->first);
+    Block *b = get_curr_block(x, y);
+    if(b->map[b->rectify_x(x)][b->rectify_y(y)] == DEAD_CELL)
+    {
+      user_loses(i_c->second);
+    }
+  }
   log -> record(ME, "Crank - finish");
   crank_lock.unlock();
+}
+
+void Game::user_loses(CELL_TYPE user_type)
+{
+
 }
 
 Block *Game::get_curr_block(int x, int y)
@@ -196,12 +212,17 @@ void Game::flush_buf()
   int x, y;
   CELL_TYPE t;
   Block *curr_block;
-  std::map<uint64_t, CELL_TYPE>::iterator buff_it;
+  std::map<uint64_t, CELL_TYPE>::iterator buff_it, i_c;
   for(buff_it = change_buffer.begin(); buff_it != change_buffer.end(); buff_it++)
   {
     x = get_x(buff_it->first);
     y = get_y(buff_it->first);
     t = buff_it->second;
+    i_c = capitals.find(compress_xy(x, y));
+    if(i_c == capitals.end())
+    {
+      capitals[compress_xy(x, y)] = t;
+    }
     curr_block = get_curr_block(x, y);
     curr_block->set(curr_block->rectify_x(x), curr_block->rectify_y(y), t);
   }
@@ -320,6 +341,7 @@ int Game::user_does(int x, int y, CELL_TYPE t, CELL_TYPE user_type)
   if(crank_lock.try_lock())
   {
     uint64_t complessed_coord = compress_xy(x, y);
+    Block *curr_block = get_curr_block(x, y);
     if(user_type == DEAD_CELL)
     {
       change_buffer[complessed_coord] = t;
@@ -334,7 +356,6 @@ int Game::user_does(int x, int y, CELL_TYPE t, CELL_TYPE user_type)
       return 0;
     }
     //Second check
-    Block *curr_block = get_curr_block(x, y);
     if(curr_block->map[curr_block->rectify_x(x)][curr_block->rectify_y(y)] + t != user_type)
     {
       crank_lock.unlock();
