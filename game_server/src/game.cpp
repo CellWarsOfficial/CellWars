@@ -458,7 +458,7 @@ string Game::getdets()
 
 string Game::getcaps()
 {
-  capitals_lock.lock()
+  capitals_lock.lock();
   string res = to_string(capitals.size()) + "\n";
   std::map<uint64_t, CELL_TYPE>::iterator i_c;
   for(i_c = capitals.begin(); i_c != capitals.end(); i_c++)
@@ -469,7 +469,7 @@ string Game::getcaps()
               + to_string(y) + " " 
               + to_string(i_c -> second) + "\n";
   }
-  capitals_lock.unlock()
+  capitals_lock.unlock();
   return res;
 }
 
