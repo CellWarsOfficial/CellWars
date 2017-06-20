@@ -351,7 +351,6 @@ class InteractiveExample extends Component {
   }
 
   advanceColour() {
-    window.alert("here");
     InteractiveExampleID =  (InteractiveExampleID + 1) % players
   }
   
