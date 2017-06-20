@@ -163,6 +163,7 @@ void Game::crank_stage(int generations)
   {
     up_db();
   }
+  capitals_lock.lock();
   for(i_c = capitals.begin(); i_c != capitals.end(); i_c++)
   {
     int x = get_x(i_c->first);
@@ -173,6 +174,7 @@ void Game::crank_stage(int generations)
       user_loses(i_c->second);
     }
   }
+  capitals_lock.unlock();
   log -> record(ME, "Crank - finish");
   crank_lock.unlock();
 }
@@ -218,11 +220,13 @@ void Game::flush_buf()
     x = get_x(buff_it->first);
     y = get_y(buff_it->first);
     t = buff_it->second;
+    capitals_lock.lock();
     i_c = capitals.find(compress_xy(x, y));
     if(i_c == capitals.end())
     {
       capitals[compress_xy(x, y)] = t;
     }
+    capitals_lock.unlock();
     curr_block = get_curr_block(x, y);
     curr_block->set(curr_block->rectify_x(x), curr_block->rectify_y(y), t);
   }
