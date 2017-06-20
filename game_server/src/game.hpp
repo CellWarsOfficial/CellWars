@@ -39,6 +39,7 @@ class Game
   void ping_round();
   void demand_stat();
   Action *action;
+  Block *get_curr_block(int x, int y);
   private:
   Logger *log;
   Server *server;
