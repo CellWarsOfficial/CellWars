@@ -150,10 +150,28 @@ function crankCell(i, j, preBoard) {
       addNeighbour(neighbours, i + x, j + y, preBoard);
     }
   }
-  if (neighbours.length < 2 || neighbours.length > 3) {
-    return 0;
+
+  if (neighbours.length < 2) {
+    return 0; // death by underpop
   }
-  return 5; //TODO: use our variant of rules here
+
+  if (neighbours.length > 3) {
+    return 0; // death by overpop
+  }
+
+  if (neighbours.length == 3 && preBoard[i][j] == 0) {
+    if (neighbours.length === new Set(neighbours).size) {
+      return 0; // no birth as no parent majority
+    }
+
+    if (neighbours[0] == neighbours[1]) {
+      return neighbours[0];
+    } else {
+      return neighbours[2];
+    } // birth by parent majority
+  }
+
+  return preBoard[i][j]; // stays alive
 }
 
 function ImgSquare(props) {
@@ -316,8 +334,15 @@ class InteractiveExample extends Component {
     super();
     this.state = {
       preBoard: emptyGrid(width, height), // TODO: randomly fill this with ~10 cells of different colour initially
-      infobox: ''
+      infobox: '',
+      displayMode: 0
     }
+  }
+  
+  advanceDisplayMode() {
+    this.setState({
+      displayMode: (this.state.displayMode + 1) % 2
+    });
   }
 
   handlePreBoardClick(row, col) {
@@ -381,6 +406,7 @@ class InteractiveExample extends Component {
         {preRows}
         <br></br>
         {postRows}
+        <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()}/> &nbsp;
       </div>
     );
   }
