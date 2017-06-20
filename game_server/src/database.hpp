@@ -24,6 +24,7 @@ class DB_conn
   void rewrite_db(const char *f);
   int safe;
   string run_query(int expectation, string s);
+  string run_query(int expectation, string s, string table);
   void insert_query_builder(CELL_TYPE t, int x, int y);
   void demand_stat();
   void clean_db();

@@ -65,7 +65,13 @@ DB_conn::~DB_conn()
   delete[] answer_buf;
 }
 
+
 string DB_conn::run_query(int expectation, string s)
+{
+  return run_query(expectation, s, "agents.grid");
+}
+
+string DB_conn::run_query(int expectation, string s, string table)
 {
   log -> record(ME, (string)"Running query " + s);
   string wrapper;
@@ -75,17 +81,17 @@ string DB_conn::run_query(int expectation, string s)
   {
   case EXPECT_READ :
   case EXPECT_CLIENT :
-    wrapper = "copy (SELECT count(*) FROM agents.grid";
+    wrapper = "copy (SELECT count(*) FROM " + table;
     point = string_seek(s.c_str(), "WHERE");
     if(point)
     {
       wrapper = wrapper + " WHERE " + string_get_next_token(point, "");
     }
-    wrapper = wrapper + ") to STDOUT DELIMITER ' '; copy (" + s 
+    wrapper = wrapper + ") to STDOUT DELIMITER ' '; copy (" + s
               + ") TO STDOUT DELIMITER ' '; \\echo #\n";
     break;
   case EXPECT_COUNT :
-    wrapper = "copy (SELECT count(*) FROM agents.grid";
+    wrapper = "copy (SELECT count(*) FROM " + table;
     point = string_seek(s.c_str(), "WHERE");
     if(point)
     {
@@ -93,7 +99,7 @@ string DB_conn::run_query(int expectation, string s)
     }
     wrapper = wrapper + ") to STDOUT DELIMITER ' '; \\echo #\n";
     break;
-  default : 
+  default :
     wrapper = s + "; \\echo #\n";
     break;
   }

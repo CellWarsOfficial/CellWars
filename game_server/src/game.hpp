@@ -40,8 +40,10 @@ class Game
   void demand_stat();
   int compute_m_cost(int x, int y, CELL_TYPE t);
   string getdets();
+  string getcaps();
   Action *action;
   Block *get_curr_block(int x, int y);
+  void user_loses(CELL_TYPE user_type);
   private:
   Logger *log;
   Server *server;
@@ -66,6 +68,7 @@ class Game
   void clean_up();
   //std::queue<int> change_buffer;
   std::map<uint64_t, CELL_TYPE> change_buffer;
+  std::map<uint64_t, CELL_TYPE> capitals;
 };
 
 #endif

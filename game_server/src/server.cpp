@@ -107,6 +107,11 @@ void Server::inform(int task, int value)
       w -> ms = value + ((int) trunc(sqrt(w -> ms))) + get_score(w ->agent);
     }
     break;
+  case INFORM_USER_DIES:
+    it = monitor.find(value);
+    broadcaster(it -> second, 1, "LOST");
+    new thread(&Server::broadcaster, this, it->second, 8, "Standard msg");
+    break;
   default:
     break;
   }
@@ -354,6 +359,16 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
       {
         log -> record(this_con, "Query received");
         if(serve_query(w, aux, point, comm_buf))
+        {
+          w -> drop(this);
+          return;
+        }
+      }
+      point = string_seek(virtual_buf, "CAPITAL");
+      if(point)
+      {
+        log -> record(this_con, "Capitalist query received");
+        if(serve_capitals(w, aux, point, comm_buf))
         {
           w -> drop(this);
           return;
@@ -807,6 +822,20 @@ int Server::serve_details(WS_info *w, string taskid, const char *virtual_buf, ch
   log -> record(w -> this_con, "Showing details.");
   to_send = to_send + "1 ";
   to_send = to_send + game -> getdets();
+  if(handle_ws_write(w, comm_buf, 1, to_send))
+  {
+    log -> record(w -> this_con, "Websocket failure, terminating");
+    return 1;
+  }
+  return 0;
+}
+
+int Server::serve_capitals(WS_info *w, string taskid, const char *virtual_buf, char *comm_buf)
+{
+  string to_send = taskid + ": ";
+  log -> record(w -> this_con, "Showing details.");
+  to_send = to_send + "1 ";
+  to_send = to_send + game -> getcaps();
   if(handle_ws_write(w, comm_buf, 1, to_send))
   {
     log -> record(w -> this_con, "Websocket failure, terminating");
