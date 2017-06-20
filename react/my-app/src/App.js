@@ -79,7 +79,7 @@ class App extends Component {
           <RulePage3 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_4)}/>
           <RulePage4 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(lastPage)}/>
           <UserPicker currentPage = {this.state.currentPage} onClick={() => this.setPageTo(GAME_PAGE)}/>
-          <Grid currentPage = {this.state.currentPage}/>
+          <InteractiveExample currentPage = {this.state.currentPage}/>
         </div>
       </div>
     );
@@ -130,16 +130,47 @@ function rainbow(n) {
 }
 
 
+function addNeighbour(neighbours, p1, p2, preBoard) {
+  if (p1 < 0 || p1 >= INTERACTIVE_EXAMPLE_GRID_SIZE || p2 < 0 || p2 >= INTERACTIVE_EXAMPLE_GRID_SIZE) {
+    return;
+  }
+  if (preBoard[p1][p2] == 0) {
+    return;
+  }
+  neighbours.push(preBoard[p1][p2]);
+}
+
+function crankCell(i, j, preBoard) {
+  var neighbours = [];
+  for (var x = -1; x <= 1; x++) {
+    for (var y = -1; y <= 1; y++) {
+      if (x == 0 && y == 0) {
+        continue;
+      }
+      addNeighbour(neighbours, i + x, j + y, preBoard);
+    }
+  }
+  if (neighbours.length < 2 || neighbours.length > 3) {
+    return 0;
+  }
+  return 5; //TODO: use our variant of rules here
+}
+
 function ImgSquare(props) {
   var src = null;
+
+  var cellColourID = props.userID;
+  if (props.boardType == 'postBoard') {
+    cellColourID = crankCell(props.row, props.col, props.preBoard);
+  }
 
   if (props.displayMode === DISPLAYMODE.COLOURS.value) {
     src = idle_cell;
   } else if (props.displayMode === DISPLAYMODE.EMOJIS.value) {
-    src = VOL_IMAGES.concat('emojis/').concat((Number(props.userID) + 1000).toString()).concat('.png');
+    src = VOL_IMAGES.concat('emojis/').concat((Number(cellColourID) + 1000).toString()).concat('.png');
   }
 
-  if (props.userID === 0) {
+  if (cellColourID === 0) {
     src = small_cell;
   }
 
@@ -150,7 +181,7 @@ function ImgSquare(props) {
     alt="cell"
     src={src}
     onClick={props.onClick}
-    style={{width:20, height:20, backgroundColor:rainbow(props.userID)}}
+    style={{width:20, height:20, backgroundColor:rainbow(cellColourID)}}
     className='cell'>
     </input>
     </div>
@@ -163,6 +194,10 @@ class Row extends Component {
   renderSquare(userIDturtle, row, col) {
     return (
       <ImgSquare
+      boardType={this.props.boardType}
+      preBoard={this.props.preBoard}
+      row={row}
+      col={col}
       key={row.toString().concat(col.toString())}
       userID={userIDturtle}
       onClick={() => this.props.onClick(row, col)}
@@ -285,31 +320,7 @@ class InteractiveExample extends Component {
     }
   }
 
-  addNeighbour(neighbours, p1, p2) {
-    if (p1 < 0 || p1 >= INTERACTIVE_EXAMPLE_GRID_SIZE || p2 < 0 || p2 >= INTERACTIVE_EXAMPLE_GRID_SIZE) {
-      return;
-    }
-    neighbours.push(this.state.preBoard[p1][p2]);
-  }
-
-  crankCell(i, j) {
-    var neighbours = [];
-    for (var x = -1; x <= 1; x++) {
-      for (var y = -1; y <= 1; y++) {
-        this.addNeighbour(neighbours, i + x, j + y);
-      }
-    }
-
-    if (neighbours.length < 2 || neighbours.length > 3) {
-      return 0;
-    }
-  }
-
-  handleMouseOver(row, col) {
-
-  }
-
-  handleClick(row, col) {
+  handlePreBoardClick(row, col) {
     /*
     if (row == 0 || row == INTERACTIVE_EXAMPLE_GRID_SIZE || col == 0 || col == INTERACTIVE_EXAMPLE_GRID_SIZE) { // disallows toggling border cells
       return;
@@ -322,19 +333,34 @@ class InteractiveExample extends Component {
     });
   }
 
-  renderRow(row, boardType) {
+  renderPreRow(row) {
     return (
       <div key={row.toString()}>
         <Row
-          boardType={boardType}
-          squares={this.state.board[row]}
+          boardType={'preBoard'}
+          squares={this.state.preBoard[row]}
           row={row}
-          onClick={(r, c) => this.handleClick(r, c)}
+          onClick={(r, c) => this.handlePreBoardClick(r, c)}
           displayMode={this.state.displayMode}
         />
       </div>
     );
   }
+
+  renderPostRow(row) {
+    return (
+      <div key={row.toString()}>
+        <Row
+          boardType={'postBoard'}
+          preBoard={this.state.preBoard}
+          squares={this.state.preBoard[row]}
+          row={row}
+          onClick={null}
+          displayMode={this.state.displayMode}
+        />
+      </div>
+    );
+  } 
   
   render() {
     if (this.props.currentPage !== GAME_PAGE) { // this will change
@@ -342,17 +368,18 @@ class InteractiveExample extends Component {
     }
     var preRows = [];
     for (var i = 0; i < INTERACTIVE_EXAMPLE_GRID_SIZE; i++) {
-      preRows.push(this.renderRow(i, 'preBoard'));
+      preRows.push(this.renderPreRow(i));
     }
     var postRows = [];
     for (var j = 0; j < INTERACTIVE_EXAMPLE_GRID_SIZE; j++) {
-      postRows.push(this.renderRow(j, 'postBoard'));
+      postRows.push(this.renderPostRow(j));
     }
 
     return (
       <div>
         <h1> {this.state.infobox} </h1>
         {preRows}
+        <br></br>
         {postRows}
       </div>
     );
