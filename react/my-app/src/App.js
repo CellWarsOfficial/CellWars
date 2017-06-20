@@ -18,7 +18,7 @@ var height = 20; //dimensions of the board
 var offsetWidth = 0;
 var offsetHeight = 0;
 
-const headerHeight = 230;
+const headerHeight = 180;
 
 const players = 10; //determines how colours are split between userID's
 var yourUserID = 0;
