@@ -40,6 +40,7 @@ class Game
   void demand_stat();
   int compute_m_cost(int x, int y, CELL_TYPE t);
   string getdets();
+  string getcaps();
   Action *action;
   Block *get_curr_block(int x, int y);
   void user_loses(CELL_TYPE user_type);

@@ -55,6 +55,7 @@ class Server
   int serve_score(WS_info *w, string taskid, const char *point, char *comm_buf);
   int serve_pick(WS_info *w, string taskid, const char *point, char *comm_buf);
   int serve_details(WS_info *w, string taskid, const char *point, char *comm_buf);
+  int serve_capitals(WS_info *w, string taskid, const char *point, char *comm_buf);
   int socketid;
   DB_conn *db_info;
   Game *game;
