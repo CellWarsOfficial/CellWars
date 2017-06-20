@@ -834,7 +834,6 @@ int Server::serve_capitals(WS_info *w, string taskid, const char *virtual_buf, c
 {
   string to_send = taskid + ": ";
   log -> record(w -> this_con, "Showing details.");
-  to_send = to_send + "1 ";
   to_send = to_send + game -> getcaps();
   if(handle_ws_write(w, comm_buf, 1, to_send))
   {

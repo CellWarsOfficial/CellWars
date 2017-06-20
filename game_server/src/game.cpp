@@ -181,6 +181,7 @@ void Game::crank_stage(int generations)
 
 void Game::user_loses(CELL_TYPE user_type)
 {
+  log -> record(ME, "Mama, i just killed a capital cell.");
   if(server)
   {
     server -> inform(INFORM_USER_DIES, user_type);
@@ -223,13 +224,16 @@ void Game::flush_buf()
     x = get_x(buff_it->first);
     y = get_y(buff_it->first);
     t = buff_it->second;
-    capitals_lock.lock();
-    i_c = capitals.find(compress_xy(x, y));
-    if(i_c == capitals.end())
+    if(GFLAG_running)
     {
-      capitals[compress_xy(x, y)] = t;
+      capitals_lock.lock();
+      i_c = capitals.find(compress_xy(x, y));
+      if(i_c == capitals.end())
+      {
+        capitals[compress_xy(x, y)] = t;
+      }
+      capitals_lock.unlock();
     }
-    capitals_lock.unlock();
     curr_block = get_curr_block(x, y);
     curr_block->set(curr_block->rectify_x(x), curr_block->rectify_y(y), t);
   }
