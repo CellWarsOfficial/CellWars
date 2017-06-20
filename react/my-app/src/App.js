@@ -46,6 +46,7 @@ const QUERY_REQUEST = 1;
 const UPDATE_REQUEST = 2;
 const PICK_REQUEST = 3;
 const SCORE_REQUEST = 4;
+const DETAILS_REQUEST = 5;
 const INVALID_REQUEST = -1;
 const FINISHED_REQUEST = 0;
 
@@ -130,8 +131,6 @@ class DisplayModeAdvancer extends Component {
     );
   }
 }
-
-
 
 
 function rainbow(n) {
@@ -308,6 +307,7 @@ function completeHeader(header) {
 }
 
 function send(request) {
+  console.log("WS_SEND : '".concat(request).concat("'"));
   if (ws.readyState !== WS_READY) {
     console.log("ABORT: Websocket is not ready!");
     ws.close();
@@ -322,11 +322,22 @@ function requestColor(yourUserID) {
   var pickRequest = header.toString()
                     .concat(": PICK t=")
                     .concat(yourUserID)
-  console.log("WS_SEND : '".concat(pickRequest).concat("'"));
   send(pickRequest);
 }
 
 class Grid extends Component {
+  decrementTime() {
+    var newTime = Math.max(this.state.timeLeft - 1, 0);
+    this.setState({
+      timeLeft: newTime,
+    });
+  }
+
+  componentDidMount() {
+    var intervalId = setInterval(() => {this.decrementTime()}, 1000);
+    this.setState({intervalId: intervalId});
+    window.addEventListener("resize", () => {this.get()});
+  }
 
   constructor() {
     super();
@@ -336,6 +347,8 @@ class Grid extends Component {
       localHighscores: localHighscores,
       displayMode: 0,
       board: emptyGrid(width, height),
+      timePerRound: 10,
+      timeLeft: 30,
     }
     var url = "ws".concat(window.location.toString().substring(4));
     // url = "ws://89.122.28.235:7777/"; // DEBUG
@@ -372,6 +385,7 @@ class Grid extends Component {
           case SCORE_REQUEST: this.parseScore(lines); break;
           case PICK_REQUEST: this.parsePick(lines); break;
           case QUERY_REQUEST: this.parseQuery(lines); break;
+          case DETAILS_REQUEST: this.parseDetails(lines); break;
           case INVALID_REQUEST: console.log("Parse error : Header not found"); break;
           default: console.log("Parse error : Invalid header type (".concat(header).concat(" - ").concat(type).concat(")"));
         }
@@ -395,9 +409,17 @@ class Grid extends Component {
     }.bind(this);
   }
 
+  restartTimer() {
+    this.setState({
+      timeLeft: this.state.timePerRound,
+    })
+  }
+
+
   respondCrankFin(header) {
     console.log("Responding to CRANKFIN");
     this.respondOne(header);
+    this.restartTimer();
     this.get();
   }
 
@@ -410,7 +432,6 @@ class Grid extends Component {
     if (uniqueID === 0)
       return;
     var response = header.toString().concat(": 1");
-    console.log("WS_SEND : '".concat(response).concat("'"));
     send(response);
   }
 
@@ -434,6 +455,54 @@ class Grid extends Component {
     }
   }
 
+  parseDetails(lines) {
+    if (Number(lines[0]) === 0) {
+      console.log("ParseDetails: game is ending..");
+      return;
+    } else if (Number(lines[0] < 0)) {
+      console.log("ParseDetails: unexpected initial number (".concat(lines[0]).concat(")"));
+      return;
+    }
+    for (let i = 1; i < lines.length; i++) {
+      var data = lines[i].split("=");
+      if (data.length !== 2) {
+        console.log("ParseDetails: unexpected number of '='s");
+        return;
+      }
+      switch (data[0]) {
+        case "gtc": this.parseDetailsGtc(data[1]); break;
+        case "wait": this.parseDetailsWait(data[1]); break;
+        default: console.log("ParseDetails: unexpected param (".concat(lines[i]).concat(")")); return;
+      }
+    }
+    console.log("ParseDetails: successfully parsed details");
+  }
+
+  parseDetailsGtc(value) {
+    console.log("ParseDetailsGtc : Currently ignoring(".concat(value).concat(")"));
+  }
+
+  parseDetailsWait(value) {
+    this.updateTimePerRound(Number(value));
+  }
+
+  updateTimePerRound(time) {
+    this.setState({
+      timePerRound: time,
+    });
+  }
+
+  fetchDetails() {
+    if (uniqueID === 0)
+      return;
+
+    var header = generateUniqueHeader(DETAILS_REQUEST);
+
+    var detailsRequest = header.toString().concat(": DETAILS");
+
+    send(detailsRequest);
+  }
+
   parseScore(lines) {
     // TODO
     console.log("ParseScore: currently ignoring score response");
@@ -446,6 +515,7 @@ class Grid extends Component {
     uniqueID = Number(lines[0]);
     console.log("ParsePick : uid received ".concat(lines[0]));
     this.get();
+    this.fetchDetails();
   }
 
   parseQuery(lines) {
@@ -496,7 +566,6 @@ class Grid extends Component {
                 .concat(col + offsetWidth)
                 .concat(" t=")
                 .concat(board[row][col]);
-    console.log("WS_SEND : '".concat(updateRequest).concat("'"));
     send(updateRequest);
   }
 
@@ -546,22 +615,28 @@ class Grid extends Component {
     }
     var opacity = 1 - highscorePosition * 0.8 / players;
 
+    return (
+      <div key={player.toString()} style={{display: 'inline-block'}}>
+      <input 
+      type="image"
+      alt="cell"
+      src={src}
+      style={{width:20, height:20, backgroundColor:rainbow(player), border: border, opacity: opacity}}
+      className='cell'>
+      </input>
+      <h6  style={{color: rainbow(player), opacity: opacity}}>
+      {':'.concat(score.toString())}
+      </h6>
+      </div>
+    );
+  }
 
-  return (
-    <div key={player.toString()} style={{display: 'inline-block'}}>
-    <input 
-    type="image"
-    alt="cell"
-    src={src}
-    style={{width:20, height:20, backgroundColor:rainbow(player), border: border, opacity: opacity}}
-    className='cell'>
-    </input>
-    <h6  style={{color: rainbow(player), opacity: opacity}}>
-    {':'.concat(score.toString())}
-    </h6>
-    </div>
-  );
-
+  renderTime() {
+    return (
+      <div key={this.state.timeLeft.toString()} className='time'>
+      Time Left : {this.state.timeLeft.toString()}
+      </div>
+    );
   }
 
   render() {
@@ -591,8 +666,11 @@ class Grid extends Component {
       biggestPlayer = -1;
     }
 
+    var time = this.renderTime();
+
     return (
       <div>
+      {time}
       {scoresC}
       {rows}
       <MoveLeft onClick={() => this.get()}/>
@@ -603,10 +681,6 @@ class Grid extends Component {
       <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()}/> &nbsp;
       <GetButton onClick={() => this.get()}/> &nbsp;
       </div>);
-  }
-
-  componentDidMount() {
-    window.addEventListener("resize", () => {this.get()});
   }
 
   advanceDisplayMode() {
@@ -639,7 +713,6 @@ class Grid extends Component {
                 .concat(px2)
                 .concat(" py2=")
                 .concat(py2);
-    console.log("WS_SEND : '".concat(queryRequest).concat("'"));
     send(queryRequest);
   }
 }
