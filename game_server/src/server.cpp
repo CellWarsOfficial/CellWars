@@ -108,9 +108,8 @@ void Server::inform(int task, int value)
     }
     break;
   case INFORM_USER_DIES:
-    it = monitor.find(value);
+    it = monitor.find((CELL_TYPE)value);
     broadcaster(it -> second, 1, "LOST");
-    new thread(&Server::broadcaster, this, it->second, 8, "Standard msg");
     break;
   default:
     break;

@@ -192,7 +192,9 @@ void Game::user_loses(CELL_TYPE user_type)
   log -> record(ME, "Mama, i just killed a capital cell.");
   if(server)
   {
-    server -> inform(INFORM_USER_DIES, user_type);
+    printf("damn, %d, he ded", user_type);
+    server -> inform(INFORM_USER_DIES, (int)user_type);
+    printf("killed him");
   }
 }
 
