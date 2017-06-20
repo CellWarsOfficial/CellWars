@@ -173,8 +173,8 @@ void Game::crank_stage(int generations)
     {
       user_loses(i_c->first);
       log -> record(ME, "User lost with capital at: " + to_string(x) + " " + to_string(y));
+      rips[i_c -> first] = i_c -> second;
     }
-    rips[i_c -> first] = i_c -> second;
   }
   for(i_c = rips.begin(); i_c != rips.end(); i_c++)
   {
@@ -233,7 +233,7 @@ void Game::flush_buf()
     x = get_x(buff_it->first);
     y = get_y(buff_it->first);
     t = buff_it->second;
-    if(GFLAG_running)
+    if(GFLAG_continue)
     {
       capitals_lock.lock();
       i_c = capitals.find(t);
@@ -241,6 +241,7 @@ void Game::flush_buf()
       {
         capitals[t] = compress_xy(x, y);
         log -> record(ME, "Added the capital at: " + to_string(x) + " " + to_string(y));
+        log -> record(ME, "There are " + to_string(capitals.size()) + " capitals inside now.");
       }
       capitals_lock.unlock();
     }
