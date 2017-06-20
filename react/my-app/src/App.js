@@ -8,6 +8,7 @@ const big_cell = VOL_IMAGES.concat('big_cell.png')
 const logo = VOL_IMAGES.concat('logo.gif');
 const small_cell = VOL_IMAGES.concat('small_cell.png');
 const arrow = VOL_IMAGES.concat('arrow.png');
+const crown = VOL_IMAGES.concat('crown.png');
 
 var ws;
 
@@ -159,14 +160,14 @@ function ImgSquare(props) {
   } else if (props.displayMode === DISPLAYMODE.COLOURS.value) {
     if (isCapital) {
       // TODO add capital iamge and set it as src
-      src = VOL_IMAGES.concat('emojis/').concat((Number(user) + 1000).toString()).concat('.png');
+      src = crown;
     } else {
       src = idle_cell;
     }
   } else if (props.displayMode === DISPLAYMODE.EMOJIS.value) {
     if (isCapital) {
       // TODO add capital iamge and set it as src
-      src = VOL_IMAGES.concat('emojis/').concat((Number(user) + 1000).toString()).concat('.png');
+      src = crown;
     } else {
       src = VOL_IMAGES.concat('emojis/').concat((Number(user) + 1000).toString()).concat('.png');
     }
