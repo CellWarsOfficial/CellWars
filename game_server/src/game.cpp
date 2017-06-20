@@ -71,7 +71,7 @@ void Game::check_run()
   execution_lock.unlock();
 }
 
-void *Game::start(FLAG_TYPE f, int gtc, int w)
+void *Game::start(FLAG_TYPE f, int gtc, int w, int bm)
 {
   if(GFLAG_started)
   {
@@ -89,6 +89,7 @@ void *Game::start(FLAG_TYPE f, int gtc, int w)
   flags = (f & NO_LAST_MASK) | JUST_28_MASK; // unset running and set started.
   gen_to_run = gtc;
   plan_time = w;
+  base_moves = bm;
   action = new Crank();
   if(!GFLAG_nodb)
   {
@@ -130,13 +131,14 @@ void Game::plan_stage(int wait_time)
     std::this_thread::sleep_for(std::chrono::seconds(wait_time));
   }
   log -> record(ME, "Planning time - timeout ");
-  if(server)
-  {
-    server -> bcast_message("TIMEOUT");
-  }
   if(!GFLAG_nodb)
   {
     up_db();
+  }
+  if(server)
+  {
+    server -> bcast_message("TIMEOUT");
+    server -> inform(INFORM_UPDATE_MOVES, base_moves);
   }
 }
 
@@ -162,6 +164,11 @@ void Game::crank_stage(int generations)
   }
   log -> record(ME, "Crank - finish");
   crank_lock.unlock();
+}
+
+int Game::compute_m_cost(int x, int y, CELL_TYPE t)
+{
+  return 5;
 }
 
 void Game::flush_buf()

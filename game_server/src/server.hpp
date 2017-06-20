@@ -27,6 +27,7 @@ class WS_info
   int id;
   int s;
   CELL_TYPE agent;
+  int ms;
   std::set<int> expectation;
 };
 
@@ -40,6 +41,8 @@ class Server
   void check_clients(uint8_t opcode);
   void erase(int id);
   void demand_stat();
+  void inform(int task, int value);
+  int get_score(CELL_TYPE t);
   private:
   void act(int s, int id);
   void hijack_ws(string this_con, int s, char *comm_buf);

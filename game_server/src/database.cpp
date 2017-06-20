@@ -70,20 +70,32 @@ string DB_conn::run_query(int expectation, string s)
   log -> record(ME, (string)"Running query " + s);
   string wrapper;
   int len, aux, tlen = 0;
-  if(expectation)
+  const char *point;
+  switch(expectation)
   {
+  case EXPECT_READ :
+  case EXPECT_CLIENT :
     wrapper = "copy (SELECT count(*) FROM agents.grid";
-    const char *point = string_seek(s.c_str(), "WHERE");
+    point = string_seek(s.c_str(), "WHERE");
     if(point)
     {
       wrapper = wrapper + " WHERE " + string_get_next_token(point, "");
     }
     wrapper = wrapper + ") to STDOUT DELIMITER ' '; copy (" + s 
               + ") TO STDOUT DELIMITER ' '; \\echo #\n";
-  }
-  else
-  {
+    break;
+  case EXPECT_COUNT :
+    wrapper = "copy (SELECT count(*) FROM agents.grid";
+    point = string_seek(s.c_str(), "WHERE");
+    if(point)
+    {
+      wrapper = wrapper + " WHERE " + string_get_next_token(point, "");
+    }
+    wrapper = wrapper + ") to STDOUT DELIMITER ' '; \\echo #\n";
+    break;
+  default : 
     wrapper = s + "; \\echo #\n";
+    break;
   }
   const char *c = wrapper.c_str();
 

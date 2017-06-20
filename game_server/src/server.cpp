@@ -9,6 +9,7 @@
 #include <csignal>
 #include <chrono>
 #include <ctime>
+#include <cmath>
 
 #define ME "server"
 
@@ -19,6 +20,7 @@ WS_info::WS_info(string this_con, int id, int socketid)
   this -> s = socketid;
   this -> agent = 0;
   this -> task = 101;
+  this -> ms = 0;
 }
 
 void WS_info::drop(Server *server)
@@ -89,6 +91,33 @@ void Server::bcast_message(string message)
     new thread(&Server::broadcaster, this, it->second, 1, message);
   }
   server_lock.unlock();
+}
+
+void Server::inform(int task, int value)
+{
+  std::map<int, WS_info *>::iterator it;
+  WS_info *w;
+  server_lock.lock();
+  switch(task)
+  {
+  case INFORM_UPDATE_MOVES:
+    for(it = monitor.begin(); it != monitor.end(); it++)
+    {
+      w = it -> second;
+      w -> ms = value + ((int) trunc(sqrt(w -> ms))) + get_score(w ->agent);
+    }
+    break;
+  default:
+    break;
+  }
+  server_lock.unlock();
+}
+
+int Server::get_score(CELL_TYPE t)
+{
+  string query = "SELECT null FROM agents.grid WHERE user_id=" + to_string(t);
+  string result = db_info -> run_query(EXPECT_COUNT, query);
+  return stoi(string_get_next_token(result.c_str(), STR_WHITE));
 }
 
 void Server::check_clients(uint8_t opcode)
@@ -684,12 +713,25 @@ int Server::serve_update(WS_info *w, string taskid, const char *virtual_buf, cha
   string to_send = taskid + ": ";
   if(gf)
   {
-    log -> record(w -> this_con, "will update " 
-                            + to_string(px) + " " 
-                            + to_string(py) + " " 
-                            + to_string(t)
-                            );
-    to_send = to_send + to_string(game -> user_does(px, py, t));
+    int move_cost = game -> compute_m_cost(px, py, t, w -> agent);
+    if(move_cost > w -> ms)
+    {
+      log -> record(w -> this_con, "expensive move " 
+                              + to_string(px) + " " 
+                              + to_string(py) + " " 
+                              + to_string(t)
+                              );
+      to_send = to_send + "0";
+    }
+    else
+    {
+      log -> record(w -> this_con, "will update " 
+                              + to_string(px) + " " 
+                              + to_string(py) + " " 
+                              + to_string(t)
+                              );
+      to_send = to_send + to_string(game -> user_does(px, py, t));
+    }
   }
   else
   {
@@ -726,8 +768,7 @@ int Server::serve_score(WS_info *w, string taskid, const char *virtual_buf, char
     log -> record(w -> this_con, "will show score of " 
                             + to_string(t)
                             );
-    string query = "SELECT null FROM agents.grid WHERE user_id=" + to_string(t);
-    to_send = to_send + db_info -> run_query(EXPECT_CLIENT, query);
+    to_send = to_send + to_string(get_score(t));
   }
   else
   {
