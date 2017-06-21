@@ -12,9 +12,14 @@ h6 {
     margin-right: 20px;
 }
 
+.time {
+    font-size: 30px;
+    font-weight: bold;
+}
+
 .App-header {
   background-color: #222;
-  height: 150px;
+  height: 100px;
   padding: 20px;
   color: white;
 }

@@ -114,3 +114,26 @@ int str_eq(string s1, string s2)
   }
   return 1;
 }
+
+int is_num(const char *s)
+{
+  if(s == NULL)
+  {
+    return 0;
+  }
+  int i = 0;
+  if(s[i] == '-')
+  {
+    i++;
+  }
+  if((s[i]) && (in(s[i], STR_DIGITS)))
+  {
+    return 1;
+  }
+  return 0;
+}
+
+int is_num(string s)
+{
+  return is_num(s.c_str());
+}

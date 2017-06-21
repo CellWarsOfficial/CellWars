@@ -8,6 +8,7 @@ const big_cell = VOL_IMAGES.concat('big_cell.png')
 const logo = VOL_IMAGES.concat('logo.gif');
 const small_cell = VOL_IMAGES.concat('small_cell.png');
 const arrow = VOL_IMAGES.concat('arrow.png');
+const crown = VOL_IMAGES.concat('crown.png');
 
 var ws;
 
@@ -17,7 +18,7 @@ var height = 20; //dimensions of the board
 var offsetWidth = 0;
 var offsetHeight = 0;
 
-const headerHeight = 230;
+const headerHeight = 180;
 
 const players = 10; //determines how colours are split between userID's
 var yourUserID = 1;
@@ -39,8 +40,24 @@ const RULE_PAGE_4 = 6
 
 const WS_READY = 1;
 
-const UPDATE_FAIL = 1;
-const UPDATE_SUCCESS = 2;
+const UPDATE_FAIL = 0;
+const UPDATE_SUCCESS = 1;
+
+var requests = [];
+const QUERY_REQUEST = 1;
+const UPDATE_REQUEST = 2;
+const PICK_REQUEST = 3;
+const SCORE_REQUEST = 4;
+const DETAILS_REQUEST = 5;
+const CAPITAL_REQUEST = 6;
+const INVALID_REQUEST = -1;
+const FINISHED_REQUEST = 0;
+
+const CRANKFIN = "CRANKFIN";
+const TIMEOUT = "TIMEOUT";
+const LOST = "LOST";
+
+var uniqueID = 0;
 
 const INTERACTIVE_EXAMPLE_GRID_SIZE = 5;
 
@@ -60,6 +77,7 @@ class App extends Component {
       page = RULE_PAGE_1;
     }
     this.setState({currentPage: page});
+    this.forceUpdate();
   }
 
   render() {
@@ -132,8 +150,6 @@ class ColourSwatcher extends Component {
 }
 
 
-
-
 function rainbow(n) {
   if (n === 0) { return '#FFFFFF'} //userID 0 is always mapped to white
   n = n * 240 / players; //splits assigned colours based on the number of players
@@ -187,22 +203,37 @@ function crankCell(i, j, preBoard) {
 
 function ImgSquare(props) {
   var src = null;
+  var isCapital = false;
 
   var cellColourID = props.userID;
+
+  if (cellColourID < 0) {
+    cellColourID = -cellColourID;
+    isCapital = true;
+  }
+
   if (props.boardType == 'postBoard') {
     cellColourID = crankCell(props.row, props.col, props.preBoard);
   }
 
-  if (props.displayMode === DISPLAYMODE.COLOURS.value) {
-    src = idle_cell;
-  } else if (props.displayMode === DISPLAYMODE.EMOJIS.value) {
-    src = VOL_IMAGES.concat('emojis/').concat((Number(cellColourID) + 1000).toString()).concat('.png');
-  }
-
   if (cellColourID === 0) {
     src = small_cell;
+  } else if (props.displayMode === DISPLAYMODE.COLOURS.value) {
+    if (isCapital) {
+      // TODO add capital iamge and set it as src
+      src = crown;
+    } else {
+      src = idle_cell;
+    }
+  } else if (props.displayMode === DISPLAYMODE.EMOJIS.value) {
+    if (isCapital) {
+      // TODO add capital iamge and set it as src
+      src = crown;
+    } else {
+      src = VOL_IMAGES.concat('emojis/').concat((Number(cellColourID) + 1000).toString()).concat('.png');
+    }
   }
-
+  
   return (
     <div style={{display: 'inline-block'}}>
     <input
@@ -259,9 +290,7 @@ function emptyGrid(width, height) { // Generates an example board fitting to the
   for (var i = 0; i < height; i++) {
     var row = [];
     for (var j = 0; j < width; j++) {
-      // TEMP DEBUG
       row.push(0);
-      // row.push(i*width + j);
     }
     ret.push(row);
   }
@@ -297,6 +326,7 @@ class UserPicker extends Component {
 
   handleClick(uid) {
     yourUserID = uid;
+    requestColor(yourUserID);
     this.props.onClick();
   }
 
@@ -312,11 +342,6 @@ function calculateLocalHighscores(board) {
   }
   return ret;
 }
-
-
-
-
-
 
 
 
@@ -439,8 +464,97 @@ class InteractiveExample extends Component {
 
 
 
+function generateUniqueHeader(requestType) {
+  var header = (Math.floor((Math.random() * 100) + 1)); 
+  var notUnique = true;
+  while (notUnique) {
+    header = (Math.floor((Math.random() * 100) + 1));
+    notUnique = false;
+    for (let i = 0; i < requests.length; i++) {
+      if (getHeader(requests[i]) === header) {
+        if (getType(requests[i]) === (FINISHED_REQUEST)) {
+          setType(requests[i], requestType);
+          return header;
+        }
+        notUnique = true;
+        break;
+      }
+    }
+  }
+  var newRequest = [header, requestType];
+  requests.push(newRequest);
+  return header;
+}
+
+function getHeader(entry) {
+  return entry[0];
+}
+
+function getType(entry) {
+  return entry[1];
+}
+
+function setType(entry, type) {
+  entry[1] = (type);
+}
+
+function findType(header) {
+  for (let i = 0; i < requests.length; i++) {
+    if (getHeader(requests[i]) === (header)) {
+      return getType(requests[i]);
+    }
+  }
+  return INVALID_REQUEST;
+}
+
+function completeHeader(header) {
+  for (let i = 0; i < requests.length; i++) {
+    if (getHeader(requests[i]) === (header)) {
+      setType(requests[i], FINISHED_REQUEST);
+      return true;
+    }
+  }
+  return false;
+}
+
+function send(request) {
+  console.log("WS_SEND : '".concat(request).concat("'"));
+  if (ws.readyState !== WS_READY) {
+    console.log("ABORT: Websocket is not ready!");
+    ws.close();
+  } else {
+    ws.send(request);
+  }
+}
+
+function requestColor(yourUserID) {
+  console.log("Requesting color ".concat(yourUserID));
+  var header = generateUniqueHeader(PICK_REQUEST);
+  var pickRequest = header.toString()
+                    .concat(": PICK t=")
+                    .concat(yourUserID)
+  send(pickRequest);
+}
 
 class Grid extends Component {
+  shouldComponentUpdate(nextProps, nextState) {
+    return false;
+  }
+
+  decrementTime() {
+    var newTime = Math.max(this.state.timeLeft - 1, 0);
+    this.setState({
+      timeLeft: newTime,
+    });
+    this.forceUpdate();
+   }
+
+  componentDidMount() {
+    var intervalId = setInterval(() => {this.decrementTime()}, 1000);
+    this.setState({intervalId: intervalId});
+    window.addEventListener("resize", () => {this.get()});
+  }
+
   constructor() {
     super();
     var localHighscores = new Array(players + 1);
@@ -449,14 +563,15 @@ class Grid extends Component {
       localHighscores: localHighscores,
       displayMode: 0,
       board: emptyGrid(width, height),
-      // cache: emptyGrid(width + LOOKAHEAD*2, height + LOOKAHEAD*2),
+      timePerRound: 10,
+      timeLeft: -1,
     }
     var url = "ws".concat(window.location.toString().substring(4));
+    // url = "ws://89.122.28.235:7777/"; // DEBUG
     ws = new WebSocket(url);
     ws.onopen = function() {
       console.log("Web socket opened : ".concat(url));
-      this.get();
-    }.bind(this);
+    };
     ws.onclose = function() {
       console.log("Web socket closed : ".concat(url));
     }
@@ -465,54 +580,247 @@ class Grid extends Component {
     }
     ws.onmessage = function (evt)
     {
-      width = Math.floor(window.innerWidth / 30);
-      height = Math.floor((window.innerHeight - headerHeight) / 30);
       var received_msg = evt.data;
-      console.log("Web socket message received: ".concat(received_msg));
 
-      var lines = received_msg.trim().split('\n');
+      console.log("WS_RECEIVE : '".concat(received_msg).concat("'"));
+      var split_msg = received_msg.trim().split(':');
 
-      if ((lines.length - 1) === Number(lines[0])) { // QUERY
-        var board = emptyGrid(width, height);
-        for (let i = 1; i <= lines[0]; i++) { // filling grid with received information
-          var data = lines[i].trim().split(',');
-          if (data.length !== 3) {
-            console.log("Parse error : unexpected number of commas");
-            break;
-          }
-          var row = data[0] - offsetHeight;
-          var col = data[1] - offsetWidth;
-          var uid = data[2];
-
-          if (row < 0 || row >= height || col < 0 || col >= width) {
-            console.log("Parse error : cell out of bounds");
-            break;
-          }
-
-          board[row][col] = uid;
-        }
-        var localHighscores = calculateLocalHighscores(board);
-        this.setState({
-          localHighscores: localHighscores,
-          board: board
-        });
-        console.log("Parse info : successfully parsed query")
-      } else if (lines.length === 1) { // SUBMIT
-        switch(Number(lines[0])) {
-          case UPDATE_FAIL:
-            console.log("Submit request responsed : FAIL");
-            window.alert("Submit request responsed : FAIL");
-            this.get();
-          break;
-          case UPDATE_SUCCESS:
-            console.log("Submit request responsed : SUCCESS");
-            break;
-          default: console.log("Parse error : unexpected submit response (value)");
-        }
-      } else { // ERROR
-        console.log("Parse error : unexpected response task");
+      if (split_msg.length !== 2) {
+        console.log("Parse error : Invalid number of ':'");
       }
+
+      var header = Number(split_msg[0].trim());
+      var data = split_msg[1].trim();
+
+      var lines = data.match(/\S+/g) || [];
+
+      if (header > 0 && header <= 100) {
+        var type = findType(header);
+        switch (type) {
+          case UPDATE_REQUEST: this.parseUpdate(lines); break;
+          case SCORE_REQUEST: this.parseScore(lines); break;
+          case PICK_REQUEST: this.parsePick(lines); break;
+          case QUERY_REQUEST: this.parseQuery(lines); break;
+          case DETAILS_REQUEST: this.parseDetails(lines); break;
+          case CAPITAL_REQUEST: this.parseCapital(lines); break;
+          case INVALID_REQUEST: console.log("Parse error : Header not found"); break;
+          default: console.log("Parse error : Invalid header type (".concat(header).concat(" - ").concat(type).concat(")"));
+        }
+        if (!completeHeader(header)) {
+          console.log("Fatal error: cannot find header which we just had!");
+        }
+      } else if (header > 100 && header <= 200) {
+        if (lines.length !== 1) {
+          console.log("Parse error(101 - 200): unexpected number of lines");
+        }
+        switch (lines[0]) {
+          case CRANKFIN: this.respondCrankFin(header); break;
+          case TIMEOUT: this.respondTimeout(header); break;
+          case LOST: this.respondLost(header); break;
+          default: console.log("Parse error(101-200): unknown method");
+        }
+      } else {
+        console.log("Error : Header out of bounds!");
+      }
+
+
     }.bind(this);
+  }
+
+  restartTimer() {
+    this.setState({
+      timeLeft: this.state.timePerRound,
+    });
+    this.forceUpdate();
+  }
+
+
+  respondCrankFin(header) {
+    console.log("Responding to CRANKFIN");
+    this.respondOne(header);
+    this.restartTimer();
+    this.get();
+  }
+
+  respondTimeout(header) {
+    console.log("Responding to TIMEOUT");
+    this.respondOne(header);
+  }
+
+  respondLost(header) {
+    console.log("USER HAS LOST!");
+    ws.close();
+    var userResponse = window.confirm("You have lost!\n Do you wish to refresh?");
+    if (userResponse) {
+      window.location.reload();
+    }
+  }
+
+  respondOne(header) {
+    if (uniqueID === 0)
+      return;
+    var response = header.toString().concat(": 1");
+    send(response);
+  }
+
+  parseUpdate(lines) {
+    if (lines.length !== 1) {
+      console.log("ParseUpdate: unexpected length");
+      return;
+    }
+    switch (Number(lines[0])) {
+      case UPDATE_FAIL:
+        console.log("ParseUpdate : response FAIL");
+        this.get();
+        break;
+
+      case UPDATE_SUCCESS:
+        console.log("ParseUpdate : response SUCCESS");
+        break;
+
+      default:
+        console.log("ParseUpdate: unexpected response value");
+    }
+  }
+
+  parseDetails(lines) {
+    if (Number(lines[0]) === 0) {
+      console.log("ParseDetails: game is ending..");
+      return;
+    } else if (Number(lines[0] < 0)) {
+      console.log("ParseDetails: unexpected initial number (".concat(lines[0]).concat(")"));
+      return;
+    }
+    for (let i = 1; i < lines.length; i++) {
+      var data = lines[i].split("=");
+      if (data.length !== 2) {
+        console.log("ParseDetails: unexpected number of '='s");
+        return;
+      }
+      switch (data[0]) {
+        case "gtc": this.parseDetailsGtc(data[1]); break;
+        case "wait": this.parseDetailsWait(data[1]); break;
+        default: console.log("ParseDetails: unexpected param (".concat(lines[i]).concat(")")); return;
+      }
+    }
+    console.log("ParseDetails: successfully parsed details");
+  }
+
+  parseDetailsGtc(value) {
+    console.log("ParseDetailsGtc : Currently ignoring(".concat(value).concat(")"));
+  }
+
+  parseDetailsWait(value) {
+    this.updateTimePerRound(Number(value));
+  }
+
+  updateTimePerRound(time) {
+    this.setState({
+      timePerRound: time,
+    });
+  }
+
+  fetchDetails() {
+    if (uniqueID === 0)
+      return;
+
+    var header = generateUniqueHeader(DETAILS_REQUEST);
+
+    var detailsRequest = header.toString().concat(": DETAILS");
+
+    send(detailsRequest);
+  }
+
+  parseScore(lines) {
+    // TODO
+    console.log("ParseScore: currently ignoring score response");
+  }
+
+  parsePick(lines) {
+    if (Number(lines[0]) === 0) {
+      console.log("ParsePick : uid failed");
+    }
+    uniqueID = Number(lines[0]);
+    console.log("ParsePick : uid received ".concat(lines[0]));
+    this.get();
+    this.fetchDetails();
+  }
+
+  parseQuery(lines) {
+    width = Math.floor(window.innerWidth / 30);
+    height = Math.floor((window.innerHeight - headerHeight) / 30);
+
+    var numberOfLines = Number(lines[0]);
+    if (numberOfLines !== ((lines.length - 1)/3)) {
+      console.log("ParseQuery: number of lines do not match up");
+      return;
+    }
+
+    var board = emptyGrid(width, height);
+
+    for (let i = 0; i < numberOfLines; i++) {
+      var row = lines[i*3 + 1] - offsetHeight;
+      var col = lines[i*3 + 2] - offsetWidth;
+      var uid = lines[i*3 + 3];
+
+      if (row < 0 || row >= height || col < 0 || col >= width) {
+        console.log("ParseQuery : cell out of bounds");
+        return;
+      }
+      board[row][col] = uid;
+    }
+
+    this.updateHighScores(board);
+    this.requestCapitals();
+
+    console.log("ParseQuery: successfully parsed query");
+  }
+
+  parseCapital(lines) {
+    var numberOfLines = Number(lines[0]);
+    if (numberOfLines !== ((lines.length - 1)/ 3)) {
+      console.log("ParseCapital: number of lines do not match up");
+      return;
+    }
+
+    const board = this.state.board;
+
+    for (let i = 0; i < numberOfLines; i++) {
+      var row = lines[i*3 + 1] - offsetHeight;
+      var col = lines[i*3 + 2] - offsetWidth;
+      var uid = lines[i*3 + 3];
+
+      if (row < 0 || row >= height || col < 0 || col >= width) {
+        continue;
+      }
+
+      board[row][col] = -uid;
+    }
+
+    this.forceUpdate();
+    console.log("ParseCapital: successfully parsed query");
+  }
+
+  updateHighScores(board) {
+    var localHighscores = calculateLocalHighscores(board);
+    this.setState({
+      localHighscores: localHighscores,
+      board: board
+    });
+  }
+
+  submit(board, row, col) {
+    if (uniqueID === 0)
+      return;
+    var header = generateUniqueHeader(UPDATE_REQUEST);
+    var updateRequest = header.toString()
+                .concat(": UPDATE px=")
+                .concat(row + offsetHeight)
+                .concat(" py=")
+                .concat(col + offsetWidth)
+                .concat(" t=")
+                .concat(board[row][col]);
+    send(updateRequest);
   }
 
 
@@ -523,20 +831,8 @@ class Grid extends Component {
     this.setState({
       board: board
     });
-
-    var updateRequest = "UPDATE px="
-                .concat(row + offsetHeight)
-                .concat(" py=")
-                .concat(col + offsetWidth)
-                .concat(" t=")
-                .concat(board[row][col]);
-    console.log("Sending query : ".concat(updateRequest));
-
-    if (ws.readyState !== WS_READY) {
-      console.log("ABORT: Websocket is not ready!");
-    } else {
-      ws.send(updateRequest);
-    }
+    this.forceUpdate();
+    this.submit(board, row, col);
   }
 
   renderRow(row) {
@@ -575,22 +871,28 @@ class Grid extends Component {
     }
     var opacity = 1 - highscorePosition * 0.8 / players;
 
+    return (
+      <div key={player.toString()} style={{display: 'inline-block'}}>
+      <input 
+      type="image"
+      alt="cell"
+      src={src}
+      style={{width:20, height:20, backgroundColor:rainbow(player), border: border, opacity: opacity}}
+      className='cell'>
+      </input>
+      <h6  style={{color: rainbow(player), opacity: opacity}}>
+      {':'.concat(score.toString())}
+      </h6>
+      </div>
+    );
+  }
 
-  return (
-    <div key={player.toString()} style={{display: 'inline-block'}}>
-    <input 
-    type="image"
-    alt="cell"
-    src={src}
-    style={{width:20, height:20, backgroundColor:rainbow(player), border: border, opacity: opacity}}
-    className='cell'>
-    </input>
-    <h6  style={{color: rainbow(player), opacity: opacity}}>
-    {':'.concat(score.toString())}
-    </h6>
-    </div>
-  );
-
+  renderTime() {
+    return (
+      <div key={this.state.timeLeft.toString()} className='time'>
+      Time Left : {this.state.timeLeft.toString()}
+      </div>
+    );
   }
 
   render() {
@@ -620,31 +922,46 @@ class Grid extends Component {
       biggestPlayer = -1;
     }
 
+    var time = this.renderTime();
+
     return (
       <div>
+      {time}
       {scoresC}
       {rows}
       <MoveLeft onClick={() => this.get()}/>
       <MoveDown onClick={() => this.get()}/>
       <MoveUp onClick={() => this.get()}/>
       <MoveRight onClick={() => this.get()}/>
-      <MoveReset onClick={() => this.get()}/>
+      <MoveReset onClick={() => this.get()}/> &nbsp;
       <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()}/> &nbsp;
       <GetButton onClick={() => this.get()}/> &nbsp;
       </div>);
-  }
-
-  componentDidMount() {
-    window.addEventListener("resize", () => {this.get()});
   }
 
   advanceDisplayMode() {
     this.setState({
       displayMode: (this.state.displayMode + 1) % 2
     });
+    this.forceUpdate();
+  }
+
+  requestCapitals() {
+    if (uniqueID === 0)
+      return;
+
+    var header = generateUniqueHeader(CAPITAL_REQUEST);
+    var capitalRequest = header.toString()
+                        .concat(": CAPITAL");
+    send(capitalRequest);
   }
 
   get() {
+    if (uniqueID === 0)
+      return;
+
+    var header = generateUniqueHeader(QUERY_REQUEST);
+
     var width = Math.floor(window.innerWidth / 30);
     var height = Math.floor((window.innerHeight - headerHeight) / 30);
     var px1 = offsetHeight;
@@ -652,27 +969,18 @@ class Grid extends Component {
     var px2 = height - 1 + offsetHeight;
     var py2 = width - 1 + offsetWidth;
 
-/*    if (px1 > last_px1 && py1 > last_py1 && px2 < last_px2 && py2 < last_py2) {
-      // update board
 
-    } else {*/
-      var queryRequest = "QUERY px1="
-                  .concat(px1)
-                  .concat(" py1=")
-                  .concat(py1)
-                  .concat(" px2=")
-                  .concat(px2)
-                  .concat(" py2=")
-                  .concat(py2);
-      console.log("Sending query : ".concat(queryRequest));
 
-      if (ws.readyState !== WS_READY) {
-        console.log("ABORT: Websocket is not ready!");
-      } else {
-        ws.send(queryRequest);
-      }
-    // }
-
+    var queryRequest = header.toString()
+                .concat(": QUERY px1=")
+                .concat(px1)
+                .concat(" py1=")
+                .concat(py1)
+                .concat(" px2=")
+                .concat(px2)
+                .concat(" py2=")
+                .concat(py2);
+    send(queryRequest);
   }
 }
 

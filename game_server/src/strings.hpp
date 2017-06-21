@@ -24,4 +24,8 @@ void print_bytes(uint8_t *buf, int len);
 
 int str_eq(string s1, string s2);
 
+int is_num(const char *s);
+
+int is_num(string s);
+
 #endif

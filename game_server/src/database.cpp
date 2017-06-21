@@ -65,25 +65,43 @@ DB_conn::~DB_conn()
   delete[] answer_buf;
 }
 
+
 string DB_conn::run_query(int expectation, string s)
+{
+  return run_query(expectation, s, "agents.grid");
+}
+
+string DB_conn::run_query(int expectation, string s, string table)
 {
   log -> record(ME, (string)"Running query " + s);
   string wrapper;
   int len, aux, tlen = 0;
-  if(expectation)
+  const char *point;
+  switch(expectation)
   {
-    wrapper = "copy (SELECT count(*) FROM agents.grid";
-    const char *point = string_seek(s.c_str(), "WHERE");
+  case EXPECT_READ :
+  case EXPECT_CLIENT :
+    wrapper = "copy (SELECT count(*) FROM " + table;
+    point = string_seek(s.c_str(), "WHERE");
     if(point)
     {
       wrapper = wrapper + " WHERE " + string_get_next_token(point, "");
     }
-    wrapper = wrapper + ") to STDOUT; copy (" + s
-              + ") TO STDOUT; \\echo #\n";
-  }
-  else
-  {
+    wrapper = wrapper + ") to STDOUT DELIMITER ' '; copy (" + s
+              + ") TO STDOUT DELIMITER ' '; \\echo #\n";
+    break;
+  case EXPECT_COUNT :
+    wrapper = "copy (SELECT count(*) FROM " + table;
+    point = string_seek(s.c_str(), "WHERE");
+    if(point)
+    {
+      wrapper = wrapper + " WHERE " + string_get_next_token(point, "");
+    }
+    wrapper = wrapper + ") to STDOUT DELIMITER ' '; \\echo #\n";
+    break;
+  default :
     wrapper = s + "; \\echo #\n";
+    break;
   }
   const char *c = wrapper.c_str();
 
@@ -109,6 +127,7 @@ string DB_conn::run_query(int expectation, string s)
     { // refresh the buffer
       result = result + string_get_next_token(answer_buf, "#");
       memset(answer_buf, 0, sizeof(char) * len);
+      tlen += len;
       len = 0;
     }
     aux = read(socketid, answer_buf + len, DB_MAX_BUF - len);
@@ -129,9 +148,12 @@ string DB_conn::run_query(int expectation, string s)
 
 void DB_conn::insert_query_builder(CELL_TYPE t, int x, int y)
 {
-  if((t == 0) && (size != 0))
+  if(t == 0)
   { // t = 0 means flush whatever you have
-    run_query(NO_READ, constructed_query);
+    if(size)
+    {
+      run_query(NO_READ, constructed_query);
+    }
     size = 0;
     return;
   }

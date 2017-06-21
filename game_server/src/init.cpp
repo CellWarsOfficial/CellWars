@@ -61,6 +61,12 @@ int main(int argc, char **argv)
     {
       goto cleanup;
     }
+    if(equ(argv[i], "-erase"))
+    {
+      log -> record(ME, "Erasing database.");
+      db_info->clean_db();
+      continue;
+    }
     if(equ(argv[i], "-load"))
     {
       i++;
@@ -71,7 +77,6 @@ int main(int argc, char **argv)
         fprintf(stderr, "Database missing when loading.\n");
         exit(EXIT_FAILURE);
       }
-      db_info->clean_db();
       for(int k = 1; k <= no_files; k++)
       {
         if(equ(argv[i + k], "-o"))
@@ -197,7 +202,7 @@ int main(int argc, char **argv)
     server = new Server(server_p, db_info2, log);
   }
   game = new Game(db_info, server, log);
-  game_thread = new thread(&Game::start, game, flags, gtc, wait_time);
+  game_thread = new thread(&Game::start, game, flags, gtc, wait_time, 25);
   if(!GFLAG_nosv)
   {
     new thread(&Server::start, server, game);
