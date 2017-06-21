@@ -79,6 +79,22 @@ void Server::erase(int id)
   server_lock.unlock();
 }
 
+bool Server::taken(CELL_TYPE t)
+{
+  server_lock.lock();
+  std::map<int, WS_info *>::iterator it;
+  for(it = monitor.begin(); it != monitor.end(); it++)
+  {
+    if(it -> second -> agent == t)
+    {
+      server_lock.unlock();
+      return true;
+    }
+  }
+  server_lock.unlock();
+  return false;
+}
+
 void Server::forget(int id)
 {
   server_lock.lock();
@@ -880,7 +896,7 @@ int Server::serve_pick(WS_info *w, string taskid, const char *virtual_buf, char 
     gf = false;
   }
   string to_send = taskid + ": ";
-  if((gf) && (t != 0))
+  if((gf) && (t != 0) && (!taken(t)))
   {
     log -> record(w -> this_con, "player is picking agent "
                             + to_string(t)

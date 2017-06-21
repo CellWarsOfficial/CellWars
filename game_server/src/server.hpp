@@ -39,6 +39,7 @@ class Server
   void start(Game *game);
   void bcast_message(string message);
   void check_clients(uint8_t opcode);
+  bool taken(CELL_TYPE t);
   void erase(int id);
   void demand_stat();
   void inform(int task, int value);
