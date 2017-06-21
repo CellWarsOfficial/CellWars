@@ -37,6 +37,7 @@ const RULE_PAGE_1 = 3
 const RULE_PAGE_2 = 4
 const RULE_PAGE_3 = 5
 const RULE_PAGE_4 = 6
+const INTERACTIVE_PAGE = 7;
 
 const WS_READY = 1;
 
@@ -70,6 +71,9 @@ class App extends Component {
   }
 
   setPageTo(page) {
+    if (this.state.currentPage === INTERACTIVE_PAGE) {
+      page = GAME_PAGE;
+    }
     if (this.state.currentPage < RULE_PAGE_0) {
       lastPage = this.state.currentPage;
     }
@@ -96,9 +100,10 @@ class App extends Component {
           <RulePage1 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_2)}/>
           <RulePage2 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_3)}/>
           <RulePage3 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_4)}/>
-          <RulePage4 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(lastPage)}/>
+          <RulePage4 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(INTERACTIVE_PAGE)}/>
+          <InteractiveExample currentPage = {this.state.currentPage} onClick={() => this.setPageTo(lastPage)}/>
           <UserPicker currentPage = {this.state.currentPage} onClick={() => this.setPageTo(GAME_PAGE)}/>
-          <InteractiveExample currentPage = {this.state.currentPage}/>
+          <Grid currentPage = {this.state.currentPage}/>
         </div>
       </div>
     );
@@ -107,12 +112,16 @@ class App extends Component {
 
 class HelpButton extends Component {
   render() {
-    if (this.props.currentPage >= RULE_PAGE_0) {  // hide help button on help pages
+    if (this.props.currentPage >= RULE_PAGE_0 && this.props.currentPage !== INTERACTIVE_PAGE) {  // hide help button on help pages
       return null;
+    }
+    var text = "Rules";
+    if (this.props.currentPage === INTERACTIVE_PAGE) {
+      text = "Play";
     }
     return (
       <button onClick = {this.props.onClick} className={'roundButton'}>
-      Rules
+      {text}
       </button>
     );
   }
@@ -161,7 +170,7 @@ function addNeighbour(neighbours, p1, p2, preBoard) {
   if (p1 < 0 || p1 >= INTERACTIVE_EXAMPLE_GRID_SIZE || p2 < 0 || p2 >= INTERACTIVE_EXAMPLE_GRID_SIZE) {
     return;
   }
-  if (preBoard[p1][p2] == 0) {
+  if (preBoard[p1][p2] === 0) {
     return;
   }
   neighbours.push(preBoard[p1][p2]);
@@ -171,7 +180,7 @@ function crankCell(i, j, preBoard) {
   var neighbours = [];
   for (var x = -1; x <= 1; x++) {
     for (var y = -1; y <= 1; y++) {
-      if (x == 0 && y == 0) {
+      if (x === 0 && y === 0) {
         continue;
       }
       addNeighbour(neighbours, i + x, j + y, preBoard);
@@ -186,12 +195,12 @@ function crankCell(i, j, preBoard) {
     return 0; // death by overpop
   }
 
-  if (neighbours.length == 3 && preBoard[i][j] == 0) {
+  if (neighbours.length === 3 && preBoard[i][j] === 0) {
     if (neighbours.length === new Set(neighbours).size) {
       return 0; // no birth as no parent majority
     }
 
-    if (neighbours[0] == neighbours[1]) {
+    if (neighbours[0] === neighbours[1]) {
       return neighbours[0];
     } else {
       return neighbours[2];
@@ -207,7 +216,7 @@ class ImgSquare extends Component {
   constructor(props) {
     super(props);
     var hoverable = false;
-    if (this.props.boardType == 'preBoard') {
+    if (this.props.boardType === 'preBoard') {
       hoverable = true;
     }
     this.state = {
@@ -217,13 +226,13 @@ class ImgSquare extends Component {
 
   mouseOver() {
     if (this.state.hoverable) {
-      this.props.onMouseEnter;
+      // this.props.onMouseEnter;
     }
   }
 
-    mouseOut() {
-        //this.setState({hover: false});
-    }
+  mouseOut() {
+    //this.setState({hover: false});
+  }
 
   render() {
     var src = null;
@@ -236,7 +245,7 @@ class ImgSquare extends Component {
       isCapital = true;
     }
 
-    if (this.props.boardType == 'postBoard') {
+    if (this.props.boardType === 'postBoard') {
       cellColourID = crankCell(this.props.row, this.props.col, this.props.preBoard);
     }
 
@@ -288,15 +297,20 @@ class Row extends Component {
       col={col}
       key={row.toString().concat(col.toString())}
       userID={userIDturtle}
-      onClick={() => this.props.onClick(row, col)}
+      onClick={() => this.handleClick(row, col)}
       displayMode={this.props.displayMode}
       />
     );
   }
 
+  handleClick(row, col) {
+    if (this.props.boardType !== 'postBoard')
+      this.props.onClick(row, col)
+  }
+
   render() {
     var squaresInARow = INTERACTIVE_EXAMPLE_GRID_SIZE;
-    if (this.props.boardType == 'online') {
+    if (this.props.boardType === 'online') {
       squaresInARow = width;
     }
 
@@ -452,7 +466,7 @@ class InteractiveExample extends Component {
   } 
   
   render() {
-    if (this.props.currentPage !== GAME_PAGE) { // this will change
+    if (this.props.currentPage !== INTERACTIVE_PAGE) { // this will change
       return null;
     }
     var preRows = [];
@@ -1098,7 +1112,7 @@ class RulePage0 extends Component {
     return (
     <div>
     <h1>To play the game you must first pick your colour which your cells will be representing!</h1>
-    </div>
+    </div>    
     );
   }
 }
@@ -1108,9 +1122,8 @@ class RulePage1 extends Component {
     if (this.props.currentPage !== RULE_PAGE_1) {
       return null;
     }
-    var divHeight = ((window.innerHeight - headerHeight)*.8).toString().concat('px');
     return (
-    <div onClick={this.props.onClick} style={{height: divHeight}}>
+    <div>
     <h1>Cell Law I</h1>
     <h2>Any live cell with fewer than two live neighbours will die, as if caused by underpopulation.</h2>
     <div className="fullExample">
@@ -1176,6 +1189,9 @@ class RulePage1 extends Component {
       </table>
     </div>
     </div>
+    <button onClick = {this.props.onClick} className={'roundButton'}>
+    Next
+    </button>
     </div>
     );
   }
@@ -1186,9 +1202,8 @@ class RulePage2 extends Component {
     if (this.props.currentPage !== RULE_PAGE_2) {
       return null;
     }
-    var divHeight = ((window.innerHeight - headerHeight)*.8).toString().concat('px');
     return (
-    <div onClick={this.props.onClick} style={{height: divHeight}}>
+    <div>
     <h1>Cell Law II</h1>
     <h2>Any live cell with two or three live neighbours lives on to the next generation.</h2>
     <div className="fullExample">
@@ -1254,6 +1269,9 @@ class RulePage2 extends Component {
       </table>
     </div>
     </div>
+    <button onClick = {this.props.onClick} className={'roundButton'}>
+    Next
+    </button>
     </div>
     );
   }
@@ -1264,9 +1282,8 @@ class RulePage3 extends Component {
     if (this.props.currentPage !== RULE_PAGE_3) {
       return null;
     }
-    var divHeight = ((window.innerHeight - headerHeight)*.8).toString().concat('px');
     return (
-    <div onClick={this.props.onClick} style={{height: divHeight}}>
+    <div>
     <h1>Cell Law III</h1>
     <h2>Any dead cell with exactly 3 live neighbours and a majority cell type can be identified
         among them, the cell will be reborn as the same type as the majority.</h2>
@@ -1333,6 +1350,9 @@ class RulePage3 extends Component {
       </table>
     </div>
     </div>
+    <button onClick = {this.props.onClick} className={'roundButton'}>
+    Next
+    </button>
     </div>
     );
   }
@@ -1343,9 +1363,8 @@ class RulePage4 extends Component {
     if (this.props.currentPage !== RULE_PAGE_4) {
       return null;
     }
-    var divHeight = ((window.innerHeight - headerHeight)*.8).toString().concat('px');
     return (
-    <div onClick={this.props.onClick} style={{height: divHeight}}>
+    <div>
     <h1>Cell Law IV</h1>
     <h2>Any live cell with greater than three live neighbours dies, as if caused by overpopulation.</h2>
     <div className="fullExample">
@@ -1411,6 +1430,9 @@ class RulePage4 extends Component {
       </table>
     </div>
     </div>
+    <button onClick = {this.props.onClick} className={'roundButton'}>
+    Next
+    </button>
     </div>
     );
   }
