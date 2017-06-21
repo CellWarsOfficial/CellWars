@@ -480,10 +480,12 @@ class InteractiveExample extends Component {
 
     return (
       <div>
+        <h1>Sandbox Mode</h1>
         <h1> {this.state.infobox} </h1>
         {preRows}
         <br></br>
         {postRows}
+        <br></br>
         <DisplayModeAdvancer onClick={() => this.advanceDisplayMode()}/> &nbsp;
         <ColourSwatcher onClick={() => this.advanceColour()}/>
       </div>
@@ -1189,6 +1191,7 @@ class RulePage1 extends Component {
       </table>
     </div>
     </div>
+    <br></br>
     <button onClick = {this.props.onClick} className={'roundButton'}>
     Next
     </button>
@@ -1269,6 +1272,7 @@ class RulePage2 extends Component {
       </table>
     </div>
     </div>
+    <br></br>
     <button onClick = {this.props.onClick} className={'roundButton'}>
     Next
     </button>
@@ -1350,6 +1354,7 @@ class RulePage3 extends Component {
       </table>
     </div>
     </div>
+    <br></br>
     <button onClick = {this.props.onClick} className={'roundButton'}>
     Next
     </button>
@@ -1430,6 +1435,7 @@ class RulePage4 extends Component {
       </table>
     </div>
     </div>
+    <br></br>
     <button onClick = {this.props.onClick} className={'roundButton'}>
     Next
     </button>
