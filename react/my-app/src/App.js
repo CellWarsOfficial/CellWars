@@ -201,51 +201,78 @@ function crankCell(i, j, preBoard) {
   return preBoard[i][j]; // stays alive
 }
 
-function ImgSquare(props) {
-  var src = null;
-  var isCapital = false;
 
-  var cellColourID = props.userID;
 
-  if (cellColourID < 0) {
-    cellColourID = -cellColourID;
-    isCapital = true;
-  }
-
-  if (props.boardType == 'postBoard') {
-    cellColourID = crankCell(props.row, props.col, props.preBoard);
-  }
-
-  if (cellColourID === 0) {
-    src = small_cell;
-  } else if (props.displayMode === DISPLAYMODE.COLOURS.value) {
-    if (isCapital) {
-      // TODO add capital iamge and set it as src
-      src = crown;
-    } else {
-      src = idle_cell;
+class ImgSquare extends Component {
+  constructor(props) {
+    super(props);
+    var hoverable = false;
+    if (this.props.boardType == 'preBoard') {
+      hoverable = true;
     }
-  } else if (props.displayMode === DISPLAYMODE.EMOJIS.value) {
-    if (isCapital) {
-      // TODO add capital iamge and set it as src
-      src = crown;
-    } else {
-      src = VOL_IMAGES.concat('emojis/').concat((Number(cellColourID) + 1000).toString()).concat('.png');
+    this.state = {
+      hoverable: hoverable
     }
   }
-  
-  return (
-    <div style={{display: 'inline-block'}}>
-    <input
-    type="image"
-    alt="cell"
-    src={src}
-    onClick={props.onClick}
-    style={{width:20, height:20, backgroundColor:rainbow(cellColourID)}}
-    className='cell'>
-    </input>
-    </div>
-  );
+
+  mouseOver() {
+    if (this.state.hoverable) {
+      this.props.onMouseEnter;
+    }
+  }
+
+    mouseOut() {
+        //this.setState({hover: false});
+    }
+
+  render() {
+    var src = null;
+    var isCapital = false;
+
+    var cellColourID = this.props.userID;
+
+    if (cellColourID < 0) {
+      cellColourID = -cellColourID;
+      isCapital = true;
+    }
+
+    if (this.props.boardType == 'postBoard') {
+      cellColourID = crankCell(this.props.row, this.props.col, this.props.preBoard);
+    }
+
+    if (cellColourID === 0) {
+      src = small_cell;
+    } else if (this.props.displayMode === DISPLAYMODE.COLOURS.value) {
+      if (isCapital) {
+        // TODO add capital iamge and set it as src
+        src = crown;
+      } else {
+        src = idle_cell;
+      }
+    } else if (this.props.displayMode === DISPLAYMODE.EMOJIS.value) {
+      if (isCapital) {
+        // TODO add capital iamge and set it as src
+        src = crown;
+      } else {
+        src = VOL_IMAGES.concat('emojis/').concat((Number(cellColourID) + 1000).toString()).concat('.png');
+      }
+    }
+
+    return (
+      <div style={{display: 'inline-block'}}>
+      <input
+      onMouseEnter={this.mouseOver.bind(this)}
+      onMouseLeave={this.mouseOut}
+      type="image"
+      alt="cell"
+      src={src}
+      onClick={this.props.onClick}
+      style={{width:20, height:20, backgroundColor:rainbow(cellColourID)}}
+      className='cell'>
+      </input>
+      </div>
+    );
+  }
 }
 
 
@@ -254,6 +281,7 @@ class Row extends Component {
   renderSquare(userIDturtle, row, col) {
     return (
       <ImgSquare
+      onMouseEnter={() => this.props.onMouseEnter(row, col)}
       boardType={this.props.boardType}
       preBoard={this.props.preBoard}
       row={row}
@@ -386,11 +414,6 @@ class InteractiveExample extends Component {
   }
 
   handlePreBoardClick(row, col) {
-    /*
-    if (row == 0 || row == INTERACTIVE_EXAMPLE_GRID_SIZE || col == 0 || col == INTERACTIVE_EXAMPLE_GRID_SIZE) { // disallows toggling border cells
-      return;
-    }
-    */
     const preBoard = this.state.preBoard.slice(); //Clones the preBoard
     preBoard[row][col] = (this.state.preBoard[row][col] === 0) ? InteractiveExampleID : 0; // TODO: need a way of picking your colour for the example, stop using yourUserID
     this.setState({
@@ -402,6 +425,7 @@ class InteractiveExample extends Component {
     return (
       <div key={row.toString()}>
         <Row
+          onMouseEnter={(r, c) => this.handlePreBoardMouseEnter(r, c)}
           boardType={'preBoard'}
           squares={this.state.preBoard[row]}
           row={row}
