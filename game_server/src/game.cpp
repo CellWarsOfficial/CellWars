@@ -387,7 +387,7 @@ int Game::user_does(int x, int y, CELL_TYPE t, CELL_TYPE user_type)
       return 0;
     }
     // Third check for n_neighbours
-    if(!curr_block->can_place_here(t, curr_block->rectify_x(x), curr_block->rectify_y(y)))
+    if(!curr_block->can_place_here(user_type, curr_block->rectify_x(x), curr_block->rectify_y(y)))
     {
       crank_lock.unlock();
       log -> record("Move analyser", "failed check 3");

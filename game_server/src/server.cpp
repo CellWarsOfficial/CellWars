@@ -62,7 +62,12 @@ Server::Server(int port, DB_conn *db, Logger *l)
 
 Server::~Server()
 {
+  shutdown(socketid, 0);
   check_clients(8); // close all open websockets
+  std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+  shutdown(socketid, 2);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  close(socketid);
   log -> record(ME, "Server closed");
 }
 
@@ -87,7 +92,10 @@ void Server::bcast_message(string message)
   std::map<int, WS_info *>::iterator it;
   for(it = monitor.begin(); it != monitor.end(); it++)
   {
-    new thread(&Server::broadcaster, this, it->second, 1, message);
+    if(it -> second -> agent)
+    {
+      new thread(&Server::broadcaster, this, it->second, 1, message);
+    }
   }
   server_lock.unlock();
 }
@@ -102,13 +110,20 @@ void Server::inform(int task, int value)
   case INFORM_UPDATE_MOVES:
     for(it = monitor.begin(); it != monitor.end(); it++)
     {
-      w = it -> second;
-      w -> ms = value + ((int) trunc(sqrt(w -> ms))) + get_score(w ->agent);
+      if(it -> second -> agent)
+      {
+        w = it -> second;
+        w -> ms = value + ((int) trunc(sqrt(w -> ms))) + get_score(w ->agent);
+      }
     }
     break;
   case INFORM_USER_DIES:
-    for(it = monitor.begin(); it -> second -> agent != (CELL_TYPE)value; it++);
-    broadcaster(it -> second, 1, "LOST");
+    for(it = monitor.begin(); (it != monitor.end()) && (it -> second -> agent != (CELL_TYPE)value); it++);
+    if(it != monitor.end())
+    {
+      it -> second -> agent = 0;
+      broadcaster(it -> second, 1, "LOST");
+    }
     break;
   default:
     break;
@@ -148,7 +163,10 @@ void Server::broadcaster(WS_info *w, uint8_t opcode, string to_send)
   w -> expectation.insert(tid);
   w -> write_lock.unlock();
   log -> record(w -> this_con, "Server sending msg: " + to_string(tid));
-  if(handle_ws_write(w, comm_buf, opcode, to_string(tid) + ": " + to_send))
+  if(
+    handle_ws_write(w, comm_buf, opcode, to_string(tid) + ": " + to_send) 
+    || (opcode == 8)
+    )
   {
     close(w -> s);
     forget(w -> id);
@@ -168,8 +186,8 @@ void Server::start(Game *game)
     news = accept(socketid, (struct sockaddr *) &cli_addr, &clilen);
     if (news < 0)
     {
-      log -> record(ME, "Failed to accept client.");
-      continue;
+      log -> record(ME, "Server closing.");
+      break;
     }
     con_id++;
     conns++;
@@ -316,8 +334,9 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
   log -> record(this_con, "Websocket started");
   server_lock.lock();
   live_conns++; next_ws++; my_id = next_ws;
-  server_lock.unlock();
   WS_info *w = new WS_info(this_con, my_id, s);
+  monitor[my_id] = w;
+  server_lock.unlock();
   string msg;
   const char *virtual_buf, *point;
   while(1)
@@ -407,9 +426,6 @@ void Server::hijack_ws(string this_con, int s, char *comm_buf)
           w -> drop(this);
           return;
         }
-        server_lock.lock();
-        monitor[my_id] = w;
-        server_lock.unlock();
       }
     }
   }
