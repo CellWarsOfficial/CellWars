@@ -194,6 +194,11 @@ void Game::user_loses(CELL_TYPE user_type)
   {
     server -> inform(INFORM_USER_DIES, (int)user_type);
   }
+  if(db_info)
+  {
+    db_info -> run_query(NO_READ, "DELETE FROM agents.grid WHERE user_id="
+                                  + to_string(user_type) );
+  }
 }
 
 Block *Game::get_curr_block(int x, int y)
