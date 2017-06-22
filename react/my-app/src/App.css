@@ -54,16 +54,25 @@ h6 {
 
 .roundButton:hover {background-color: white; color: black;}
 
+.table {
+  width: 100%;
+}
+
+.textcenter {
+  width: 20px;
+  height: 20px;
+}
+
 .tableImage {
-  width: 75px;
-  height: 75px;
+  width: 20px;
+  height: 20px;
   cursor: pointer;
   -webkit-transition-duration: 0.4s;
 }
 
 .tableImage:hover {
-  width: 100px;
-  height: 100px;
+  width: 30px;
+  height: 30px;
 }
 
 .left {

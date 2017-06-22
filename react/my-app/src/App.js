@@ -20,7 +20,7 @@ var offsetHeight = 0;
 
 const headerHeight = 180;
 
-const players = 10; //determines how colours are split between userID's
+const players = 255; //determines how colours are split between userID's
 var yourUserID = 1;
 var InteractiveExampleID = 1;
 
@@ -339,6 +339,18 @@ function emptyGrid(width, height) { // Generates an example board fitting to the
   return ret;
 }
 
+const GenCol = (props) => {
+  var cols = [];
+  for (let i = 1; i <= 30; i++) {
+    cols.push(<GenRow key={"id=".concat(props.start+i)} id={i+props.start} onClick={() => props.onClick(i+props.start)} />);
+  }
+  return (<tr className = "textcenter">{cols}</tr>);
+}
+
+const GenRow = (props) => {
+  return (<td onClick={() => props.onClick(props.id)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(props.id)}}></img></td>);
+}
+
 
 class UserPicker extends Component {
   render() {
@@ -347,22 +359,20 @@ class UserPicker extends Component {
      return null;
     }
 
-    return (<div><h2>Pick your colour</h2><br></br><table width="100%">
+    var cols = [];
+    for (let i = 0; i < (players / 30); i++) {
+      cols.push(<GenCol key={"r=".concat(i*30)} start={i*30} onClick={() => this.handleClick(i*30)} />);
+    }
+
+    return (<div><h2>Pick your colour</h2><br></br><table className="table">
       <tbody>
-      <tr className = "textcenter">
-        <td onClick={() => this.handleClick(1)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(1)}}></img></td>    
-        <td onClick={() => this.handleClick(2)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(2)}}></img></td>    
-        <td onClick={() => this.handleClick(3)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(3)}}></img></td>    
-        <td onClick={() => this.handleClick(4)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(4)}}></img></td>    
-        <td onClick={() => this.handleClick(5)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(5)}}></img></td>    
-        <td onClick={() => this.handleClick(6)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(6)}}></img></td>    
-        <td onClick={() => this.handleClick(7)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(7)}}></img></td>    
-        <td onClick={() => this.handleClick(8)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(8)}}></img></td>    
-        <td onClick={() => this.handleClick(9)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(9)}}></img></td>    
-        <td onClick={() => this.handleClick(10)}><img alt="big_cell" src={big_cell} className={'tableImage'} style={{backgroundColor:rainbow(10)}}></img></td>    
-      </tr>
+      {cols}
       </tbody>
-    </table></div>);
+    </table>
+    <br></br>
+    <br></br>
+    <h5>Based on the cellular automaton, <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life">Conway's Game of Life - https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life</a></h5>
+    </div>);
 
   }
 
