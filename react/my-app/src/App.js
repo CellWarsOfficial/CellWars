@@ -35,12 +35,11 @@ var cellPerRow = 8;
 var lastPage = 0;
 const INTRO_PAGE = 0;
 const GAME_PAGE = 1;
-const RULE_PAGE_0 = 2
-const RULE_PAGE_1 = 3
-const RULE_PAGE_2 = 4
-const RULE_PAGE_3 = 5
-const RULE_PAGE_4 = 6
-const INTERACTIVE_PAGE = 7;
+const RULE_PAGE_1 = 2
+const RULE_PAGE_2 = 3
+const RULE_PAGE_3 = 4
+const RULE_PAGE_4 = 5
+const INTERACTIVE_PAGE = 6;
 
 const WS_READY = 1;
 
@@ -77,11 +76,8 @@ class App extends Component {
     if (this.state.currentPage === INTERACTIVE_PAGE) {
       page = GAME_PAGE;
     }
-    if (this.state.currentPage < RULE_PAGE_0) {
+    if (this.state.currentPage < RULE_PAGE_1) {
       lastPage = this.state.currentPage;
-    }
-    if (page === RULE_PAGE_0 && lastPage === GAME_PAGE) {
-      page = RULE_PAGE_1;
     }
     this.setState({currentPage: page});
     this.forceUpdate();
@@ -95,12 +91,11 @@ class App extends Component {
           <h3>Multiplayer online turn-based strategy game</h3>
         </div>
         <div style={{position: 'absolute', right:'10px'}}>
-          <HelpButton onClick={() => this.setPageTo(RULE_PAGE_0)} currentPage = {this.state.currentPage}/>
+          <HelpButton onClick={() => this.setPageTo(RULE_PAGE_1)} currentPage = {this.state.currentPage}/>
         </div>
         <br></br>
         <br></br>
         <div className="App-grid">
-          <RulePage0 currentPage = {this.state.currentPage}/>
           <RulePage1 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_2)}/>
           <RulePage2 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_3)}/>
           <RulePage3 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_4)}/>
@@ -116,10 +111,10 @@ class App extends Component {
 
 class HelpButton extends Component {
   render() {
-    if (this.props.currentPage >= RULE_PAGE_0 && this.props.currentPage !== INTERACTIVE_PAGE) {  // hide help button on help pages
+    if (this.props.currentPage == INTRO_PAGE && this.props.currentPage !== INTERACTIVE_PAGE) {  // hide help button on help pages
       return null;
     }
-    var text = "Rules";
+    var text = "Tutorial";
     if (this.props.currentPage === INTERACTIVE_PAGE) {
       text = "Play";
     }
@@ -361,7 +356,7 @@ const GenRow = (props) => {
 
 class UserPicker extends Component {
   render() {
-    if (this.props.currentPage !== INTRO_PAGE && this.props.currentPage !== RULE_PAGE_0)
+    if (this.props.currentPage !== INTRO_PAGE)
     {
      return null;
     }
@@ -1122,19 +1117,6 @@ class MoveReset extends Component {
     offsetHeight = 0;
     offsetWidth = 0;
     this.props.onClick();
-  }
-}
-
-class RulePage0 extends Component {
-  render() {
-    if (this.props.currentPage !== RULE_PAGE_0) {
-      return null;
-    }
-    return (
-    <div>
-    <h1>To play the game you must first pick your colour which your cells will be representing!</h1>
-    </div>    
-    );
   }
 }
 
