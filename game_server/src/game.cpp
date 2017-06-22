@@ -239,7 +239,7 @@ void Game::flush_buf()
     x = get_x(buff_it->first);
     y = get_y(buff_it->first);
     t = buff_it->second;
-    if(GFLAG_continue)
+    if((GFLAG_continue) && (t != DEAD_CELL))
     {
       capitals_lock.lock();
       i_c = capitals.find(t);
