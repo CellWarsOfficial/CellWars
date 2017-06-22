@@ -199,6 +199,23 @@ void Game::user_loses(CELL_TYPE user_type)
     db_info -> run_query(NO_READ, "DELETE FROM agents.grid WHERE user_id="
                                   + to_string(user_type) );
   }
+  int px, py;
+  Block *b;
+  std::map<uint64_t,Block*>::iterator i;
+  for(i = super_node.begin(); i != super_node.end(); i++)
+  {
+    b = i -> second;
+    for(px = 0; px < BLOCK_FULL; px++)
+    {
+      for(py = 0; py < BLOCK_FULL; py++)
+      {
+        if(b -> map[px][py] == user_type)
+        {
+          b -> map[px][py] = DEAD_CELL;
+        }
+      }
+    }
+  }
 }
 
 Block *Game::get_curr_block(int x, int y)
@@ -239,7 +256,7 @@ void Game::flush_buf()
     x = get_x(buff_it->first);
     y = get_y(buff_it->first);
     t = buff_it->second;
-    if(GFLAG_continue)
+    if((GFLAG_continue) && (t != DEAD_CELL))
     {
       capitals_lock.lock();
       i_c = capitals.find(t);
