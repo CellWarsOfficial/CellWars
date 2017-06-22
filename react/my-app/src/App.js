@@ -89,6 +89,7 @@ class App extends Component {
       <div className="App">
         <div className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
+          <h3>Multiplayer online turn-based strategy game</h3>
         </div>
         <div style={{position: 'absolute', right:'10px'}}>
           <HelpButton onClick={() => this.setPageTo(RULE_PAGE_0)} currentPage = {this.state.currentPage}/>

@@ -54,6 +54,12 @@ h6 {
 
 .roundButton:hover {background-color: white; color: black;}
 
+h3 {
+  padding: 0;
+  margin: 0;
+  font-size: 10px;
+}
+
 .table {
   width: 100%;
 }
