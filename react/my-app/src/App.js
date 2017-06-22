@@ -1247,14 +1247,14 @@ class RulePage2 extends Component {
       <tbody>
       <tr>
         <td></td>
-        <td></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
         <td></td>
         <td></td>
       </tr>
       <tr>
         <td></td>
         <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
-        <td></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(10)}}></img></td>
         <td></td>
       </tr>
       <tr>
@@ -1417,19 +1417,19 @@ class RulePage4 extends Component {
       <tr>
         <td></td>
         <td></td>
-        <td></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td></td>
-        <td></td>
-        <td></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
         <td></td>
       </tr>
       <tr>
         <td></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
+        <td></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
+      </tr>
+      <tr>
         <td></td>
         <td></td>
+        <td><img alt="pacman" src={idle_cell} style={{width: '30px', height: '30px', backgroundColor:rainbow(6)}}></img></td>
         <td></td>
       </tr>
       </tbody>
