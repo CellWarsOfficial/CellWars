@@ -65,20 +65,21 @@ h3 {
 }
 
 .textcenter {
-  width: 20px;
-  height: 20px;
+  width: 40px;
+  height: 40px;
 }
 
 .tableImage {
-  width: 20px;
-  height: 20px;
+  width: 40px;
+  height: 40px;
   cursor: pointer;
   -webkit-transition-duration: 0.4s;
+  margin-bottom: 10%;
 }
 
 .tableImage:hover {
-  width: 30px;
-  height: 30px;
+  width: 50px;
+  height: 50px;
 }
 
 .left {

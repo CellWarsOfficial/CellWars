@@ -20,7 +20,7 @@ var offsetHeight = 0;
 
 const headerHeight = 180;
 
-const players = 255; //determines how colours are split between userID's
+const players = 64; //determines how colours are split between userID's
 var yourUserID = 1;
 var InteractiveExampleID = 1;
 
@@ -28,6 +28,9 @@ var DISPLAYMODE = {
   COLOURS: {value: 0, name: "colours"},
   EMOJIS: {value: 1, name: "emojis"}
 };
+
+var cellPerRow = 10;
+
 
 var lastPage = 0;
 const INTRO_PAGE = 0;
@@ -162,8 +165,11 @@ class ColourSwatcher extends Component {
 
 function rainbow(n) {
   if (n === 0) { return '#FFFFFF'} //userID 0 is always mapped to white
-  n = n * 240 / players; //splits assigned colours based on the number of players
-  return 'hsl(' + n + ',100%,50%)';
+  // n = n * 240 / players; //splits assigned colours based on the number of players
+  var b = (n % 4) * 64;
+  var g = ((n / 4) % 4) * 64;
+  var r = ((n / 16) % 4)* 64;
+  return 'rgb(' + r + ',' + g + ',' + b + ')';
 }
 
 
@@ -342,7 +348,7 @@ function emptyGrid(width, height) { // Generates an example board fitting to the
 
 const GenCol = (props) => {
   var cols = [];
-  for (let i = 1; i <= 30; i++) {
+  for (let i = 1; i <= cellPerRow; i++) {
     cols.push(<GenRow key={"id=".concat(props.start+i)} id={i+props.start} onClick={() => props.onClick(i+props.start)} />);
   }
   return (<tr className = "textcenter">{cols}</tr>);
@@ -361,8 +367,8 @@ class UserPicker extends Component {
     }
 
     var cols = [];
-    for (let i = 0; i < (players / 30); i++) {
-      cols.push(<GenCol key={"r=".concat(i*30)} start={i*30} onClick={() => this.handleClick(i*30)} />);
+    for (let i = 0; i < Math.floor(players / cellPerRow); i++) {
+      cols.push(<GenCol key={"r=".concat(i*cellPerRow)} start={i*cellPerRow} onClick={(a) => this.handleClick(a)} />);
     }
 
     return (<div><h2>Pick your colour</h2><br></br><table className="table">
@@ -790,6 +796,8 @@ class Grid extends Component {
   parsePick(lines) {
     if (Number(lines[0]) === 0) {
       console.log("ParsePick : uid failed");
+      window.location.reload();
+      return;
     }
     uniqueID = Number(lines[0]);
     console.log("ParsePick : uid received ".concat(lines[0]));
