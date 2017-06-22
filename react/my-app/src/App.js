@@ -29,7 +29,7 @@ var DISPLAYMODE = {
   EMOJIS: {value: 1, name: "emojis"}
 };
 
-var cellPerRow = 10;
+var cellPerRow = 8;
 
 
 var lastPage = 0;
