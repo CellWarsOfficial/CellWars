@@ -1,8 +1,0 @@
-/home/mv1315/webapps_23/socket.io-client-cpp/build/include/sio_client.h
-/home/mv1315/webapps_23/socket.io-client-cpp/build/include/sio_socket.h
-/home/mv1315/webapps_23/socket.io-client-cpp/build/include/sio_message.h
-/home/mv1315/webapps_23/socket.io-client-cpp/build/lib/Release/libsioclient.a
-/home/mv1315/webapps_23/socket.io-client-cpp/build/lib/Release/libsioclient_tls.a
-/home/mv1315/webapps_23/socket.io-client-cpp/build/lib/Release/libboost_system.a
-/home/mv1315/webapps_23/socket.io-client-cpp/build/lib/Release/libboost_date_time.a
-/home/mv1315/webapps_23/socket.io-client-cpp/build/lib/Release/libboost_random.a
