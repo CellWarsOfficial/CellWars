@@ -95,7 +95,6 @@ install: all uninstall
 uninstall:
 	-ps -A | grep gameserver | awk '{print "echo " $$1 ";pgrep -P " $$1}' | sh | sed -e 's#^#/bin/kill -2 #' | sh
 	-while pgrep gameserver > /dev/null; do sleep 1; done
-	-sleep 60
 
 .phony: clean
 clean:
