@@ -17,3 +17,7 @@ nohup.out
 asio-*/
 # exclude html output folder
 html/
+# exclude node dependencies
+node_modules/
+# exclude node package lock
+package-lock.json

@@ -1,0 +1,20 @@
+{
+  "name": "database",
+  "version": "1.0.0",
+  "description": "Simple module for managing database",
+  "main": "index.js",
+  "scripts": {
+    "db": "node index.js"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "config.json": "0.0.4",
+    "cors": "^2.8.4",
+    "express": "^4.15.3",
+    "morgan": "^1.8.2",
+    "pg": "^7.0.2",
+    "pg-hstore": "^2.3.2",
+    "sequelize": "^4.4.2"
+  }
+}

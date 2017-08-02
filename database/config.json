@@ -1,0 +1,7 @@
+{
+  "dbUser": "cellwarsuser",
+  "dbPass": "EXps4YvVt85hXpMSutP",
+  "dbType": "postgres",
+  "dbName": "cellwars",
+  "svDefPort": 3000
+}
