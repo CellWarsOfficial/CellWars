@@ -45,6 +45,8 @@ Server::Server(int port, DB_conn *db, Logger *l)
     log -> record(ME, "Failed to initialise socket.");
     return;
   }
+  int aux = 1;
+  setsockopt(socketid, SOL_SOCKET, SO_REUSEADDR, &aux, sizeof(int));
   bzero((char *) &serv_addr, sizeof(serv_addr));
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_addr.s_addr = INADDR_ANY;
