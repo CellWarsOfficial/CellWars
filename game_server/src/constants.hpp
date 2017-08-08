@@ -84,12 +84,14 @@
 #define SV_HTML_MISSING "../client/html/not_found.html"
 #define SV_HTTP_SWITCH "HTTP/1.1 101 Switching Protocols\r\n"
 #define SV_HTTP_OK "HTTP/1.1 200 OK\r\n"
+#define SV_HTTP_REDIR "HTTP/1.1 301 OK\r\n"
 #define SV_HTTP_NOT_FOUND "HTTP/1.1 404 Not Found\r\n"
 #define SV_HTTP_ILLEGAL "HTTP/1.1 405 Method Not Allowed\r\n"
 #define SV_HTTP_CLOSE_CON "Connection: close\r\n"
 #define SV_HTTP_UP_CON "Connection: Upgrade\r\n"
 #define SV_HTTP_SERVER_NAME "Server: CellWars Server UNIX\r\n"
 #define SV_HTTP_ALLOWED "Allow: GET, HEAD\r\n"
+#define SV_HTTP_DEST "Location: http://cellwars.co.uk\r\n" 
 #define SV_HTTP_CRLF "\r\n"
 
 /* String related constants
@@ -103,5 +105,9 @@
  */
 #define INFORM_UPDATE_MOVES 1
 #define INFORM_USER_DIES 2
+
+/* Websocket related defines
+ */
+#define WS_MAX_BUF 10
 
 #endif
