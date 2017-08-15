@@ -74,4 +74,8 @@ FILE *get_file(string file);
 
 void catfile(FILE *f, int s, char *buf);
 
+int deny_access(int s);
+
+int safe_write(int s, const char *buf, int len);
+
 #endif

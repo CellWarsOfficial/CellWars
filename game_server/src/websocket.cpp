@@ -78,15 +78,6 @@ void Websocket_Con::handle()
   }
   else // obsolete, 301
   { // TODO: export
-    response = response + SV_HTTP_REDIR + SV_HTTP_DEST + SV_HTTP_SERVER_NAME;
-    response = response + SV_HTTP_CLOSE_CON + SV_HTTP_CRLF;
-    key = response.c_str();
-    aux = write(this -> socket, key, response.length());
-    if(aux < (int)response.length())
-    { // TODO: export
-      fprintf(stderr, "Write failed1. PANIC\n");
-      exit(0);
-    }
   }
   this -> callback(this, ""); // tell higher entity to close delete me
 }

@@ -981,3 +981,25 @@ void Server::demand_stat()
   log -> record(ME, "Below is info about my own little database.");
   db_info -> demand_stat();
 }
+
+int deny_access(int s)
+{
+  string response = "";
+  response = response + SV_HTTP_REDIR + SV_HTTP_DEST + SV_HTTP_SERVER_NAME;
+  response = response + SV_HTTP_CLOSE_CON + SV_HTTP_CRLF;
+  return safe_write(s, response.c_str(), response.length());
+}
+
+int safe_write(int s, const char *buf, int len)
+{
+  int trials = SV_MAX_ATTEMPTS, aux = 0;
+  while(trials--)
+  {
+    aux += write(s, buf + aux, len - aux);
+    if(aux == len)
+    {
+      return 0;
+    }
+  }
+  return -1; // broken socket :(
+}
