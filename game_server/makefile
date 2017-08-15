@@ -19,7 +19,7 @@ else
 	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11 -pthread
 endif
 TFLAGS = 
-OBJECT = $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o $(BINDIR)/game.o $(BINDIR)/server_ui.o $(BINDIR)/log.o $(BINDIR)/crank.o $(BINDIR)/server.o $(BINDIR)/math.o $(BINDIR)/strings.o
+OBJECT = $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o $(BINDIR)/game.o $(BINDIR)/server_ui.o $(BINDIR)/log.o $(BINDIR)/crank.o $(BINDIR)/server.o $(BINDIR)/math.o $(BINDIR)/strings.o $(BINDIR)/websocket.o
 TESTS  = $(BINDIR)/log_test $(BINDIR)/crank_test $(BINDIR)/block_test $(BINDIR)/misc_test
 LIBS = $(wildcard $(SKDIR)/*.a) # /usr/lib/x86_64-linux-gnu/libcrypto.a
 
@@ -66,6 +66,9 @@ $(BINDIR)/math.o: $(SRCDIR)/math.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
 
 $(BINDIR)/strings.o: $(SRCDIR)/strings.cpp $(HEADER)
+	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
+
+$(BINDIR)/websocket.o: $(SRCDIR)/websocket.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
 
 $(BINDIR)/log_test: $(TSTDIR)/log_test.cpp $(BINDIR)/log.o $(TSTDIR)/log_test.hpp $(HEADER)

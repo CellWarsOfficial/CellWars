@@ -2,19 +2,19 @@
 #include <math.hpp>
 #include <strings.hpp>
 
-Websocket_Con::Websocket_Con(int socket, char *buffer, Logger log, std::function<void(void *,std::string)> callback)
+using namespace std;
+
+Websocket_Con::Websocket_Con(int socket, char *buffer, Logger *log, std::function<void(void *,std::string)> callback)
 {
-  this.id = id;
-  this.socket = socket;
-  this.buffer = buffer;
-  this.callback = callback;
-  this.logger = log;
-  this.write_buffer = new string[WS_MAX_BUF];
+  this -> id = socket;
+  this -> socket = socket;
+  this -> buffer = buffer; // becomes by responsibility
+  this -> callback = callback;
+  this -> log = log;
+  this -> write_buffer = new string[WS_MAX_BUF];
   con = "" + socket;
-  kill = false;
   buffer_read = 0;
   buffer_write = 0;
-  pinger = -1;
 }
 
 Websocket_Con::~Websocket_Con()
@@ -23,9 +23,9 @@ Websocket_Con::~Websocket_Con()
   delete[] write_buffer;
 }
 
-Websocket_Con::handle()
+void Websocket_Con::handle()
 {
-  char *key;
+  const char *key;
   int aux;
   string response = "";
   key = string_seek(buffer, "Sec-WebSocket-Key:");
@@ -67,7 +67,7 @@ Websocket_Con::handle()
     response = response + SV_HTTP_CRLF;
 
     key = response.c_str();
-    aux = write(s, key, response.length());
+    aux = write(this -> socket, key, response.length());
     if(aux < (int)response.length())
     { // TODO: export
       fprintf(stderr, "Write failed1. PANIC\n");
@@ -81,16 +81,27 @@ Websocket_Con::handle()
     response = response + SV_HTTP_REDIR + SV_HTTP_DEST + SV_HTTP_SERVER_NAME;
     response = response + SV_HTTP_CLOSE_CON + SV_HTTP_CRLF;
     key = response.c_str();
-    aux = write(s, key, response.length());
+    aux = write(this -> socket, key, response.length());
     if(aux < (int)response.length())
     { // TODO: export
       fprintf(stderr, "Write failed1. PANIC\n");
       exit(0);
     }
   }
-  callback(this.id, ""); // tell higher entity to close delete me
+  this -> callback(this, ""); // tell higher entity to close delete me
 }
 
-Websocket_Con::act(){
+void Websocket_Con::act()
+{
   // dark magic
+}
+
+void Websocket_Con::writews(string data)
+{
+
+}
+
+void Websocket_Con::ping(string data)
+{
+
 }
