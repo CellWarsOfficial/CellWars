@@ -25,7 +25,7 @@ class Websocket_Con{
   void ping(string data);
   std::function<void(void *,std::string)> callback;
   private:
-//  bool need_ping;
+  bool need_ping;
   string con; // used to identify myself
   int socket;
   Logger *log;
@@ -37,6 +37,7 @@ class Websocket_Con{
   int buffer_read;
   int buffer_write;
   void act(); // main loop, will write if there's something to write.
+  void self_terminate();
 };
 
 #endif

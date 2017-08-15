@@ -12,6 +12,7 @@ Websocket_Con::Websocket_Con(int socket, char *buffer, Logger *log, std::functio
   this -> callback = callback;
   this -> log = log;
   this -> write_buffer = new string[WS_MAX_BUF];
+  this -> need_ping = false;
   con = "" + socket;
   buffer_read = 0;
   buffer_write = 0;
@@ -26,7 +27,6 @@ Websocket_Con::~Websocket_Con()
 void Websocket_Con::handle()
 {
   const char *key;
-  int aux;
   string response = "";
   key = string_seek(buffer, "Sec-WebSocket-Key:");
   if(key) // It's a websocket
@@ -66,20 +66,19 @@ void Websocket_Con::handle()
     }
     response = response + SV_HTTP_CRLF;
 
-    key = response.c_str();
-    aux = write(this -> socket, key, response.length());
-    if(aux < (int)response.length())
-    { // TODO: export
-      fprintf(stderr, "Write failed1. PANIC\n");
-      exit(0);
+    if(safe_write(this -> socket, response.c_str(), response.length()))
+    {
+      this -> self_terminate();
+      return;
     }
     memset(buffer, 0, SV_MAX_BUF + 2 * BUF_PROCESS_ERROR);
     act();
   }
-  else // obsolete, 301
-  { // TODO: export
+  else
+  {
+    deny_access(this -> socket);
   }
-  this -> callback(this, ""); // tell higher entity to close delete me
+  this -> self_terminate();
 }
 
 void Websocket_Con::act()
@@ -94,5 +93,11 @@ void Websocket_Con::writews(string data)
 
 void Websocket_Con::ping(string data)
 {
-
+  need_ping = true;
 }
+
+void Websocket_Con::self_terminate()
+{
+  this -> callback(this, ""); // tell higher entity to close me
+}
+
