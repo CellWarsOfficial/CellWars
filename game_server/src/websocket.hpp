@@ -34,8 +34,11 @@ class Websocket_Con{
   mutex ws_lock;
   string *write_buffer;
   char *buffer;
+  int buffer_size;
   int buffer_read;
   int buffer_write;
+  bool wrapped;
+  int emit(uint8_t opcode, string to_send);
   void act(); // main loop, will write if there's something to write.
   void self_terminate();
 };
