@@ -26,11 +26,10 @@ class Websocket_Con{
   std::function<void(void *,std::string)> callback;
   private:
   bool need_ping;
+  bool sent_ping;
   string con; // used to identify myself
   int socket;
   Logger *log;
-
-//  mutex kill_lock;
   mutex ws_lock;
   string *write_buffer;
   char *buffer;

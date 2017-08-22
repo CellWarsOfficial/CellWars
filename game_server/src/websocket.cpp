@@ -13,8 +13,9 @@ Websocket_Con::Websocket_Con(int socket, char *buffer, Logger *log, std::functio
   this -> buffer = buffer; // becomes my responsibility
   this -> callback = callback;
   this -> log = log;
-  this -> write_buffer = new string[WS_MAX_BUF];
-  this -> need_ping = false;
+  write_buffer = new string[WS_MAX_BUF];
+  need_ping = false;
+  sent_ping = false;
   buffer_size = WS_MAX_BUF;
   wrapped = false;
   con = "" + socket;
@@ -77,6 +78,7 @@ void Websocket_Con::handle()
     }
     memset(buffer, 0, SV_MAX_BUF + 2 * BUF_PROCESS_ERROR);
     act();
+    self_terminate();
     return;
   }
   else
@@ -89,7 +91,7 @@ void Websocket_Con::handle()
 void Websocket_Con::ping(string data)
 {
   ws_lock.lock();
-  need_ping = true;
+  need_ping = !sent_ping; // don't schedule to send another ping if one is sent already
   ws_lock.unlock();
 }
 
@@ -107,9 +109,60 @@ void Websocket_Con::writews(string data)
 }
 
 /* private functions */
+/* act priority in functioning
+ * if I have something to write, I will write it.
+ * if I need to send a ping, I will if there's nothing to write.
+ * if I need to read, I'll send a ping if there's none on the way.
+ * if there's a ping on the way and I need to read, I will read one message.
+ * if I get a ping message, I will respond straight away.
+ * if I get a pong message, I will mark sent_ping as false.
+ * if I can't tell at a first glance what to do with a message, I'll send it
+ *   to the boss so he can have a look at it.
+ */
 
 void Websocket_Con::act()
 {
+  while(true)
+  {
+    ws_lock.lock();
+    if(buffer_read != buffer_write)
+    {
+      ws_lock.unlock();
+      log -> record(con, "Writing data");
+      if(emit(WS_OPCODE_TXT, write_buffer[buffer_write]))
+      {
+        return;
+      }
+      ws_lock.lock();
+      buffer_write++;
+      if(buffer_write == buffer_size)
+      {
+        buffer_write = 0;
+        wrapped = false;
+      }
+      ws_lock.unlock();
+      continue;
+    }
+    if(need_ping)
+    {
+      need_ping = false;
+      sent_ping = true;
+      ws_lock.unlock();
+      log -> record(con, "Sending ping");
+      if(emit(WS_OPCODE_PING, "Cells are pretty cool man!"))
+      {
+        return;
+      }
+      continue;
+    }
+    if(!sent_ping)
+    {
+      need_ping = true;
+      ws_lock.unlock();
+      log -> record(con, "Setting up wake-up ping");
+      continue;
+    }
+  }
   // dark magic
 }
 
@@ -148,7 +201,6 @@ int Websocket_Con::emit(uint8_t opcode, string to_send)
 
     if(safe_write(socket, buffer, slice + delta))
     {
-      this -> self_terminate();
       return -1;
     }
     memset(buffer, 0, slice + delta);

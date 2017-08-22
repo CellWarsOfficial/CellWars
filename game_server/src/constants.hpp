@@ -109,5 +109,10 @@
 /* Websocket related defines
  */
 #define WS_MAX_BUF 10
+#define WS_OPCODE_CONT 0
+#define WS_OPCODE_TXT 1
+#define WS_OPCODE_END 8
+#define WS_OPCODE_PING 9
+#define WS_OPCODE_PONG 10
 
 #endif
