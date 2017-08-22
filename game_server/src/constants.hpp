@@ -114,5 +114,6 @@
 #define WS_OPCODE_END 8
 #define WS_OPCODE_PING 9
 #define WS_OPCODE_PONG 10
+#define WS_INPUT_WAIT_TIMEOUT 10000
 
 #endif

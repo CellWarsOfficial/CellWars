@@ -13,6 +13,12 @@
 
 using namespace std;
 
+/*
+class Websocket_Msg{
+  // TODO: use this instead
+};
+*/
+
 class Websocket_Con{
   public:
   int id;
@@ -22,7 +28,7 @@ class Websocket_Con{
 //  void call(); // used to connect to a remote websocket server
 //  void kill(); // used to close the websocket
   void writews(string data);
-  void ping(string data);
+  void ping();
   std::function<void(void *,std::string)> callback;
   private:
   bool need_ping;
@@ -37,8 +43,10 @@ class Websocket_Con{
   int buffer_read;
   int buffer_write;
   bool wrapped;
-  int emit(uint8_t opcode, string to_send);
   void act(); // main loop, will write if there's something to write.
+  int parse(string *result_container);
+  int analyse(string previous_data);
+  int emit(uint8_t opcode, string to_send);
   void self_terminate();
 };
 

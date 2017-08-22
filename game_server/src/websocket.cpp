@@ -1,6 +1,7 @@
 #include <websocket.hpp>
 #include <math.hpp>
 #include <strings.hpp>
+#include <poll.h>
 
 using namespace std;
 
@@ -88,7 +89,7 @@ void Websocket_Con::handle()
   self_terminate();
 }
 
-void Websocket_Con::ping(string data)
+void Websocket_Con::ping()
 {
   ws_lock.lock();
   need_ping = !sent_ping; // don't schedule to send another ping if one is sent already
@@ -110,10 +111,12 @@ void Websocket_Con::writews(string data)
 
 /* private functions */
 /* act priority in functioning
- * if I have something to write, I will write it.
- * if I need to send a ping, I will if there's nothing to write.
- * if I need to read, I'll send a ping if there's none on the way.
- * if there's a ping on the way and I need to read, I will read one message.
+ * 1 if I have something to write, I will write it.
+ * 2 if I need to send a ping, I will if there's nothing to write.
+ * 3 if I need to read, I will if there's something to read within 10 seconds.
+ * 4 if there's nothing to read, but no ping on the way, I'll send a ping
+ * 5 if there's nothing to read within 10 seconds again, i'll terminate myself
+ * analyse - 
  * if I get a ping message, I will respond straight away.
  * if I get a pong message, I will mark sent_ping as false.
  * if I can't tell at a first glance what to do with a message, I'll send it
@@ -122,11 +125,12 @@ void Websocket_Con::writews(string data)
 
 void Websocket_Con::act()
 {
+  string read_data;
   while(true)
   {
     ws_lock.lock();
     if(buffer_read != buffer_write)
-    {
+    { // 1
       ws_lock.unlock();
       log -> record(con, "Writing data");
       if(emit(WS_OPCODE_TXT, write_buffer[buffer_write]))
@@ -144,7 +148,7 @@ void Websocket_Con::act()
       continue;
     }
     if(need_ping)
-    {
+    { // 2
       need_ping = false;
       sent_ping = true;
       ws_lock.unlock();
@@ -155,20 +159,38 @@ void Websocket_Con::act()
       }
       continue;
     }
-    if(!sent_ping)
-    {
-      need_ping = true;
-      ws_lock.unlock();
-      log -> record(con, "Setting up wake-up ping");
+    ws_lock.unlock();
+    log -> record(con, "See if there's something to read");
+    if(poll(NULL, 1, WS_INPUT_WAIT_TIMEOUT)) // TODO: obvious
+    { // 3
+      log -> record(con, "There is");
+      if(parse(&read_data))
+      {
+        return;
+      }
+      if(analyse(read_data))
+      {
+        return;
+      }
       continue;
     }
+    if(!sent_ping)
+    { // 4
+      ping();
+      continue;
+    }
+    return; // 5 - user timeout, didn't respond to my ping
   }
-  // dark magic
 }
 
-void Websocket_Con::self_terminate()
+int Websocket_Con::parse(string *result_container)
 {
-  this -> callback(this, ""); // tell higher entity to close me
+  return 0;
+}
+
+int Websocket_Con::analyse(string previous_data)
+{
+  return 0;
 }
 
 int Websocket_Con::emit(uint8_t opcode, string to_send)
@@ -208,4 +230,9 @@ int Websocket_Con::emit(uint8_t opcode, string to_send)
     opcode = 0; // at this point, it's continuation
   }
   return 0;
+}
+
+void Websocket_Con::self_terminate()
+{
+  this -> callback(this, ""); // tell higher entity to close me
 }
