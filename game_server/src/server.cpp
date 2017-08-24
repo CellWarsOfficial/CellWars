@@ -10,6 +10,7 @@
 #include <chrono>
 #include <ctime>
 #include <cmath>
+#include <poll.h>
 
 #define ME "server"
 
@@ -990,16 +991,80 @@ int deny_access(int s)
   return safe_write(s, response.c_str(), response.length());
 }
 
-int safe_write(int s, const char *buf, int len)
+int safe_write(int s, const char *buf, int len, int timeout)
 {
   int trials = SV_MAX_ATTEMPTS, aux = 0;
   while(trials--)
   {
-    aux += write(s, buf + aux, len - aux);
-    if(aux == len)
+    if(check_writable(s, timeout))
     {
-      return 0;
+      aux += write(s, buf + aux, len - aux);
+      if(aux == len)
+      {
+        return 0;
+      }
+    }
+    else 
+    {
+      break;
     }
   }
   return -1; // broken socket :(
+}
+
+int safe_read(int s, char *buf, int len, int timeout)
+{
+  int trials = SV_MAX_ATTEMPTS, aux = 0;
+  while(trials--)
+  {
+    if(check_readable(s, timeout))
+    {
+      aux += read(s, buf + aux, len - aux);
+      if(aux == len)
+      {
+        return 0;
+      }
+    }
+    else 
+    {
+      break;
+    }
+  }
+  return -1; // broken socket :(
+}
+
+int check_readable(int s, int timeout)
+{
+  struct pollfd pfds;
+  pfds.fd = s;
+  pfds.events = POLLIN;
+  return poll(&pfds, 1, timeout);
+}
+
+int check_writable(int s, int timeout)
+{
+  struct pollfd pfds;
+  pfds.fd = s;
+  pfds.events = POLLOUT;
+  return poll(&pfds, 1, timeout);
+}
+
+int safe_write(int s, const char *buf, int len)
+{
+  return safe_write(s, buf, len, SV_WRITE_WAIT_TIMEOUT);
+}
+
+int safe_read(int s, char *buf, int len)
+{
+  return safe_read(s, buf, len, SV_READ_WAIT_TIMEOUT);
+}
+
+int check_readable(int s)
+{
+  return check_readable(s, SV_READ_WAIT_TIMEOUT);
+}
+
+int check_writable(int s)
+{
+  return check_writable(s, SV_WRITE_WAIT_TIMEOUT);
 }

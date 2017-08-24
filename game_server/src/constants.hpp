@@ -93,6 +93,8 @@
 #define SV_HTTP_ALLOWED "Allow: GET, HEAD\r\n"
 #define SV_HTTP_DEST "Location: http://cellwars.co.uk\r\n" 
 #define SV_HTTP_CRLF "\r\n"
+#define SV_READ_WAIT_TIMEOUT 10000
+#define SV_WRITE_WAIT_TIMEOUT 10000
 
 /* String related constants
  */

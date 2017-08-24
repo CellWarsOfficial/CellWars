@@ -13,12 +13,6 @@
 
 using namespace std;
 
-/*
-class Websocket_Msg{
-  // TODO: use this instead
-};
-*/
-
 class Websocket_Con{
   public:
   int id;
@@ -42,10 +36,13 @@ class Websocket_Con{
   int buffer_size;
   int buffer_read;
   int buffer_write;
+  string last_msg;
+  uint8_t last_opcode;
+  bool last_fin;
   bool wrapped;
   void act(); // main loop, will write if there's something to write.
-  int parse(string *result_container);
-  int analyse(string previous_data);
+  int parse();
+  int analyse();
   int emit(uint8_t opcode, string to_send);
   void self_terminate();
 };

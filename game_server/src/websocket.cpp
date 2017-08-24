@@ -1,7 +1,6 @@
 #include <websocket.hpp>
 #include <math.hpp>
 #include <strings.hpp>
-#include <poll.h>
 
 using namespace std;
 
@@ -22,6 +21,9 @@ Websocket_Con::Websocket_Con(int socket, char *buffer, Logger *log, std::functio
   con = "" + socket;
   buffer_read = 0;
   buffer_write = 0;
+  last_msg = "";
+  last_opcode = 0;
+  last_fin = false;
 }
 
 Websocket_Con::~Websocket_Con()
@@ -161,14 +163,14 @@ void Websocket_Con::act()
     }
     ws_lock.unlock();
     log -> record(con, "See if there's something to read");
-    if(poll(NULL, 1, WS_INPUT_WAIT_TIMEOUT)) // TODO: obvious
+    if(check_readable(socket, WS_INPUT_WAIT_TIMEOUT))
     { // 3
       log -> record(con, "There is");
-      if(parse(&read_data))
+      if(parse())
       {
         return;
       }
-      if(analyse(read_data))
+      if(analyse())
       {
         return;
       }
@@ -183,13 +185,78 @@ void Websocket_Con::act()
   }
 }
 
-int Websocket_Con::parse(string *result_container)
+int Websocket_Con::parse()
 {
+  int expect_len = 2;
+  int current_len = 0;
+  long size_desc; // size of current package
+  uint32_t mask;
+  long delta; // size of header
+  int next_slice;
+
+  if(safe_read(socket, buffer, expect_len))
+  {
+    return -1;
+  }
+  current_len = expect_len;
+  last_opcode = buffer[0];
+  last_fin = (last_opcode & 128);
+  last_opcode = last_opcode & 15; // 00001111
+  delta = 1;
+  size_desc = (long)(*((uint8_t *)(buffer + delta)));
+  mask = size_desc & 128;
+  size_desc = size_desc % 128;
+  delta = 2;
+  expect_len = size_desc + delta;
+  if(safe_read(socket, buffer + current_len, expect_len - current_len))
+  {
+    return -1;
+  }
+  current_len = expect_len;
+  if(size_desc == 127)
+  {
+    size_desc = (long)(*((uint64_t *)(buffer + delta)));
+    delta += 8; // skip size
+  }
+  if(size_desc == 126)
+  {
+    size_desc = (long)(*((uint16_t *)(buffer + delta)));
+    delta += 2; // skip size
+  }
+  if(mask)
+  {
+    mask = *((uint32_t *)(buffer + delta));
+    delta += 4; // skip mask
+  }
+  expect_len = size_desc + delta;
+  // save some data
+  xormask((uint32_t *)(buffer + delta), mask);
+  memset(buffer + current_len, 0, BUF_PROCESS_ERROR);
+  last_msg = last_msg + (buffer + delta);
+  memset(buffer, 0, sizeof(char) * current_len);
+
+  next_slice = min(SV_MAX_BUF, expect_len - current_len);
+  while(current_len < expect_len)
+  { // read some more data
+    if(safe_read(socket, buffer, next_slice))
+    {
+      return -1;
+    }
+    current_len += next_slice;
+    // save some more data
+    xormask((uint32_t *)buffer, mask);
+    memset(buffer + next_slice, 0, BUF_PROCESS_ERROR);
+    last_msg = last_msg + buffer;
+    memset(buffer, 0, sizeof(char) * next_slice);
+  }
   return 0;
 }
 
-int Websocket_Con::analyse(string previous_data)
+int Websocket_Con::analyse()
 {
+  if(last_opcode == WS_OPCODE_PING){ // respond to ping
+    return emit(WS_OPCODE_PONG, last_msg);
+  }
   return 0;
 }
 
