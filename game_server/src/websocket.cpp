@@ -6,7 +6,7 @@ using namespace std;
 
 /* public functions */
 
-Websocket_Con::Websocket_Con(int socket, char *buffer, Logger *log, std::function<void(void *,std::string)> callback)
+Websocket_Con::Websocket_Con(int socket, char *buffer, Logger *log, std::function<void(Websocket_Con *,std::string)> callback)
 {
   this -> id = socket;
   this -> socket = socket;
@@ -31,6 +31,7 @@ Websocket_Con::~Websocket_Con()
 {
   delete[] buffer;
   delete[] write_buffer;
+  close(socket);
 }
 
 void Websocket_Con::handle()
@@ -77,19 +78,59 @@ void Websocket_Con::handle()
 
     if(safe_write(socket, response.c_str(), response.length()))
     {
-      self_terminate();
-      return;
+      goto terminate_handle;
     }
     memset(buffer, 0, SV_MAX_BUF + 2 * BUF_PROCESS_ERROR);
     act();
-    self_terminate();
-    return;
+    goto terminate_handle;
   }
   else
   {
     deny_access(socket);
   }
+  terminate_handle:
   self_terminate();
+  // thread ends after this
+}
+
+void Websocket_Con::call(string http_call, string protocol)
+{
+  const char *key;
+  string sec_token = get_random_string();
+  string ret_token = "";
+  http_call = http_call + "Upgrade: websocket" + SV_HTTP_CRLF;
+  http_call = http_call + SV_HTTP_UP_CON;
+  http_call = http_call + "Sec-WebSocket-Key: " + sec_token + SV_HTTP_CRLF;
+  http_call = http_call + "Sec-WebSocket-Protocol: " + protocol + SV_HTTP_CRLF;
+  http_call = http_call + "Sec-WebSocket-Version: 13" + SV_HTTP_CRLF + SV_HTTP_CRLF;
+  if(safe_write(socket, http_call.c_str(), http_call.length()))
+  {
+    goto terminate_call;
+  }
+  if(safe_read_http_all(socket, buffer))
+  {
+    goto terminate_call;
+  }
+
+  key = string_seek(buffer, "101 Switching Protocols");
+  if(!key)
+  {
+    goto terminate_call;
+  }
+  key = string_seek(buffer, "Sec-WebSocket-Accept:");
+  if(key)
+  {
+    ret_token = string_get_next_token(key, STR_WHITE);
+  }
+  if(encode(sec_token).compare(ret_token))
+  { // wrong token encoding
+    goto terminate_call;
+  }
+  memset(buffer, 0, SV_MAX_BUF + 2 * BUF_PROCESS_ERROR);
+  act();
+  terminate_call:
+  self_terminate();
+  // thread ends after this
 }
 
 void Websocket_Con::ping()
@@ -97,6 +138,11 @@ void Websocket_Con::ping()
   ws_lock.lock();
   need_ping = !sent_ping; // don't schedule to send another ping if one is sent already
   ws_lock.unlock();
+}
+
+void Websocket_Con::kill()
+{
+  kill_lock.lock();
 }
 
 void Websocket_Con::writews(string data)
@@ -129,8 +175,9 @@ void Websocket_Con::writews(string data)
 void Websocket_Con::act()
 {
   string read_data;
-  while(true)
+  while(kill_lock.try_lock())
   {
+    kill_lock.unlock();
     ws_lock.lock();
     if(buffer_read != buffer_write)
     { // 1
@@ -256,6 +303,11 @@ int Websocket_Con::parse()
 
 int Websocket_Con::analyse()
 {
+  if(last_opcode == WS_OPCODE_END)
+  { // respond to ping
+    log -> record(con, "Websocket closed by remote:" + last_msg);
+    return emit(WS_OPCODE_END, last_msg);
+  }
   if(last_opcode == WS_OPCODE_PING)
   { // respond to ping
     log -> record(con, "Responding to ping with message:" + last_msg);
@@ -327,5 +379,11 @@ int Websocket_Con::emit(uint8_t opcode, string to_send)
 
 void Websocket_Con::self_terminate()
 {
+  log -> record(con, "Websocket closing");
+  if(!kill_lock.try_lock())
+  { // closed from within
+    emit(WS_OPCODE_END, "Bye");
+  }
+  kill_lock.unlock();
   this -> callback(this, ""); // tell higher entity to close me
 }

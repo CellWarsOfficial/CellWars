@@ -84,6 +84,8 @@ int check_readable(int s, int timeout);
 
 int check_writable(int s, int timeout);
 
+int safe_read_http_all(int s, char *buf, int timeout);
+
 int safe_write(int s, const char *buf, int len);
 
 int safe_read(int s, char *buf, int len);
@@ -91,5 +93,7 @@ int safe_read(int s, char *buf, int len);
 int check_readable(int s);
 
 int check_writable(int s);
+
+int safe_read_http_all(int s, char *buf);
 
 #endif

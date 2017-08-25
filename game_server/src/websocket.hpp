@@ -16,14 +16,14 @@ using namespace std;
 class Websocket_Con{
   public:
   int id;
-  Websocket_Con(int socket, char *buffer, Logger *log, function<void(void *,string)> callback);
+  Websocket_Con(int socket, char *buffer, Logger *log, function<void(Websocket_Con *,string)> callback);
   ~Websocket_Con();
   void handle(); // used to accept a websocket request
-//  void call(); // used to connect to a remote websocket server
-//  void kill(); // used to close the websocket
+  void call(string http_call, string protocol); // used to connect to a remote websocket server
+  void kill(); // used to close the websocket
   void writews(string data);
   void ping();
-  std::function<void(void *,std::string)> callback;
+  std::function<void(Websocket_Con *,std::string)> callback;
   private:
   bool need_ping;
   bool sent_ping;
@@ -32,6 +32,7 @@ class Websocket_Con{
   int socket;
   Logger *log;
   mutex ws_lock;
+  mutex kill_lock;
   string *write_buffer;
   char *buffer;
   int buffer_size;

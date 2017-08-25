@@ -1049,6 +1049,30 @@ int check_writable(int s, int timeout)
   return poll(&pfds, 1, timeout);
 }
 
+int safe_read_http_all(int s, char *buf, int timeout)
+{
+  int trials = SV_MAX_ATTEMPTS;
+  int old = 0;
+  int fresh;
+  while(trials--)
+  {
+    if(check_readable(s, timeout))
+    {
+      fresh = read(s, buf + old, SV_MAX_BUF - old);
+      if(strstr(buf + old - (old > 4 ? 4 : old), SV_HTTP_CRLF SV_HTTP_CRLF))
+      {
+        return 0;
+      }
+      old += fresh;
+    }
+    else 
+    {
+      break;
+    }
+  }
+  return -1; // some sort of protocol violation
+}
+
 int safe_write(int s, const char *buf, int len)
 {
   return safe_write(s, buf, len, SV_WRITE_WAIT_TIMEOUT);
@@ -1067,4 +1091,9 @@ int check_readable(int s)
 int check_writable(int s)
 {
   return check_writable(s, SV_WRITE_WAIT_TIMEOUT);
+}
+
+int safe_read_http_all(int s, char *buf)
+{
+  return safe_read_http_all(s, buf, SV_READ_WAIT_TIMEOUT);
 }
