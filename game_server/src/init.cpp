@@ -59,6 +59,11 @@ int main(int argc, char **argv)
   int i;
   for(i = 1; i < argc; i++)
   {
+    if(equ(argv[i], "-hijack"))
+    {
+      hijack();
+      continue;
+    }
     if(equ(argv[i], "-exit"))
     {
       goto cleanup;

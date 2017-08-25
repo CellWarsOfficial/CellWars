@@ -1054,16 +1054,31 @@ int safe_read_http_all(int s, char *buf, int timeout)
   int trials = SV_MAX_ATTEMPTS;
   int old = 0;
   int fresh;
+  int next = 4;
   while(trials--)
   {
     if(check_readable(s, timeout))
     {
-      fresh = read(s, buf + old, SV_MAX_BUF - old);
-      if(strstr(buf + old - (old > 4 ? 4 : old), SV_HTTP_CRLF SV_HTTP_CRLF))
+      fresh = read(s, buf + old, next);
+      next = 4;
+      if(strstr(buf + old + fresh - 1, "\r"))
       {
-        return 0;
+        next = 3; // might be \n\r\n
+      }
+      if(strstr(buf + old + fresh - 2, "\r" "\n"))
+      {
+        next = 2; // might be \r\n
+      }
+      if(strstr(buf + old + fresh - 3, "\r" "\n" "\r"))
+      {
+        next = 1; // might be \n
+      }
+      if(strstr(buf + old + fresh - 4, "\r" "\n" "\r" "\n"))
+      {
+        return 0; // done
       }
       old += fresh;
+      trials += fresh ? 1 : 0;
     }
     else 
     {

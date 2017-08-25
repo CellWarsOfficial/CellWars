@@ -84,7 +84,7 @@
 #define SV_HTML_MISSING "../client/html/not_found.html"
 #define SV_HTTP_SWITCH "HTTP/1.1 101 Switching Protocols\r\n"
 #define SV_HTTP_OK "HTTP/1.1 200 OK\r\n"
-#define SV_HTTP_REDIR "HTTP/1.1 301 OK\r\n"
+#define SV_HTTP_REDIR "HTTP/1.1 301 Moved Permanently\r\n"
 #define SV_HTTP_NOT_FOUND "HTTP/1.1 404 Not Found\r\n"
 #define SV_HTTP_ILLEGAL "HTTP/1.1 405 Method Not Allowed\r\n"
 #define SV_HTTP_CLOSE_CON "Connection: close\r\n"

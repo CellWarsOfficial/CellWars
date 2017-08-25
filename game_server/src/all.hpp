@@ -13,5 +13,7 @@
 #include <server.hpp>
 #include <math.hpp>
 #include <strings.hpp>
+#include <websocket.hpp>
+#include <hijack.hpp>
 
 #endif
