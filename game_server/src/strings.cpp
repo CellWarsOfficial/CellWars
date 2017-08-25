@@ -1,5 +1,7 @@
 #include <strings.hpp>
 #include <constants.hpp>
+#include <math.hpp>
+#include <cstdlib>
 
 const char *skip_ws(const char *origin)
 {
@@ -136,4 +138,9 @@ int is_num(const char *s)
 int is_num(string s)
 {
   return is_num(s.c_str());
+}
+
+string get_random_string()
+{
+  return encode(to_string(rand()));
 }

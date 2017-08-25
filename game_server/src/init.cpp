@@ -5,6 +5,7 @@
 #include <map>
 #include <thread>
 #include <cstdlib>
+#include <ctime>
 
 #define ME "Init"
 
@@ -51,6 +52,7 @@ int main(int argc, char **argv)
   int gtc = DEFAULT_GTC;
   int server_p = SV_DEF_PORT;
   int wait_time = DEFAULT_WAIT_TIME;
+  srand(time(0));
   Logger *log = new Logger(LOG_MAX_BUFFER_DEFAULT, LOG_BUFFER_DELAY_DEFAULT);
 /* Parsing program arguments
  */

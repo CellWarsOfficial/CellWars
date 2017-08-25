@@ -28,4 +28,6 @@ int is_num(const char *s);
 
 int is_num(string s);
 
+string get_random_string();
+
 #endif

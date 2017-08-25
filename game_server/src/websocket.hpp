@@ -27,6 +27,7 @@ class Websocket_Con{
   private:
   bool need_ping;
   bool sent_ping;
+  string ping_msg;
   string con; // used to identify myself
   int socket;
   Logger *log;

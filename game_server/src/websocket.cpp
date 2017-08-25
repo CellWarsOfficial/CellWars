@@ -16,6 +16,7 @@ Websocket_Con::Websocket_Con(int socket, char *buffer, Logger *log, std::functio
   write_buffer = new string[WS_MAX_BUF];
   need_ping = false;
   sent_ping = false;
+  ping_msg = "";
   buffer_size = WS_MAX_BUF;
   wrapped = false;
   con = "" + socket;
@@ -155,7 +156,8 @@ void Websocket_Con::act()
       sent_ping = true;
       ws_lock.unlock();
       log -> record(con, "Sending ping");
-      if(emit(WS_OPCODE_PING, "Cells are pretty cool man!"))
+      ping_msg = get_random_string();
+      if(emit(WS_OPCODE_PING, ping_msg))
       {
         return;
       }
@@ -207,7 +209,7 @@ int Websocket_Con::parse()
   mask = size_desc & 128;
   size_desc = size_desc % 128;
   delta = 2;
-  expect_len = size_desc + delta;
+  expect_len = size_desc + delta + (mask ? 4 : 0);
   if(safe_read(socket, buffer + current_len, expect_len - current_len))
   {
     return -1;
@@ -254,8 +256,32 @@ int Websocket_Con::parse()
 
 int Websocket_Con::analyse()
 {
-  if(last_opcode == WS_OPCODE_PING){ // respond to ping
+  if(last_opcode == WS_OPCODE_PING)
+  { // respond to ping
+    log -> record(con, "Responding to ping with message:" + last_msg);
     return emit(WS_OPCODE_PONG, last_msg);
+  }
+  if(last_opcode == WS_OPCODE_PONG)
+  { // got pong back
+    if(sent_ping && (last_msg.compare(ping_msg) == 0))
+    {
+      log -> record(con, "Received pong for a ping I sent");
+      sent_ping = false;
+      ping_msg = "";
+    }
+    else
+    {
+      log -> record(con, "Received random pong containing:" + last_msg);
+    }
+    return 0;
+  }
+  if(last_fin)
+  {
+    log -> record(con, "Returning message to higher entity");
+    this -> callback(this, last_msg); // can't handle it anymore
+    last_msg = "";
+    last_fin = "";
+    last_opcode = 0;
   }
   return 0;
 }
