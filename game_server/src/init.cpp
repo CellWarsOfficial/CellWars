@@ -61,7 +61,7 @@ int main(int argc, char **argv)
   {
     if(equ(argv[i], "-hijack"))
     {
-      hijack();
+      hijack(log);
       continue;
     }
     if(equ(argv[i], "-exit"))

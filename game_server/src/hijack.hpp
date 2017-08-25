@@ -1,6 +1,6 @@
 #ifndef HIJACK_HPP
 #define HIJACK_HPP
 
-int hijack();
+int hijack(Logger *log);
 
 #endif

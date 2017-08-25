@@ -19,12 +19,13 @@ Websocket_Con::Websocket_Con(int socket, char *buffer, Logger *log, std::functio
   ping_msg = "";
   buffer_size = WS_MAX_BUF;
   wrapped = false;
-  con = "" + socket;
+  con = to_string(socket);
   buffer_read = 0;
   buffer_write = 0;
   last_msg = "";
   last_opcode = 0;
   last_fin = false;
+  applymask = false;
 }
 
 Websocket_Con::~Websocket_Con()
@@ -95,6 +96,7 @@ void Websocket_Con::handle()
 
 void Websocket_Con::call(string http_call, string protocol)
 {
+  applymask = true;
   const char *key;
   string sec_token = get_random_string();
   string ret_token = "";
@@ -103,6 +105,7 @@ void Websocket_Con::call(string http_call, string protocol)
   http_call = http_call + "Sec-WebSocket-Key: " + sec_token + SV_HTTP_CRLF;
   http_call = http_call + "Sec-WebSocket-Protocol: " + protocol + SV_HTTP_CRLF;
   http_call = http_call + "Sec-WebSocket-Version: 13" + SV_HTTP_CRLF + SV_HTTP_CRLF;
+  this -> callback(this, http_call);
   if(safe_write(socket, http_call.c_str(), http_call.length()))
   {
     goto terminate_call;
@@ -111,8 +114,9 @@ void Websocket_Con::call(string http_call, string protocol)
   {
     goto terminate_call;
   }
+  this -> callback(this, string(buffer));
 
-  key = string_seek(buffer, "101 Switching Protocols");
+  key = string_seek(buffer, " 101 ");
   if(!key)
   {
     goto terminate_call;
@@ -217,8 +221,12 @@ void Websocket_Con::act()
       log -> record(con, "There is");
       if(parse())
       {
+        callback(this, "weird failure");
+        callback(this, last_msg);
         return;
       }
+      callback(this, last_msg);
+      callback(this, to_string(last_opcode));
       if(analyse())
       {
         return;
@@ -245,6 +253,7 @@ int Websocket_Con::parse()
 
   if(safe_read(socket, buffer, expect_len))
   {
+        callback(this, "weird failure");
     return -1;
   }
   current_len = expect_len;
@@ -341,6 +350,7 @@ int Websocket_Con::analyse()
 int Websocket_Con::emit(uint8_t opcode, string to_send)
 {
   int len, delta, sofar = 0, slice = SV_MAX_BUF;
+  uint32_t mask = 0; // masking with 0 has no effect
   len = to_send.length();
   while(sofar < len)
   {
@@ -364,7 +374,19 @@ int Websocket_Con::emit(uint8_t opcode, string to_send)
       buffer[delta + 2] = (char)(slice % 256);
       delta += 3; // skip size
     }
+    if(applymask)
+    {
+      mask = rand();
+      buffer[1] = buffer[1] | 128; // set mask bit
+      buffer[delta] = (mask >> 24) & 255;
+      buffer[delta + 1] = (mask >> 16) & 255;
+      buffer[delta + 2] = (mask >> 8) & 255;
+      buffer[delta + 3] = mask & 255;
+      delta += 4;
+    }
     to_send.copy(buffer + delta, slice, sofar);
+    xormask((uint32_t *)(buffer + delta), mask);
+    memset(buffer + slice + delta, 0, BUF_PROCESS_ERROR);
 
     if(safe_write(socket, buffer, slice + delta))
     {

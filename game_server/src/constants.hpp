@@ -93,8 +93,8 @@
 #define SV_HTTP_ALLOWED "Allow: GET, HEAD\r\n"
 #define SV_HTTP_DEST "Location: http://cellwars.co.uk\r\n" 
 #define SV_HTTP_CRLF "\r\n"
-#define SV_READ_WAIT_TIMEOUT 10000
-#define SV_WRITE_WAIT_TIMEOUT 10000
+#define SV_READ_WAIT_TIMEOUT 1000
+#define SV_WRITE_WAIT_TIMEOUT 1000
 
 /* String related constants
  */
@@ -116,6 +116,6 @@
 #define WS_OPCODE_END 8
 #define WS_OPCODE_PING 9
 #define WS_OPCODE_PONG 10
-#define WS_INPUT_WAIT_TIMEOUT 10000
+#define WS_INPUT_WAIT_TIMEOUT 1000
 
 #endif

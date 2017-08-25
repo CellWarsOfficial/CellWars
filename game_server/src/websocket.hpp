@@ -42,6 +42,7 @@ class Websocket_Con{
   uint8_t last_opcode;
   bool last_fin;
   bool wrapped;
+  bool applymask;
   void act(); // main loop, will write if there's something to write.
   int parse();
   int analyse();
