@@ -24,6 +24,7 @@ class Websocket_Con{
   void writews(string data);
   void ping();
   std::function<void(Websocket_Con *,std::string)> callback;
+  void act(); // main loop, will write if there's something to write.
   private:
   bool need_ping;
   bool sent_ping;
@@ -43,7 +44,6 @@ class Websocket_Con{
   bool last_fin;
   bool wrapped;
   bool applymask;
-  void act(); // main loop, will write if there's something to write.
   int parse();
   int analyse();
   int emit(uint8_t opcode, string to_send);

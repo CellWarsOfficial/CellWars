@@ -993,16 +993,6 @@ int deny_access(int s)
 
 int safe_write(int s, const char *buf, int len, int timeout)
 {
-  printf("\nSENDING:\n");
-  for(const char *i = buf; *i; i++)
-  {
-    printf("%u ", (uint8_t)(*i));
-  }
-  printf("\nOR:\n");
-  printf("%s", buf);
-  printf("\nSENT\n");
-  printf("DETS: len = %d\n", len);
-  
   int trials = SV_MAX_ATTEMPTS, aux = 0;
   while(trials--)
   {
@@ -1057,6 +1047,7 @@ int check_writable(int s, int timeout)
   struct pollfd pfds;
   pfds.fd = s;
   pfds.events = POLLOUT;
+  pfds.revents = 0;
   return poll(&pfds, 1, timeout) > 0;
 }
 

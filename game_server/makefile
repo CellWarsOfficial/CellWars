@@ -14,9 +14,9 @@ KILLCOM = /bin/kill -9
 EFLAGS = -lssl -lcrypto
 OS := $(shell uname)
 ifeq ($(OS), Darwin)
-	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11
+	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11 -g
 else
-	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11 -pthread
+	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11 -g -O0 -pthread
 endif
 TFLAGS = 
 OBJECT = $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o $(BINDIR)/game.o $(BINDIR)/server_ui.o $(BINDIR)/log.o $(BINDIR)/crank.o $(BINDIR)/server.o $(BINDIR)/math.o $(BINDIR)/strings.o $(BINDIR)/websocket.o $(BINDIR)/hijack.o

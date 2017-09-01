@@ -37,6 +37,8 @@ Websocket_Con::~Websocket_Con()
 
 void Websocket_Con::handle()
 {
+  printf("definitely used to work: %p\n", callback);
+  this -> callback(this, "jumper");
   const char *key;
   string response = "";
   key = string_seek(buffer, "Sec-WebSocket-Key:");
@@ -76,17 +78,28 @@ void Websocket_Con::handle()
                + SV_HTTP_CRLF;
     }
     response = response + SV_HTTP_CRLF;
-
+    this -> callback(this, response);
     if(safe_write(socket, response.c_str(), response.length()))
     {
+      this -> callback(this, "oh");
       goto terminate_handle;
     }
+    printf("myself is: %p\n", this);
+    printf("callback is: %p\n", this -> callback);
+    this -> callback(this, "done");
+    this -> callback(this, "done");
+    this -> callback(this, "done");
+    this -> callback(this, "done");
+    this -> callback(this, "done");
     memset(buffer, 0, SV_MAX_BUF + 2 * BUF_PROCESS_ERROR);
-    act();
+    this -> act();
+    printf("imma die\n");
+    this -> callback(this, "imded");
     goto terminate_handle;
   }
   else
   {
+    this -> callback(this, "WHAT?");
     deny_access(socket);
   }
   terminate_handle:
@@ -103,9 +116,13 @@ void Websocket_Con::call(string http_call, string protocol)
   http_call = http_call + "Upgrade: websocket" + SV_HTTP_CRLF;
   http_call = http_call + SV_HTTP_UP_CON;
   http_call = http_call + "Sec-WebSocket-Key: " + sec_token + SV_HTTP_CRLF;
-  http_call = http_call + "Sec-WebSocket-Protocol: " + protocol + SV_HTTP_CRLF;
-  http_call = http_call + "Sec-WebSocket-Version: 13" + SV_HTTP_CRLF + SV_HTTP_CRLF;
-  this -> callback(this, http_call);
+  if(protocol.length())
+  {
+    http_call = http_call + "Sec-WebSocket-Protocol: " + protocol + SV_HTTP_CRLF;
+  }
+  http_call = http_call + "Sec-WebSocket-Version: 13" + SV_HTTP_CRLF;
+  http_call = http_call + "Origin: null" + SV_HTTP_CRLF;
+  http_call = http_call + SV_HTTP_CRLF;
   if(safe_write(socket, http_call.c_str(), http_call.length()))
   {
     goto terminate_call;
@@ -114,7 +131,6 @@ void Websocket_Con::call(string http_call, string protocol)
   {
     goto terminate_call;
   }
-  this -> callback(this, string(buffer));
 
   key = string_seek(buffer, " 101 ");
   if(!key)
@@ -131,7 +147,7 @@ void Websocket_Con::call(string http_call, string protocol)
     goto terminate_call;
   }
   memset(buffer, 0, SV_MAX_BUF + 2 * BUF_PROCESS_ERROR);
-  act();
+  this -> act();
   terminate_call:
   self_terminate();
   // thread ends after this
@@ -165,8 +181,8 @@ void Websocket_Con::writews(string data)
 /* private functions */
 /* act priority in functioning
  * 1 if I have something to write, I will write it.
- * 2 if I need to send a ping, I will if there's nothing to write.
- * 3 if I need to read, I will if there's something to read within 10 seconds.
+ * 2 if I need to read, I will if there's something to read within 10 seconds.
+ * 3 if I need to send a ping, I will if there's nothing to write.
  * 4 if there's nothing to read, but no ping on the way, I'll send a ping
  * 5 if there's nothing to read within 10 seconds again, i'll terminate myself
  * analyse - 
@@ -178,6 +194,12 @@ void Websocket_Con::writews(string data)
 
 void Websocket_Con::act()
 {
+  return;
+    printf("myself is: %p\n", this);
+    printf("callback is: %p\n", this -> callback);
+    printf("callback is: %p\n", callback);
+  this -> handle();
+  callback(this, "now what");
   string read_data;
   while(kill_lock.try_lock())
   {
@@ -201,43 +223,46 @@ void Websocket_Con::act()
       ws_lock.unlock();
       continue;
     }
-    if(need_ping)
+    ws_lock.unlock();
+    log -> record(con, "See if there's something to read");
+    if(check_readable(socket, WS_INPUT_WAIT_TIMEOUT))
     { // 2
+      printf("READING\n");
+      log -> record(con, "There is");
+      if(this -> parse())
+      {
+        return;
+      }
+      printf("PARSED\n");
+      if(this -> analyse())
+      {
+        return;
+      }
+      printf("ANALYSED\n");
+      continue;
+    }
+    ws_lock.lock();
+    if(need_ping)
+    { // 3
       need_ping = false;
       sent_ping = true;
       ws_lock.unlock();
       log -> record(con, "Sending ping");
       ping_msg = get_random_string();
-      if(emit(WS_OPCODE_PING, ping_msg))
+      /*if(emit(WS_OPCODE_PING, ping_msg))
       {
         return;
-      }
-      continue;
-    }
-    ws_lock.unlock();
-    log -> record(con, "See if there's something to read");
-    if(check_readable(socket, WS_INPUT_WAIT_TIMEOUT))
-    { // 3
-      log -> record(con, "There is");
-      if(parse())
-      {
-        callback(this, "weird failure");
-        callback(this, last_msg);
-        return;
-      }
-      callback(this, last_msg);
-      callback(this, to_string(last_opcode));
-      if(analyse())
-      {
-        return;
-      }
+      }*/
       continue;
     }
     if(!sent_ping)
     { // 4
+      ws_lock.unlock();
+      log -> record(con, "Self scheduling ping");
       ping();
       continue;
     }
+    ws_lock.unlock();
     return; // 5 - user timeout, didn't respond to my ping
   }
 }
@@ -253,7 +278,6 @@ int Websocket_Con::parse()
 
   if(safe_read(socket, buffer, expect_len))
   {
-        callback(this, "weird failure");
     return -1;
   }
   current_len = expect_len;
@@ -307,6 +331,7 @@ int Websocket_Con::parse()
     last_msg = last_msg + buffer;
     memset(buffer, 0, sizeof(char) * next_slice);
   }
+  printf("lastmsg is: %s\n", last_msg.c_str());
   return 0;
 }
 
@@ -339,9 +364,15 @@ int Websocket_Con::analyse()
   if(last_fin)
   {
     log -> record(con, "Returning message to higher entity");
+    printf("magic happens :)\n");
+    printf("lastmsg is: %s\n", last_msg.c_str());
+    printf("myself is: %p\n", this);
+    printf("callback is: %p\n", this -> callback);
+    this -> callback(this, "why am i broken");
+    printf("totally broken");
     this -> callback(this, last_msg); // can't handle it anymore
     last_msg = "";
-    last_fin = "";
+    last_fin = false;
     last_opcode = 0;
   }
   return 0;
