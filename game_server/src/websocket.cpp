@@ -37,8 +37,6 @@ Websocket_Con::~Websocket_Con()
 
 void Websocket_Con::handle()
 {
-  printf("definitely used to work: %p\n", callback);
-  this -> callback(this, "jumper");
   const char *key;
   string response = "";
   key = string_seek(buffer, "Sec-WebSocket-Key:");
@@ -48,7 +46,7 @@ void Websocket_Con::handle()
     string token = string_get_next_token(key, STR_WHITE);
     log -> record(con, "requesting WS with token: " + token);
     string answer = encode(token);
-    log -> record(con, "responding with:" + answer);
+    log -> record(con, "responding with: " + answer);
 
     response = response + SV_HTTP_SWITCH;
     key = string_seek(buffer, "Upgrade:");
@@ -78,32 +76,20 @@ void Websocket_Con::handle()
                + SV_HTTP_CRLF;
     }
     response = response + SV_HTTP_CRLF;
-    this -> callback(this, response);
     if(safe_write(socket, response.c_str(), response.length()))
     {
-      this -> callback(this, "oh");
       goto terminate_handle;
     }
-    printf("myself is: %p\n", this);
-    printf("callback is: %p\n", this -> callback);
-    this -> callback(this, "done");
-    this -> callback(this, "done");
-    this -> callback(this, "done");
-    this -> callback(this, "done");
-    this -> callback(this, "done");
     memset(buffer, 0, SV_MAX_BUF + 2 * BUF_PROCESS_ERROR);
     this -> act();
-    printf("imma die\n");
-    this -> callback(this, "imded");
     goto terminate_handle;
   }
   else
   {
-    this -> callback(this, "WHAT?");
     deny_access(socket);
   }
   terminate_handle:
-  self_terminate();
+  this -> self_terminate();
   // thread ends after this
 }
 
@@ -149,7 +135,7 @@ void Websocket_Con::call(string http_call, string protocol)
   memset(buffer, 0, SV_MAX_BUF + 2 * BUF_PROCESS_ERROR);
   this -> act();
   terminate_call:
-  self_terminate();
+  this -> self_terminate();
   // thread ends after this
 }
 
@@ -194,13 +180,6 @@ void Websocket_Con::writews(string data)
 
 void Websocket_Con::act()
 {
-  return;
-    printf("myself is: %p\n", this);
-    printf("callback is: %p\n", this -> callback);
-    printf("callback is: %p\n", callback);
-  this -> handle();
-  callback(this, "now what");
-  string read_data;
   while(kill_lock.try_lock())
   {
     kill_lock.unlock();
@@ -227,18 +206,15 @@ void Websocket_Con::act()
     log -> record(con, "See if there's something to read");
     if(check_readable(socket, WS_INPUT_WAIT_TIMEOUT))
     { // 2
-      printf("READING\n");
       log -> record(con, "There is");
       if(this -> parse())
       {
         return;
       }
-      printf("PARSED\n");
       if(this -> analyse())
       {
         return;
       }
-      printf("ANALYSED\n");
       continue;
     }
     ws_lock.lock();
@@ -247,12 +223,12 @@ void Websocket_Con::act()
       need_ping = false;
       sent_ping = true;
       ws_lock.unlock();
-      log -> record(con, "Sending ping");
       ping_msg = get_random_string();
-      /*if(emit(WS_OPCODE_PING, ping_msg))
+      log -> record(con, "Sending ping with content [" + ping_msg + "]");
+      if(emit(WS_OPCODE_PING, ping_msg))
       {
         return;
-      }*/
+      }
       continue;
     }
     if(!sent_ping)
@@ -331,21 +307,24 @@ int Websocket_Con::parse()
     last_msg = last_msg + buffer;
     memset(buffer, 0, sizeof(char) * next_slice);
   }
-  printf("lastmsg is: %s\n", last_msg.c_str());
   return 0;
 }
 
 int Websocket_Con::analyse()
 {
+  int aux = 0;
   if(last_opcode == WS_OPCODE_END)
   { // respond to ping
     log -> record(con, "Websocket closed by remote:" + last_msg);
-    return emit(WS_OPCODE_END, last_msg);
+    emit(WS_OPCODE_END, last_msg);
+    return -1;
   }
   if(last_opcode == WS_OPCODE_PING)
   { // respond to ping
-    log -> record(con, "Responding to ping with message:" + last_msg);
-    return emit(WS_OPCODE_PONG, last_msg);
+    log -> record(con, "Responding to ping with message [" + last_msg + "]");
+    aux = emit(WS_OPCODE_PONG, last_msg);
+    this -> refresh();
+    return aux;
   }
   if(last_opcode == WS_OPCODE_PONG)
   { // got pong back
@@ -357,23 +336,16 @@ int Websocket_Con::analyse()
     }
     else
     {
-      log -> record(con, "Received random pong containing:" + last_msg);
+      log -> record(con, "Received random pong containing [" + last_msg + "]");
     }
+    this -> refresh();
     return 0;
   }
   if(last_fin)
   {
     log -> record(con, "Returning message to higher entity");
-    printf("magic happens :)\n");
-    printf("lastmsg is: %s\n", last_msg.c_str());
-    printf("myself is: %p\n", this);
-    printf("callback is: %p\n", this -> callback);
-    this -> callback(this, "why am i broken");
-    printf("totally broken");
     this -> callback(this, last_msg); // can't handle it anymore
-    last_msg = "";
-    last_fin = false;
-    last_opcode = 0;
+    this -> refresh();
   }
   return 0;
 }
@@ -409,10 +381,7 @@ int Websocket_Con::emit(uint8_t opcode, string to_send)
     {
       mask = rand();
       buffer[1] = buffer[1] | 128; // set mask bit
-      buffer[delta] = (mask >> 24) & 255;
-      buffer[delta + 1] = (mask >> 16) & 255;
-      buffer[delta + 2] = (mask >> 8) & 255;
-      buffer[delta + 3] = mask & 255;
+      *((uint32_t *)(buffer + delta)) = mask;
       delta += 4;
     }
     to_send.copy(buffer + delta, slice, sofar);
@@ -428,6 +397,13 @@ int Websocket_Con::emit(uint8_t opcode, string to_send)
     opcode = 0; // at this point, it's continuation
   }
   return 0;
+}
+
+void Websocket_Con::refresh()
+{
+  this -> last_msg = "";
+  this -> last_fin = false;
+  this -> last_opcode = 0;
 }
 
 void Websocket_Con::self_terminate()

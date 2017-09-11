@@ -1036,19 +1036,23 @@ int safe_read(int s, char *buf, int len, int timeout)
 int check_readable(int s, int timeout)
 {
   struct pollfd pfds;
+  int poll_return;
   pfds.fd = s;
   pfds.events = POLLIN;
   pfds.revents = 0;
-  return poll(&pfds, 1, timeout) > 0;
+  poll_return = poll(&pfds, 1, timeout);
+  return (poll_return > 0) && (pfds.revents & POLLIN);
 }
 
 int check_writable(int s, int timeout)
 {
   struct pollfd pfds;
+  int poll_return;
   pfds.fd = s;
   pfds.events = POLLOUT;
   pfds.revents = 0;
-  return poll(&pfds, 1, timeout) > 0;
+  poll_return = poll(&pfds, 1, timeout);
+  return (poll_return > 0) && (pfds.revents & POLLOUT);
 }
 
 int safe_read_http_all(int s, char *buf, int timeout)

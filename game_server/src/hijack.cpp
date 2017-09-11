@@ -31,7 +31,11 @@
 
 void cb(Websocket_Con *ws, string x)
 {
-  printf("callback called with [%s]\n", x.c_str());
+  printf("callback called by {%d} with [%s]\n", ws -> id, x.c_str());
+  if(x.length() == 0)
+  {
+    delete ws;
+  }
 }
 
 int host(Logger *log)
@@ -64,13 +68,13 @@ int host(Logger *log)
       break;
     }
     log -> record(ME, "fresh meat.");
-  char *buffer = new char[SV_MAX_BUF]();
+  char *buffer = new char[SV_ACTUAL_BUF_SIZE]();
   safe_read_http_all(news, buffer);
   Websocket_Con *ws = new Websocket_Con(news, buffer, log, cb);
   new thread(&Websocket_Con::handle, ws);
   long wait = 999999999;
   while(wait--);
-  ws -> writews("WebSocket rocks");
+  ws -> writews("Ya bet they do!");
   while(1);
   }
   return 123;
@@ -78,9 +82,11 @@ int host(Logger *log)
 
 int hijack(Logger *log)
 {
-  host(log);
+  new thread(host, log);
+  long wait = 999999999;
+  while(wait--);
   printf("hi jack!\n");
-  char *buffer = new char[SV_MAX_BUF]();
+  char *buffer = new char[SV_ACTUAL_BUF_SIZE]();
   int sock = socket(AF_INET, SOCK_STREAM, 0);
   if(sock < 0)
   {
@@ -98,7 +104,7 @@ int hijack(Logger *log)
   bcopy((char *)server->h_addr,
        (char *)&server_address.sin_addr.s_addr,
        server->h_length);
-  server_address.sin_port = htons(1632);
+  server_address.sin_port = htons(1633);
   if(connect(
      sock,
      (struct sockaddr *)&server_address,
@@ -111,7 +117,7 @@ int hijack(Logger *log)
   ws -> writews("WebSocket rocks");
   string call = "GET / HTTP/1.1\r\nHost: echo.websocket.org\r\n";
   new thread(&Websocket_Con::call, ws, call, "echo");
-  long wait = 999999999;
+  wait = 999999999;
   while(wait--);
   while(1);
   return 0;

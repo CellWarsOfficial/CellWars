@@ -47,6 +47,7 @@ class Websocket_Con{
   int parse();
   int analyse();
   int emit(uint8_t opcode, string to_send);
+  void refresh();
   void self_terminate();
 };
 

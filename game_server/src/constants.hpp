@@ -72,12 +72,20 @@
 #define FIXED_STRING "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 #define BASE_64_TABLE "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
+/* String related constants
+ */
+#define STR_WHITE " \f\n\r\t\v"
+#define STR_DIGITS "0123456789"
+#define BUF_THRESHOLD 500
+#define BUF_PROCESS_ERROR 10
+
 /* Server related constants
  */
 #define SV_DEF_PORT 7777
 #define SV_MAX_PORT 65535
 #define SV_MAX_LISTEN 5
 #define SV_MAX_BUF 5000
+#define SV_ACTUAL_BUF_SIZE (SV_MAX_BUF + 2 * BUF_PROCESS_ERROR)
 #define SV_DELAY 50
 #define SV_MAX_ATTEMPTS 10000000
 #define SV_HTML_PATH "../client/html"
@@ -93,15 +101,8 @@
 #define SV_HTTP_ALLOWED "Allow: GET, HEAD\r\n"
 #define SV_HTTP_DEST "Location: http://cellwars.co.uk\r\n" 
 #define SV_HTTP_CRLF "\r\n"
-#define SV_READ_WAIT_TIMEOUT 1000
-#define SV_WRITE_WAIT_TIMEOUT 1000
-
-/* String related constants
- */
-#define STR_WHITE " \f\n\r\t\v"
-#define STR_DIGITS "0123456789"
-#define BUF_THRESHOLD 500
-#define BUF_PROCESS_ERROR 10
+#define SV_READ_WAIT_TIMEOUT 2000
+#define SV_WRITE_WAIT_TIMEOUT 2000
 
 /* Game sync/API related constants
  */
@@ -116,6 +117,6 @@
 #define WS_OPCODE_END 8
 #define WS_OPCODE_PING 9
 #define WS_OPCODE_PONG 10
-#define WS_INPUT_WAIT_TIMEOUT 1000
+#define WS_INPUT_WAIT_TIMEOUT 2000
 
 #endif
