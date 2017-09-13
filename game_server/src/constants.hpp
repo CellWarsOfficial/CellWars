@@ -119,4 +119,9 @@
 #define WS_OPCODE_PONG 10
 #define WS_INPUT_WAIT_TIMEOUT 2000
 
+/* Cells protocol related constants
+ */
+#define CW_PROT_SV_MIN_SEQ 101
+#define CW_PROT_SV_MAX_SEQ 200
+
 #endif

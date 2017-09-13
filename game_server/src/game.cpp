@@ -6,9 +6,6 @@
 
 #define ME "Game"
 
-/* Note that Game has default destructor, as clean_up takes care of memory.
- */
-
 Game::Game(DB_conn* db, Server *server, Logger *log)
 {
   this -> log = log;
@@ -16,6 +13,12 @@ Game::Game(DB_conn* db, Server *server, Logger *log)
   db_info = db;
   execution_lock.lock();
   flags = 0; // Important because it unsets running flag
+  player_manager = new Player_Manager(this, log);
+}
+
+Game::~Game()
+{
+  delete player_manager;
 }
 
 int Game::get_status()
@@ -115,11 +118,7 @@ void *Game::start(FLAG_TYPE f, int gtc, int w, int bm)
 
 void Game::plan_stage(int wait_time)
 {
-  if(server)
-  {
-    server -> bcast_message("CRANKFIN");
-    server -> inform(INFORM_UPDATE_MOVES, base_moves);
-  }
+  player_manager -> bcast_message("CRANKFIN");
   if(GFLAG_stepped_tick)
   {
     log -> record(ME, "Planning time - debug step - waiting for UI");
@@ -136,10 +135,7 @@ void Game::plan_stage(int wait_time)
   {
     up_db();
   }
-  if(server)
-  {
-    server -> bcast_message("TIMEOUT");
-  }
+  player_manager -> bcast_message("TIMEOUT");
 }
 
 void Game::crank_stage(int generations)
@@ -192,7 +188,7 @@ void Game::user_loses(CELL_TYPE user_type)
   log -> record(ME, "Mama, i just killed a capital cell.");
   if(server)
   {
-    server -> inform(INFORM_USER_DIES, (int)user_type);
+    player_manager -> kill(user_type);
   }
   if(db_info)
   {

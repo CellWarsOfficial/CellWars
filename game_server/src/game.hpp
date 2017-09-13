@@ -4,6 +4,7 @@
 #include <block.hpp>
 #include <log.hpp>
 #include <server.hpp>
+#include <players.hpp>
 #include <database.hpp>
 #include <action.hpp>
 #include <crank.hpp>
@@ -47,6 +48,7 @@ class Game
   private:
   Logger *log;
   Server *server;
+  Player_Manager *player_manager;
   std::mutex execution_lock;
   std::mutex flag_protection;
   std::mutex crank_lock;
