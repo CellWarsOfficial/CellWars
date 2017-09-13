@@ -60,8 +60,8 @@ void Server::act(int socket)
   key = string_seek(buffer, "/database HTTP/");
   if(key)
   {
-    ws = new Websocket_Con(socket, buffer, log, db_info -> get_websocket_client_callback());
-    db_info -> subscribe(ws);
+    // ws = new Websocket_Con(socket, buffer, log, db_info -> get_websocket_client_callback());
+    // db_info -> subscribe(ws); // TODO: actually implement this stuff - CDN
   }
   else
   {
