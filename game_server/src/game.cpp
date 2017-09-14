@@ -6,19 +6,18 @@
 
 #define ME "Game"
 
-Game::Game(DB_conn* db, Server *server, Logger *log)
+Game::Game(DB_conn* db, Player_Manager *pm, Logger *log)
 {
   this -> log = log;
-  this -> server = server;
   db_info = db;
+  player_manager = pm;
+  player_manager -> expand(this);
   execution_lock.lock();
   flags = 0; // Important because it unsets running flag
-  player_manager = new Player_Manager(this, log);
 }
 
 Game::~Game()
 {
-  delete player_manager;
 }
 
 int Game::get_status()
@@ -138,6 +137,16 @@ void Game::plan_stage(int wait_time)
   player_manager -> bcast_message("TIMEOUT");
 }
 
+int Game::get_gtc()
+{
+  return gen_to_run;
+}
+
+int Game::get_wait()
+{
+  return plan_time;
+}
+
 void Game::crank_stage(int generations)
 {
   crank_lock.lock();
@@ -186,10 +195,6 @@ void Game::crank_stage(int generations)
 void Game::user_loses(CELL_TYPE user_type)
 {
   log -> record(ME, "Mama, i just killed a capital cell.");
-  if(server)
-  {
-    player_manager -> kill(user_type);
-  }
   if(db_info)
   {
     db_info -> run_query(NO_READ, "DELETE FROM agents.grid WHERE user_id="
@@ -477,14 +482,6 @@ void Game::clean_up()
 void Game::ping_round()
 {
   log -> record(ME, "Running pings on the slackers.");
-  if(server)
-  {
-    server -> check_clients(9);
-  }
-  else
-  {
-    log -> record(ME, "No server to ping with.");
-  }
 }
 
 string Game::getdets()
@@ -515,7 +512,7 @@ void Game::demand_stat()
   log -> record(ME, "Game is progressing quite nicely!");
   log -> record(ME, "We are currently at generation " + to_string(curr_gen));
   log -> record(ME, "Using " + to_string(super_node.size()) + " blocks");
-  if(server)
+  if(db_info)
   {
     log -> record(ME, "Here's my database report");
     db_info -> demand_stat();
@@ -523,13 +520,5 @@ void Game::demand_stat()
   else
   {
     log -> record(ME, "Running without a database!");
-  }
-  if(server)
-  {
-    server -> demand_stat();
-  }
-  else
-  {
-    log -> record(ME, "Running without a server!");
   }
 }

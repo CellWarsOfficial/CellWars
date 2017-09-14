@@ -10,8 +10,9 @@ using namespace std;
 
 Player::Player(CELL_TYPE type)
 {
-  this.type = type;
+  this -> type = type;
   message_id = CW_PROT_SV_MIN_SEQ;
+  score = 0; // scrub
 }
 
 Player::~Player()
@@ -23,7 +24,7 @@ int Player::get_score()
   player_lock.lock();
   int ret_value = this -> score;
   player_lock.unlock();
-  return this.score;
+  return ret_value;
 }
 
 void Player::set_score(int score)
@@ -39,7 +40,7 @@ void *Player::get_data()
   return this -> extensionData;
 }
 
-void Player::set_data(void *extensionData);
+void Player::set_data(void *extensionData)
 {
   this -> extensionData = extensionData;
   player_lock.unlock();
@@ -100,15 +101,20 @@ int Player::send_seq(string message)
   return seq;
 }
 
-Player_Manager::Player_Manager(Game *game, Logger *l)
+Player_Manager::Player_Manager(DB_conn *db, Logger *l)
 {
-  this -> game = game;
   this -> log = log;
-  cb = bind(Player_Manager::handle_client_message, this, placeholders::_1, placeholders::_2);
+  database = db;
+  cb = bind(&Player_Manager::handle_client_message, this, placeholders::_1, placeholders::_2);
 }
 
 Player_Manager::~Player_Manager()
 {
+}
+
+void Player_Manager::expand(Game *game)
+{
+  this -> game = game;
 }
 
 void Player_Manager::subscribe(Websocket_Con *ws)
@@ -126,7 +132,7 @@ void Player_Manager::kill(CELL_TYPE t)
   p -> send_seq("LOST");
 }
 
-void bcast_message(string message)
+void Player_Manager::bcast_message(string message)
 { 
   std::map<CELL_TYPE, Player *>::iterator i;
   for (i = player_list.begin(); i != player_list.end(); i++)
@@ -137,10 +143,10 @@ void bcast_message(string message)
 
 void Player_Manager::handle_client_message(Websocket_Con *ws, string msg)
 {
-  if(msg == "")
+  if(msg.length() == 0)
   {
     delete ws;
-    return
+    return;
   }
   const char *key = msg.c_str();
   try
@@ -181,15 +187,15 @@ void Player_Manager::handle_client_message(Websocket_Con *ws, string msg)
   }
 }
 
-void Player_Manager::resolve_callback(Websocket_Con *ws, int seq_id, const chat *key)
+void Player_Manager::resolve_callback(Websocket_Con *ws, int seq_id, const char *key)
 {
   // idk man, TODO: maybe?
-  check_not_null(0);
+  check_not_null(NULL);
 }
 
-void Player_Manager::resolve_pick(Websocket_Con *ws, int seq_id, const chat *key)
+void Player_Manager::resolve_pick(Websocket_Con *ws, int seq_id, const char *key)
 {
-  CELL_TYPE t = (CELL_TYPE) stoi(get_arg(key, "t="));
+  CELL_TYPE t = (CELL_TYPE) stoi(get_arg(key, "t"));
   if(t == 0)
   { // no undead 'round here!
     ws -> writews(form(seq_id, "0"));
@@ -197,7 +203,7 @@ void Player_Manager::resolve_pick(Websocket_Con *ws, int seq_id, const chat *key
   if(player_list[t] == NULL)
   { // can pick
     player_list[t] = new Player(t);
-    player_list[t].connect(ws);
+    player_list[t] -> connect(ws);
     ws -> writews(form(seq_id, "1"));
   }
   else
@@ -206,24 +212,24 @@ void Player_Manager::resolve_pick(Websocket_Con *ws, int seq_id, const chat *key
   }
 }
 
-void Player_Manager::resolve_details(Websocket_Con *ws, int seq_id, const chat *key)
+void Player_Manager::resolve_details(Websocket_Con *ws, int seq_id, const char *key)
 {
   ws -> writews(form(seq_id, form(form("gtc", game -> get_gtc(), "="), form("wait", game -> get_wait(), "="), " ")));
 }
 
-void Player_Manager::resolve_update(Websocket_Con *ws, int seq_id, const chat *key)
+void Player_Manager::resolve_update(Websocket_Con *ws, int seq_id, const char *key)
 {
-  int px = stoi(get_arg(key, "px="));
-  int py = stoi(get_arg(key, "py="));
-  CELL_TYPE t = (CELL_TYPE) stoi(get_arg(key, "t="));
+  int px = stoi(get_arg(key, "px"));
+  int py = stoi(get_arg(key, "py"));
+  CELL_TYPE t = (CELL_TYPE) stoi(get_arg(key, "t"));
   Player *owner = find_owner(ws);
-  check_not_null(owner)
+  check_not_null(owner);
   ws -> writews(form(seq_id, game -> user_does(px, py, t, owner -> type)));
 }
 
-void Player_Manager::resolve_score(Websocket_Con *ws, int seq_id, const chat *key)
+void Player_Manager::resolve_score(Websocket_Con *ws, int seq_id, const char *key)
 {
-  CELL_TYPE t = (CELL_TYPE) stoi(get_arg(key, "t="));
+  CELL_TYPE t = (CELL_TYPE) stoi(get_arg(key, "t"));
   int score = (player_list[t] == NULL) ? 0 : player_list[t] -> get_score();
   ws -> writews(form(seq_id, score));
 }
@@ -233,7 +239,7 @@ Player *Player_Manager::find_owner(Websocket_Con *ws)
   return NULL; // TODO: fix zis
 }
 
-void check_not_null(void *key)
+void check_not_null(const void *key)
 {
   if(key == NULL)
   {
@@ -253,7 +259,7 @@ string get_method(const char *source)
 
 string get_arg(const char *source, string target)
 {
-  return string_get_next_token(string_seek(source, target), STR_WHITE);
+  return string_get_next_token(string_seek(source, target + "="), STR_WHITE);
 }
 
 string form(string seq, string message, string sep)
@@ -263,17 +269,17 @@ string form(string seq, string message, string sep)
 
 string form(int seq, string message, string sep)
 {
-  return form(to_string(seq), message, string sep);
+  return form(to_string(seq), message,  sep);
 }
 
 string form(string seq, int message, string sep)
 {
-  return form(seq, to_string(message), string sep);
+  return form(seq, to_string(message),  sep);
 }
 
 string form(int seq, int message, string sep)
 {
-  return form(to_string(seq), to_string(message), string sep);
+  return form(to_string(seq), to_string(message),  sep);
 }
 
 string form(string seq, string message)

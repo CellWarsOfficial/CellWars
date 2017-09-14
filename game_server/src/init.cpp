@@ -1,4 +1,4 @@
-#include "all.hpp"
+#include <all.hpp>
 #include <cstdio>
 #include <cstring>
 #include <string>
@@ -44,16 +44,17 @@ int main(int argc, char **argv)
 {
 /* Initialising default information
  */
+  Logger *log = new Logger(LOG_MAX_BUFFER_DEFAULT, LOG_BUFFER_DELAY_DEFAULT);
   DB_conn *db_info = NULL;
-  DB_conn *db_info2 = NULL;
-  thread *game_thread = NULL;
+  Player_Manager *player_manager = NULL;
   Server *server = NULL;
+  thread *game_thread = NULL;
+
   FLAG_TYPE flags = 0;
   int gtc = DEFAULT_GTC;
   int server_p = SV_DEF_PORT;
   int wait_time = DEFAULT_WAIT_TIME;
   srand(time(0));
-  Logger *log = new Logger(LOG_MAX_BUFFER_DEFAULT, LOG_BUFFER_DELAY_DEFAULT);
 /* Parsing program arguments
  */
   int i;
@@ -124,13 +125,6 @@ int main(int argc, char **argv)
       i++;
       check_limit(i, argc);
       db_info = new DB_conn(argv[i], log);
-      db_info2 = new DB_conn(argv[i], log);
-      if((db_info == 0) || !(db_info -> safe)
-        || (db_info2 == 0) || !(db_info2 -> safe))
-      {
-        fprintf(stderr, "Database failure. Exiting\n");
-        exit(EXIT_FAILURE);
-      }
       continue;
     }
     if(equ(argv[i], "-generations", "-gtc"))
@@ -199,20 +193,13 @@ int main(int argc, char **argv)
     }
     fprintf(stderr, "Unrecognised argument \"%s\"\nIgnoring.\n", argv[i]);
   }
-  if(db_info == NULL)
-  {
-    fprintf(stderr, "Initialisation failure, missing database.\n");
-    exit(EXIT_FAILURE);
-  }
-  if(!GFLAG_nosv)
-  {
-    server = new Server(server_p, db_info2, log);
-  }
-  game = new Game(db_info, server, log);
+  player_manager = new Player_Manager(db_info, log);
+  server = new Server(server_p, db_info, player_manager, log);
+  game = new Game(db_info, player_manager, log);
   game_thread = new thread(&Game::start, game, flags, gtc, wait_time, 25);
   if(!GFLAG_nosv)
   {
-    new thread(&Server::start, server, game);
+    new thread(&Server::start, server);
   }
   init_server_ui(log);
 
@@ -224,13 +211,13 @@ cleanup:
   {
     delete server;
   }
-  if(db_info2)
-  {
-    delete db_info2;
-  }
   if(game)
   {
     delete game;
+  }
+  if(player_manager)
+  {
+    delete player_manager;
   }
   if(db_info)
   {

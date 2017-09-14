@@ -14,6 +14,7 @@
 #include <math.hpp>
 #include <strings.hpp>
 #include <websocket.hpp>
+#include <players.hpp>
 #include <hijack.hpp>
 
 #endif

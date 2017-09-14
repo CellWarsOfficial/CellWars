@@ -24,12 +24,13 @@
 
 /* Object Game is self contained as a process, and is started using start()
  */
-class Server;
+class Player_Manager;
 
 class Game
 {
   public:
-  Game(DB_conn* db, Server *server, Logger *log);
+  Game(DB_conn* db, Player_Manager *pm, Logger *log);
+  ~Game();
   void *start(FLAG_TYPE f, int gtc, int w, int bm);
   int get_status();
   string user_want(int px1, int py1, int px2, int py2);
@@ -45,9 +46,10 @@ class Game
   Action *action;
   Block *get_curr_block(int x, int y);
   void user_loses(CELL_TYPE user_type);
+  int get_gtc();
+  int get_wait();
   private:
   Logger *log;
-  Server *server;
   Player_Manager *player_manager;
   std::mutex execution_lock;
   std::mutex flag_protection;

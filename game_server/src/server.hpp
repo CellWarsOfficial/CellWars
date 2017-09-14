@@ -1,8 +1,8 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <game.hpp>
 #include <database.hpp>
+#include <players.hpp>
 #include <log.hpp>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -13,20 +13,20 @@
 
 using namespace std;
 
-class Game;
+class Player_Manager;
 
 class Server
 {
   public:
-  Server(int port, DB_conn *db, Logger *l);
+  Server(int port, DB_conn *db, Player_Manager *pm, Logger *l);
   ~Server();
-  void start(Game *game);
+  void start();
   void demand_stat();
   private:
-  void act(int s, int id);
+  void act(int s);
   int socketid;
   DB_conn *db_info;
-  Game *game;
+  Player_Manager *player_manager;
   Logger *log;
 };
 

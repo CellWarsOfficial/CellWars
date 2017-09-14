@@ -7,16 +7,15 @@
 #include <math.hpp>
 #include <strings.hpp>
 #include <csignal>
-#include <chrono>
-#include <ctime>
 #include <cmath>
 #include <poll.h>
 
 #define ME "server"
 
-Server::Server(int port, DB_conn *db, Logger *l)
+Server::Server(int port, DB_conn *db, Player_Manager *pm, Logger *l)
 {
   db_info = db;
+  player_manager = pm;
   log = l;
   socketid = create_server_socket(port);
   if(socketid < 0)
@@ -33,10 +32,9 @@ Server::~Server()
   log -> record(ME, "Server closed");
 }
 
-void Server::start(Game *game)
+void Server::start()
 {
   log -> record(ME, "Server starting.");
-  this -> game = game;
   struct sockaddr_in cli_addr;
   socklen_t clilen = sizeof(cli_addr);
   int news;
@@ -53,7 +51,7 @@ void Server::start(Game *game)
 
 void Server::act(int socket)
 {
-  char *buffer = new char[SV_ACTUAL_MAX_SIZE]();
+  char *buffer = new char[SV_ACTUAL_BUF_SIZE]();
   const char *key;
   Websocket_Con *ws;
   safe_read_http_all(socket, buffer);
@@ -65,8 +63,8 @@ void Server::act(int socket)
   }
   else
   {
-    ws = new Websocket_Con(socket, buffer, log, game -> get_websocket_client_callback());
-    game -> subscribe(ws);
+    ws = new Websocket_Con(socket, buffer, log, player_manager -> get_callback());
+    player_manager -> subscribe(ws);
   }
   ws -> handle();
 }
@@ -213,6 +211,7 @@ int safe_read_http_all(int s, char *buf, int timeout)
   {
     if(safe_read(s, buf + old, next, timeout))
     {
+      fresh = next;
       next = 4;
       if(strstr(buf + old + fresh - 1, "\r"))
       {
