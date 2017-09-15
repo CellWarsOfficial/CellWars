@@ -39,7 +39,6 @@ void Websocket_Con::handle()
 {
   const char *key;
   string response = "";
-  printf("%s", buffer);
   key = string_seek(buffer, "Sec-WebSocket-Key:");
   if(key) // It's a websocket
   {

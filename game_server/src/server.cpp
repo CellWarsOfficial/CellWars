@@ -67,6 +67,7 @@ void Server::start()
   for(i = monitor.begin(); i != monitor.end(); i++)
   {
     i -> second -> join();
+    delete i -> second;
   }
   monitor.clear();
   kill_lock.unlock();

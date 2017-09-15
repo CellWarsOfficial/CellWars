@@ -87,7 +87,7 @@
 #define SV_MAX_BUF 5000
 #define SV_ACTUAL_BUF_SIZE (SV_MAX_BUF + 2 * BUF_PROCESS_ERROR)
 #define SV_DELAY 50
-#define SV_MAX_ATTEMPTS 10000000
+#define SV_MAX_ATTEMPTS 10
 #define SV_HTML_PATH "../client/html"
 #define SV_HTML_MISSING "../client/html/not_found.html"
 #define SV_HTTP_SWITCH "HTTP/1.1 101 Switching Protocols\r\n"
