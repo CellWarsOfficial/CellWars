@@ -7,6 +7,7 @@
 #include <functional>
 
 using namespace std;
+// TODO: improve concurreny within file
 
 #define ME "Player manager"
 
@@ -142,10 +143,29 @@ function<void(Websocket_Con *,string)> Player_Manager::get_callback()
 
 void Player_Manager::kill(CELL_TYPE t)
 {
+  Player *p = get_player(t);
   manager_lock.lock();
-  Player *p = player_list[t];
   p -> send_seq("LOST");
+  detach(p -> disconnect());
   manager_lock.unlock();
+}
+
+Player *Player_Manager::get_player(CELL_TYPE t)
+{
+  Player *ret_value = NULL;
+  if(t == DEAD_CELL)
+  {
+    return ret_value;
+  }
+  map<CELL_TYPE, Player *>::iterator i;
+  manager_lock.lock();
+  i = player_list.find(t);
+  if(i != player_list.end())
+  {
+    ret_value = i -> second;
+  }
+  manager_lock.unlock();
+  return ret_value;
 }
 
 void Player_Manager::bcast_message(string message)
@@ -212,31 +232,37 @@ void Player_Manager::handle_client_message(Websocket_Con *ws, string msg)
 
 void Player_Manager::resolve_callback(Websocket_Con *ws, int seq_id, const char *key)
 {
+  fprintf(stderr, "can't deal with [%s]!", key);
   // idk man, TODO: maybe?
   check_not_null(NULL);
 }
 
 void Player_Manager::resolve_pick(Websocket_Con *ws, int seq_id, const char *key)
 {
-  manager_lock.lock();
+  if(find_owner(ws))
+  { // you already picked
+    ws -> writews(form(seq_id, "0"));
+    return;
+  }
   CELL_TYPE t = (CELL_TYPE) stoi(get_arg(key, "t"));
   if(t == 0)
   { // no undead 'round here!
     ws -> writews(form(seq_id, "0"));
-    goto resolve_pick_done;
+    return;
   }
-  if(player_list[t] == NULL)
+  if(get_player(t) == NULL)
   { // can pick
-    player_list[t] = new Player(t);
-    player_list[t] -> connect(ws);
+    Player *p = new Player(t);
+    p -> connect(ws);
+    manager_lock.lock();
+    player_list[t] = p;
+    manager_lock.unlock();
     ws -> writews(form(seq_id, "1"));
   }
   else
   { // taken
     ws -> writews(form(seq_id, "0"));
   }
-  resolve_pick_done:
-  manager_lock.unlock();
 }
 
 void Player_Manager::resolve_details(Websocket_Con *ws, int seq_id, const char *key)
@@ -257,15 +283,44 @@ void Player_Manager::resolve_update(Websocket_Con *ws, int seq_id, const char *k
 void Player_Manager::resolve_score(Websocket_Con *ws, int seq_id, const char *key)
 {
   CELL_TYPE t = (CELL_TYPE) stoi(get_arg(key, "t"));
-  manager_lock.lock();
-  int score = (player_list[t] == NULL) ? 0 : player_list[t] -> get_score();
-  manager_lock.unlock();
+  Player *p = get_player(t);
+  int score = (p == NULL) ? 0 : p -> get_score();
   ws -> writews(form(seq_id, score));
+}
+
+void Player_Manager::detach(Websocket_Con *ws)
+{
+  map<Websocket_Con *, CELL_TYPE>::iterator i;
+  manager_lock.lock();
+  i = player_mapper.find(ws);
+  if(i != player_mapper.end())
+  {
+    player_mapper.erase(i);
+  }
+  manager_lock.unlock();
+}
+
+void Player_Manager::attach(Websocket_Con *ws, CELL_TYPE t)
+{
+  manager_lock.lock();
+  player_mapper[ws] = t;
+  manager_lock.unlock();
 }
 
 Player *Player_Manager::find_owner(Websocket_Con *ws)
 {
-  return NULL; // TODO: fix zis
+  Player *ret_value = NULL;
+  CELL_TYPE ret_cell = DEAD_CELL;
+  map<Websocket_Con *, CELL_TYPE>::iterator i;
+  manager_lock.lock();
+  i = player_mapper.find(ws);
+  if(i != player_mapper.end())
+  {
+    ret_cell = i -> second;
+  }
+  manager_lock.unlock();
+  ret_value = get_player(ret_cell);
+  return ret_value;
 }
 
 void check_not_null(const void *key)

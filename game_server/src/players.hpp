@@ -46,6 +46,7 @@ class Player_Manager
   void subscribe(Websocket_Con *ws);
   function<void(Websocket_Con *, string)> get_callback();
   void kill(CELL_TYPE t);
+  Player *get_player(CELL_TYPE t);
   void bcast_message(string message);
   private:
   void handle_client_message(Websocket_Con *ws,string msg);
@@ -54,11 +55,14 @@ class Player_Manager
   void resolve_details(Websocket_Con *ws, int seq_id, const char *key);
   void resolve_update(Websocket_Con *ws, int seq_id, const char *key);
   void resolve_score(Websocket_Con *ws, int seq_id, const char *key);
+  void detach(Websocket_Con *ws);
+  void attach(Websocket_Con *ws, CELL_TYPE t);
   Player *find_owner(Websocket_Con *ws);
   function<void(Websocket_Con *, string)> cb;
   int active_conns;
   mutex manager_lock;
   map <CELL_TYPE, Player*> player_list;
+  map <Websocket_Con *, CELL_TYPE> player_mapper;
   Logger *log;
   DB_conn *database;
   Game *game;
