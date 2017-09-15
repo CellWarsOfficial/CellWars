@@ -14,7 +14,8 @@ class Player_Manager;
 
 using namespace std;
 
-class Player{
+class Player
+{
   public:
   Player(CELL_TYPE type);
   ~Player();
@@ -36,7 +37,8 @@ class Player{
   mutex player_lock;
 };
 
-class Player_Manager{
+class Player_Manager
+{
   public:
   Player_Manager(DB_conn *db, Logger *log);
   ~Player_Manager();
@@ -69,19 +71,3 @@ int get_seq_id(const char *source); // throws
 string get_method(const char *source);
 
 string get_arg(const char *source, string target);
-
-string form(string seq, string message, string sep);
-
-string form(int seq, string message, string sep);
-
-string form(string seq, int message, string sep);
-
-string form(int seq, int message, string sep);
-
-string form(string seq, string message);
-
-string form(int seq, string message);
-
-string form(string seq, int message);
-
-string form(int seq, int message);

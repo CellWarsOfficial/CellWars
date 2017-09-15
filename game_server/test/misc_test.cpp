@@ -314,6 +314,22 @@ int strings_tests()
   if(is_num("")){fails++; fprintf(stderr, "empty detected as numeric\n");}
   tests++;
   if(is_num(NULL)){fails++; fprintf(stderr, "null detected as numeric\n");}
+  tests++;
+  if(form(1, 2).compare("1: 2")){fails++; fprintf(stderr, "form failed for int int null\n");}
+  tests++;
+  if(form("1", 2).compare("1: 2")){fails++; fprintf(stderr, "form failed for string int null\n");}
+  tests++;
+  if(form(1, "2").compare("1: 2")){fails++; fprintf(stderr, "form failed for int string null\n");}
+  tests++;
+  if(form("1", "2").compare("1: 2")){fails++; fprintf(stderr, "form failed for string string null\n");}
+  tests++;
+  if(form(1, 2, "=").compare("1=2")){fails++; fprintf(stderr, "form failed for int int eq\n");}
+  tests++;
+  if(form("1", 2, "=").compare("1=2")){fails++; fprintf(stderr, "form failed for string int eq\n");}
+  tests++;
+  if(form(1, "2", "=").compare("1=2")){fails++; fprintf(stderr, "form failed for int string eq\n");}
+  tests++;
+  if(form("1", "2", "=").compare("1=2")){fails++; fprintf(stderr, "form failed for string string eq\n");}
   // results and finish
   fprintf(stderr, "%d/%d tests passed - strings\n", tests - fails, tests);
   return fails;

@@ -30,7 +30,6 @@ void signal_interpreter(int s)
   }
   if(s == SIGALRM)
   {
-    game -> ping_round();
     return;
   }
   

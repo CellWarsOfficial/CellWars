@@ -1,5 +1,6 @@
 #include <log.hpp>
 #include <constants.hpp>
+#include <strings.hpp>
 #include <chrono>
 #include <ctime>
 
@@ -101,7 +102,7 @@ int Logger::record(string process, string message)
   }
   logger_lock.lock();
   buffer[buffer_read] = 
-      '[' + to_string(chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now().time_since_epoch()).count()) + ']' + process + ": " + message + '\n';
+      '[' + get_time_as_str() + ']' + process + ": " + message + '\n';
   buffer_read++;
   if(buffer_read == buffer_size)
   {

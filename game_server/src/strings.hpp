@@ -30,4 +30,22 @@ int is_num(string s);
 
 string get_random_string();
 
+string form(string seq, string message, string sep);
+
+string form(int seq, string message, string sep);
+
+string form(string seq, int message, string sep);
+
+string form(int seq, int message, string sep);
+
+string form(string seq, string message);
+
+string form(int seq, string message);
+
+string form(string seq, int message);
+
+string form(int seq, int message);
+
+string get_time_as_str();
+
 #endif

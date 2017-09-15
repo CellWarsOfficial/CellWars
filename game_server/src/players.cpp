@@ -133,7 +133,7 @@ void Player_Manager::kill(CELL_TYPE t)
 }
 
 void Player_Manager::bcast_message(string message)
-{ 
+{
   std::map<CELL_TYPE, Player *>::iterator i;
   for (i = player_list.begin(); i != player_list.end(); i++)
   {
@@ -224,7 +224,7 @@ void Player_Manager::resolve_update(Websocket_Con *ws, int seq_id, const char *k
   CELL_TYPE t = (CELL_TYPE) stoi(get_arg(key, "t"));
   Player *owner = find_owner(ws);
   check_not_null(owner);
-  ws -> writews(form(seq_id, game -> user_does(px, py, t, owner -> type)));
+  ws -> writews(form(seq_id, game -> user_does(px, py, t, owner)));
 }
 
 void Player_Manager::resolve_score(Websocket_Con *ws, int seq_id, const char *key)
@@ -260,44 +260,4 @@ string get_method(const char *source)
 string get_arg(const char *source, string target)
 {
   return string_get_next_token(string_seek(source, target + "="), STR_WHITE);
-}
-
-string form(string seq, string message, string sep)
-{
-  return seq + sep + message;
-}
-
-string form(int seq, string message, string sep)
-{
-  return form(to_string(seq), message,  sep);
-}
-
-string form(string seq, int message, string sep)
-{
-  return form(seq, to_string(message),  sep);
-}
-
-string form(int seq, int message, string sep)
-{
-  return form(to_string(seq), to_string(message),  sep);
-}
-
-string form(string seq, string message)
-{
-  return form(seq, message, ": ");
-}
-
-string form(int seq, string message)
-{
-  return form(to_string(seq), message);
-}
-
-string form(string seq, int message)
-{
-  return form(seq, to_string(message));
-}
-
-string form(int seq, int message)
-{
-  return form(to_string(seq), to_string(message));
 }

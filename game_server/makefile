@@ -77,11 +77,11 @@ $(BINDIR)/hijack.o: $(SRCDIR)/hijack.cpp $(HEADER)
 $(BINDIR)/players.o: $(SRCDIR)/players.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
 
-$(BINDIR)/log_test: $(TSTDIR)/log_test.cpp $(BINDIR)/log.o $(TSTDIR)/log_test.hpp $(HEADER)
-	$(CC) $(CFLAGS) $(TFLAGS) $< $(BINDIR)/log.o -o $@ $(EFLAGS)
+$(BINDIR)/log_test: $(TSTDIR)/log_test.cpp $(BINDIR)/log.o $(BINDIR)/strings.o $(BINDIR)/math.o $(TSTDIR)/log_test.hpp $(HEADER)
+	$(CC) $(CFLAGS) $(TFLAGS) $< $(BINDIR)/log.o $(BINDIR)/strings.o $(BINDIR)/math.o -o $@ $(EFLAGS)
 
 $(BINDIR)/crank_test: $(TSTDIR)/crank_test.cpp $(BINDIR)/block.o $(BINDIR)/crank.o $(BINDIR)/malloc_safety.o $(TSTDIR)/crank_test.hpp $(HEADER)
-	$(CC) $(CFLAGS) $(TFLAGS) $<  $(BINDIR)/block.o $(BINDIR)/crank.o $(BINDIR)/malloc_safety.o -o $@ $(EFLAGS)
+	$(CC) $(CFLAGS) $(TFLAGS) $< $(BINDIR)/block.o $(BINDIR)/crank.o $(BINDIR)/malloc_safety.o -o $@ $(EFLAGS)
 
 $(BINDIR)/block_test: $(TSTDIR)/block_test.cpp $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(TSTDIR)/block_test.hpp $(HEADER)
 	$(CC) $(CFLAGS) $(TFLAGS) $< $(BINDIR)/block.o $(BINDIR)/malloc_safety.o -o $@ $(EFLAGS)

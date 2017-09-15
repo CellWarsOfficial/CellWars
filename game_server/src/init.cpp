@@ -69,12 +69,6 @@ int main(int argc, char **argv)
     {
       goto cleanup;
     }
-    if(equ(argv[i], "-erase"))
-    {
-      log -> record(ME, "Erasing database.");
-      db_info->clean_db();
-      continue;
-    }
     if(equ(argv[i], "-load"))
     {
       i++;
@@ -91,18 +85,18 @@ int main(int argc, char **argv)
         {
           i++;
           check_limit(i + k, argc);
-          int ofx = stoi(argv[i + k]);
+          // int ofx = stoi(argv[i + k]);
           i++;
           check_limit(i+k, argc);
-          int ofy = stoi(argv[i + k]);
+          // int ofy = stoi(argv[i + k]);
           i++;
           check_limit(i+k, argc);
-          db_info->rewrite_db(argv[i + k], ofx, ofy);
+          // db_info->rewrite_db(argv[i + k], ofx, ofy);
         }
         else
         {
           check_limit(i + k, argc);
-          db_info->rewrite_db(argv[k + i]);
+          // db_info->rewrite_db(argv[k + i]);
         }
       }
       i += no_files;
@@ -118,13 +112,6 @@ int main(int argc, char **argv)
     {
       flags = flags | JUST_30_MASK; // set stepped_debug flag
       log -> record(ME, "Using debug steps.");
-      continue;
-    }
-    if(equ(argv[i], "-db"))
-    {
-      i++;
-      check_limit(i, argc);
-      db_info = new DB_conn(argv[i], log);
       continue;
     }
     if(equ(argv[i], "-generations", "-gtc"))
@@ -175,24 +162,9 @@ int main(int argc, char **argv)
       log -> add_file(argv[i]);
       continue;
     }
-    if(equ(argv[i], "-fast_kill", "-fk"))
-    {
-      flags = flags | JUST_26_MASK; // set no server flag
-      flags = flags | JUST_27_MASK; // set no database flag
-      continue;
-    }
-    if(equ(argv[i], "-no_db", "-nd"))
-    {
-      flags = flags | JUST_27_MASK; // set no database flag
-      continue;
-    }
-    if(equ(argv[i], "-no_server", "-ns"))
-    {
-      flags = flags | JUST_26_MASK; // set no server flag
-      continue;
-    }
     fprintf(stderr, "Unrecognised argument \"%s\"\nIgnoring.\n", argv[i]);
   }
+  db_info = new DB_conn(log);
   player_manager = new Player_Manager(db_info, log);
   server = new Server(server_p, db_info, player_manager, log);
   game = new Game(db_info, player_manager, log);

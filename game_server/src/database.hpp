@@ -1,40 +1,51 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
-#include <block.hpp>
+#include <websocket.hpp>
 #include <log.hpp>
 #include <cstdio>
 #include <string>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
 #include <mutex>
+#include <map>
 
+using namespace std;
 
-// TODO figure out how to access the database
+class Database
+{
+  public:
+  Database(Websocket_Con *ws);
+  ~Database();
+  void send(string message);
+  void set_flag(int value);
+  void clear_flag(int value);
+  bool is_safe();
+  private:
+  Websocket_Con *ws;
+  int flags;
+  mutex database_lock;
+};
 
 class DB_conn
 {
   public:
-  DB_conn(const char *a, Logger *l);
+  DB_conn(Logger *log);
   ~DB_conn();
-  void rewrite_db(const char *f, int ofx, int ofy);
-  void rewrite_db(const char *f);
-  int safe;
-  string run_query(int expectation, string s);
-  string run_query(int expectation, string s, string table);
-  void insert_query_builder(CELL_TYPE t, int x, int y);
+  void subscribe(Websocket_Con *ws);
+  function<void(Websocket_Con *, string)> get_callback();
+  void erase();
+  void swap();
+  void put(CELL_TYPE t, int x, int y);
+  void set_variable(string variable_name, string value);
+  void bcast_message(string message);
+  void bcast_message(string message, int flag);
   void demand_stat();
-  void clean_db();
   private:
-  char *answer_buf;
-  std::mutex db_lock;
+  void handle_database_message(Websocket_Con *ws, string msg);
+  function<void(Websocket_Con *, string)> cb;
+  map <int, Database *> database_list;
+  map <string, string> variables;
   Logger *log;
-  const char *address;
-  int socketid;
-  int q_count;
-  int size;
-  string constructed_query;
+  int erase_status;
+  mutex manager_lock;
 };
 #endif

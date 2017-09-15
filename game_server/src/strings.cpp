@@ -2,6 +2,7 @@
 #include <constants.hpp>
 #include <math.hpp>
 #include <cstdlib>
+#include <ctime>
 
 const char *skip_ws(const char *origin)
 {
@@ -143,4 +144,49 @@ int is_num(string s)
 string get_random_string()
 {
   return encode(to_string(rand()));
+}
+
+string form(string seq, string message, string sep)
+{
+  return seq + sep + message;
+}
+
+string form(int seq, string message, string sep)
+{
+  return form(to_string(seq), message,  sep);
+}
+
+string form(string seq, int message, string sep)
+{
+  return form(seq, to_string(message),  sep);
+}
+
+string form(int seq, int message, string sep)
+{
+  return form(to_string(seq), to_string(message),  sep);
+}
+
+string form(string seq, string message)
+{
+  return form(seq, message, ": ");
+}
+
+string form(int seq, string message)
+{
+  return form(to_string(seq), message);
+}
+
+string form(string seq, int message)
+{
+  return form(seq, to_string(message));
+}
+
+string form(int seq, int message)
+{
+  return form(to_string(seq), to_string(message));
+}
+
+string get_time_as_str()
+{
+  return to_string(time(0));
 }
