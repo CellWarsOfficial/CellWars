@@ -196,9 +196,10 @@ void Player_Manager::handle_client_message(Websocket_Con *ws, string msg)
   try
   {
     int seq_id = get_seq_id(key);
+
     key = string_seek(key, ":");
     check_not_null(key);
-    if(seq_id < CW_PROT_SV_MIN_SEQ)
+    if((seq_id > CW_PROT_SV_MIN_SEQ) && (seq_id < CW_PROT_SV_MAX_SEQ))
     {
       resolve_callback(ws, seq_id, key);
       return;
