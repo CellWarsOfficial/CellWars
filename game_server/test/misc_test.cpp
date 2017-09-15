@@ -13,7 +13,6 @@ int math_tests()
 {
   fails = 0;
   tests = 0;
-  // TODO tests go here
   //test binary_to_num
   string test1 = "1101";
   string test2 = "00001101";

@@ -56,6 +56,8 @@ class Player_Manager
   void resolve_score(Websocket_Con *ws, int seq_id, const char *key);
   Player *find_owner(Websocket_Con *ws);
   function<void(Websocket_Con *, string)> cb;
+  int active_conns;
+  mutex manager_lock;
   map <CELL_TYPE, Player*> player_list;
   Logger *log;
   DB_conn *database;

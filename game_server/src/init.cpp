@@ -49,6 +49,7 @@ int main(int argc, char **argv)
   Player_Manager *player_manager = NULL;
   Server *server = NULL;
   thread *game_thread = NULL;
+  thread *server_thread = NULL;
 
   FLAG_TYPE flags = 0;
   int gtc = DEFAULT_GTC;
@@ -169,23 +170,20 @@ int main(int argc, char **argv)
   server = new Server(server_p, db_info, player_manager, log);
   game = new Game(db_info, player_manager, log);
   game_thread = new thread(&Game::start, game, flags, gtc, wait_time, 25);
-  if(!GFLAG_nosv)
-  {
-    new thread(&Server::start, server);
-  }
+  server_thread = new thread(&Server::start, server);
   init_server_ui(log);
 
   /* main terminating kills process.
    */
   game_thread -> join();
+  delete game_thread;
 cleanup:
-  if(server)
+  if(server && server_thread)
   {
+    server -> kill();
+    server_thread -> join();
     delete server;
-  }
-  if(game)
-  {
-    delete game;
+    delete server_thread;
   }
   if(player_manager)
   {
@@ -194,6 +192,10 @@ cleanup:
   if(db_info)
   {
     delete db_info;
+  }
+  if(game)
+  {
+    delete game;
   }
   if(log)
   {

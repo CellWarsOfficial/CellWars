@@ -28,8 +28,14 @@ Server::Server(int port, DB_conn *db, Player_Manager *pm, Logger *l)
 
 Server::~Server()
 {
+}
+
+void Server::kill()
+{
+  shutdown(socketid, SHUT_RD);
   close(socketid);
   log -> record(ME, "Server closed");
+  kill_lock.lock();
 }
 
 void Server::start()
@@ -38,7 +44,8 @@ void Server::start()
   struct sockaddr_in cli_addr;
   socklen_t clilen = sizeof(cli_addr);
   int news;
-  while(true){
+  while(kill_lock.try_lock()){
+    kill_lock.unlock();
     news = accept(socketid, (struct sockaddr *) &cli_addr, &clilen);
     if (news < 0)
     {
@@ -47,6 +54,8 @@ void Server::start()
     }
     new thread(&Server::act, this, news);
   }
+  /* TODO: clean my threads up */
+  kill_lock.unlock();
 }
 
 void Server::act(int socket)
@@ -59,7 +68,7 @@ void Server::act(int socket)
   if(key)
   {
     ws = new Websocket_Con(socket, buffer, log, db_info -> get_callback());
-    db_info -> subscribe(ws); // TODO: actually implement this stuff - CDN
+    db_info -> subscribe(ws);
   }
   else
   {
@@ -211,31 +220,28 @@ int safe_read_http_all(int s, char *buf, int timeout)
   {
     if(safe_read(s, buf + old, next, timeout))
     {
-      fresh = next;
-      next = 4;
-      if(strstr(buf + old + fresh - 1, "\r"))
-      {
-        next = 3; // might be \n\r\n
-      }
-      if(strstr(buf + old + fresh - 2, "\r" "\n"))
-      {
-        next = 2; // might be \r\n
-      }
-      if(strstr(buf + old + fresh - 3, "\r" "\n" "\r"))
-      {
-        next = 1; // might be \n
-      }
-      if(strstr(buf + old + fresh - 4, "\r" "\n" "\r" "\n"))
-      {
-        return 0; // done
-      }
-      old += fresh;
-      trials += fresh ? 1 : 0;
-    }
-    else 
-    {
       break;
     }
+    fresh = next;
+    next = 4;
+    if(strstr(buf + old + fresh - 1, "\r"))
+    {
+      next = 3; // might be \n\r\n
+    }
+    if(strstr(buf + old + fresh - 2, "\r" "\n"))
+    {
+      next = 2; // might be \r\n
+    }
+    if(strstr(buf + old + fresh - 3, "\r" "\n" "\r"))
+    {
+      next = 1; // might be \n
+    }
+    if(strstr(buf + old + fresh - 4, "\r" "\n" "\r" "\n"))
+    {
+      return 0; // done
+    }
+    old += fresh;
+    trials += fresh ? 1 : 0;
   }
   return -1; // some sort of protocol violation
 }

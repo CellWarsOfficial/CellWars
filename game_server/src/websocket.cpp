@@ -39,6 +39,7 @@ void Websocket_Con::handle()
 {
   const char *key;
   string response = "";
+  printf("%s", buffer);
   key = string_seek(buffer, "Sec-WebSocket-Key:");
   if(key) // It's a websocket
   {
@@ -344,7 +345,10 @@ int Websocket_Con::analyse()
   if(last_fin)
   {
     log -> record(con, "Returning message to higher entity");
-    this -> callback(this, last_msg); // can't handle it anymore
+    if(last_msg.length() != 0)
+    {
+      this -> callback(this, last_msg); // can't handle it anymore
+    }
     this -> refresh();
   }
   return 0;

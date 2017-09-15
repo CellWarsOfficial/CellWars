@@ -46,6 +46,7 @@ class DB_conn
   map <string, string> variables;
   Logger *log;
   int erase_status;
+  int active_conns;
   mutex manager_lock;
 };
 #endif

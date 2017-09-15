@@ -10,6 +10,7 @@
 #include <netdb.h>
 #include <string>
 #include <constants.hpp>
+#include <mutex>
 
 using namespace std;
 
@@ -20,6 +21,7 @@ class Server
   public:
   Server(int port, DB_conn *db, Player_Manager *pm, Logger *l);
   ~Server();
+  void kill();
   void start();
   void demand_stat();
   private:
@@ -28,6 +30,7 @@ class Server
   DB_conn *db_info;
   Player_Manager *player_manager;
   Logger *log;
+  mutex kill_lock;
 };
 
 int create_server_socket(int port);

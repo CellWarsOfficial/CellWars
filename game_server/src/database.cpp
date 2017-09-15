@@ -13,13 +13,12 @@
 #define ME "Database"
 Database::Database(Websocket_Con *ws)
 {
-  this -> ws = ws;
+  this -> ws = ws; // deleted by senior
   flags = 0;
 }
 
 Database::~Database()
 {
-
 }
 
 void Database::send(string message)
@@ -47,14 +46,26 @@ DB_conn::DB_conn(Logger *log)
   this -> log = log;
   cb = bind(&DB_conn::handle_database_message, this, placeholders::_1, placeholders::_2);
   erase_status = 1;
+  active_conns = 0;
 }
 
 DB_conn::~DB_conn()
 {
+  std::map<int, Database *>::iterator i;
+  manager_lock.lock();
+  for (i = database_list.begin(); i != database_list.end(); i++)
+  {
+    delete i -> second;
+  }
+  database_list.clear();
+  manager_lock.unlock();
 }
 
 void DB_conn::subscribe(Websocket_Con *ws)
 {
+  manager_lock.lock();
+  active_conns++;
+  manager_lock.unlock();
 }
 
 function<void(Websocket_Con *, string)> DB_conn::get_callback()
@@ -80,7 +91,9 @@ void DB_conn::put(CELL_TYPE t, int x, int y)
 
 void DB_conn::set_variable(string variable_name, string value)
 {
+  manager_lock.lock();
   variables[variable_name] = value;
+  manager_lock.unlock();
 }
 
 void DB_conn::bcast_message(string message)
@@ -91,11 +104,13 @@ void DB_conn::bcast_message(string message)
 void DB_conn::bcast_message(string message, int flag)
 {
   std::map<int, Database *>::iterator i;
+  manager_lock.lock();
   for (i = database_list.begin(); i != database_list.end(); i++)
   {
     i -> second -> send(message);
     i -> second -> set_flag(flag);
   }
+  manager_lock.unlock();
 }
 
 void DB_conn::handle_database_message(Websocket_Con *ws, string msg)
@@ -103,6 +118,10 @@ void DB_conn::handle_database_message(Websocket_Con *ws, string msg)
   if(msg.length() == 0)
   {
     delete ws;
+
+    manager_lock.lock();
+    active_conns--;
+    manager_lock.unlock();
     return;
   }
   log -> record(ME, msg);

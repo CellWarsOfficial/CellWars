@@ -54,11 +54,11 @@ class Game
   void clean_up();
   Logger *log;
   Player_Manager *player_manager;
+  DB_conn* db_info;
   std::mutex execution_lock;
   std::mutex flag_protection;
   std::mutex crank_lock;
   FLAG_TYPE flags;
-  DB_conn* db_info;
   int gen_to_run;
   int curr_gen;
   int plan_time;

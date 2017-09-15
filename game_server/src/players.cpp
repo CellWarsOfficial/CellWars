@@ -8,6 +8,8 @@
 
 using namespace std;
 
+#define ME "Player manager"
+
 Player::Player(CELL_TYPE type)
 {
   this -> type = type;
@@ -101,15 +103,24 @@ int Player::send_seq(string message)
   return seq;
 }
 
-Player_Manager::Player_Manager(DB_conn *db, Logger *l)
+Player_Manager::Player_Manager(DB_conn *db, Logger *log)
 {
   this -> log = log;
   database = db;
   cb = bind(&Player_Manager::handle_client_message, this, placeholders::_1, placeholders::_2);
+  active_conns = 0;
 }
 
 Player_Manager::~Player_Manager()
 {
+  std::map<CELL_TYPE, Player *>::iterator i;
+  manager_lock.lock();
+  for (i = player_list.begin(); i != player_list.end(); i++)
+  {
+    delete i -> second;
+  }
+  player_list.clear();
+  manager_lock.unlock();
 }
 
 void Player_Manager::expand(Game *game)
@@ -119,6 +130,9 @@ void Player_Manager::expand(Game *game)
 
 void Player_Manager::subscribe(Websocket_Con *ws)
 {
+  manager_lock.lock();
+  active_conns++;
+  manager_lock.unlock();
 }
 
 function<void(Websocket_Con *,string)> Player_Manager::get_callback()
@@ -128,17 +142,22 @@ function<void(Websocket_Con *,string)> Player_Manager::get_callback()
 
 void Player_Manager::kill(CELL_TYPE t)
 {
+  manager_lock.lock();
   Player *p = player_list[t];
   p -> send_seq("LOST");
+  manager_lock.unlock();
 }
 
 void Player_Manager::bcast_message(string message)
 {
+  log -> record(ME, "broadcasting message [" + message + "]");
   std::map<CELL_TYPE, Player *>::iterator i;
+  manager_lock.lock();
   for (i = player_list.begin(); i != player_list.end(); i++)
   {
     i -> second -> send_seq(message);
   }
+  manager_lock.unlock();
 }
 
 void Player_Manager::handle_client_message(Websocket_Con *ws, string msg)
@@ -146,8 +165,12 @@ void Player_Manager::handle_client_message(Websocket_Con *ws, string msg)
   if(msg.length() == 0)
   {
     delete ws;
+    manager_lock.lock();
+    active_conns--;
+    manager_lock.unlock();
     return;
   }
+  log -> record(ME, msg);
   const char *key = msg.c_str();
   try
   {
@@ -195,10 +218,12 @@ void Player_Manager::resolve_callback(Websocket_Con *ws, int seq_id, const char 
 
 void Player_Manager::resolve_pick(Websocket_Con *ws, int seq_id, const char *key)
 {
+  manager_lock.lock();
   CELL_TYPE t = (CELL_TYPE) stoi(get_arg(key, "t"));
   if(t == 0)
   { // no undead 'round here!
     ws -> writews(form(seq_id, "0"));
+    goto resolve_pick_done;
   }
   if(player_list[t] == NULL)
   { // can pick
@@ -210,6 +235,8 @@ void Player_Manager::resolve_pick(Websocket_Con *ws, int seq_id, const char *key
   { // taken
     ws -> writews(form(seq_id, "0"));
   }
+  resolve_pick_done:
+  manager_lock.unlock();
 }
 
 void Player_Manager::resolve_details(Websocket_Con *ws, int seq_id, const char *key)
@@ -230,7 +257,9 @@ void Player_Manager::resolve_update(Websocket_Con *ws, int seq_id, const char *k
 void Player_Manager::resolve_score(Websocket_Con *ws, int seq_id, const char *key)
 {
   CELL_TYPE t = (CELL_TYPE) stoi(get_arg(key, "t"));
+  manager_lock.lock();
   int score = (player_list[t] == NULL) ? 0 : player_list[t] -> get_score();
+  manager_lock.unlock();
   ws -> writews(form(seq_id, score));
 }
 
