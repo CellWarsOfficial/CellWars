@@ -121,6 +121,7 @@ Player_Manager::~Player_Manager()
     delete i -> second;
   }
   player_list.clear();
+  player_mapper.clear();
   manager_lock.unlock();
 }
 

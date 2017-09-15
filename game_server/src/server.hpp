@@ -11,6 +11,8 @@
 #include <string>
 #include <constants.hpp>
 #include <mutex>
+#include <map>
+#include <thread>
 
 using namespace std;
 
@@ -30,6 +32,7 @@ class Server
   DB_conn *db_info;
   Player_Manager *player_manager;
   Logger *log;
+  map<int, thread *> monitor;
   mutex kill_lock;
 };
 

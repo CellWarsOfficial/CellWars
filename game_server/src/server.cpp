@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <cctype>
-#include <thread>
 #include <math.hpp>
 #include <strings.hpp>
 #include <csignal>
@@ -28,12 +27,12 @@ Server::Server(int port, DB_conn *db, Player_Manager *pm, Logger *l)
 
 Server::~Server()
 {
+  close(socketid);
 }
 
 void Server::kill()
 {
   shutdown(socketid, SHUT_RD);
-  close(socketid);
   log -> record(ME, "Server closed");
   kill_lock.lock();
 }
@@ -52,9 +51,24 @@ void Server::start()
       log -> record(ME, "Server closing.");
       break;
     }
-    new thread(&Server::act, this, news);
+    if(monitor[news])
+    {
+      monitor[news] -> join();
+      delete monitor[news];
+    }
+    monitor[news] = new thread(&Server::act, this, news);
   }
-  /* TODO: clean my threads up */
+  shutdown(socketid, SHUT_RDWR);
+  map<int, thread *>::iterator i;
+  for(i = monitor.begin(); i != monitor.end(); i++)
+  {
+    shutdown(i -> first, SHUT_RDWR);
+  }
+  for(i = monitor.begin(); i != monitor.end(); i++)
+  {
+    i -> second -> join();
+  }
+  monitor.clear();
   kill_lock.unlock();
 }
 
@@ -76,6 +90,7 @@ void Server::act(int socket)
     player_manager -> subscribe(ws);
   }
   ws -> handle();
+
 }
 
 void Server::demand_stat()
