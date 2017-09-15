@@ -14,6 +14,7 @@ using namespace std;
 Player::Player(CELL_TYPE type)
 {
   this -> type = type;
+  ws = NULL;
   message_id = CW_PROT_SV_MIN_SEQ;
   score = 0; // scrub
 }
@@ -74,6 +75,7 @@ Websocket_Con *Player::disconnect()
 int Player::get_next_message_id()
 {
   player_lock.lock();
+  int ret_value = message_id;
   if(message_id == CW_PROT_SV_MAX_SEQ)
   {
     message_id = CW_PROT_SV_MIN_SEQ;
@@ -82,7 +84,6 @@ int Player::get_next_message_id()
   {
     message_id++;
   }
-  int ret_value = message_id;
   player_lock.unlock();
   return ret_value;
 }
@@ -185,6 +186,7 @@ void Player_Manager::handle_client_message(Websocket_Con *ws, string msg)
 {
   if(msg.length() == 0)
   {
+    detach(ws);
     delete ws;
     manager_lock.lock();
     active_conns--;
@@ -255,6 +257,7 @@ void Player_Manager::resolve_pick(Websocket_Con *ws, int seq_id, const char *key
   if(get_player(t) == NULL)
   { // can pick
     Player *p = new Player(t);
+    attach(ws, t);
     p -> connect(ws);
     manager_lock.lock();
     player_list[t] = p;
@@ -274,11 +277,17 @@ void Player_Manager::resolve_details(Websocket_Con *ws, int seq_id, const char *
 
 void Player_Manager::resolve_update(Websocket_Con *ws, int seq_id, const char *key)
 {
+  printf("god1\n");
   int px = stoi(get_arg(key, "px"));
+  printf("god2\n");
   int py = stoi(get_arg(key, "py"));
+  printf("god3\n");
   CELL_TYPE t = (CELL_TYPE) stoi(get_arg(key, "t"));
+  printf("god4\n");
   Player *owner = find_owner(ws);
+  printf("god5\n");
   check_not_null(owner);
+  printf("god6\n");
   ws -> writews(form(seq_id, game -> user_does(px, py, t, owner)));
 }
 
@@ -300,6 +309,13 @@ void Player_Manager::detach(Websocket_Con *ws)
     player_mapper.erase(i);
   }
   manager_lock.unlock();
+  Player *p = find_owner(ws);
+  if(p)
+  {
+    manager_lock.lock();
+    p -> disconnect();
+    manager_lock.unlock();
+  }
 }
 
 void Player_Manager::attach(Websocket_Con *ws, CELL_TYPE t)
