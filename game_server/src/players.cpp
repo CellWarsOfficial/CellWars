@@ -237,6 +237,11 @@ void Player_Manager::handle_client_message(Websocket_Con *ws, string msg)
   }
 }
 
+void Player_Manager::demand_stat()
+{
+  log -> record(ME, "currently managing " + to_string(player_list.size()) + " players over " + to_string(active_conns) + " connections" );
+}
+
 /* Hidden resolution functions - locks still required, don't throw while locked!.*/
 
 void Player_Manager::resolve_callback(Websocket_Con *ws, int seq_id, const char *key)

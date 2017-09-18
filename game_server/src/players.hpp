@@ -49,6 +49,7 @@ class Player_Manager
   Player *get_player(CELL_TYPE t);
   void bcast_message(string message);
   void handle_client_message(Websocket_Con *ws,string msg);
+  void demand_stat();
   private:
   void resolve_callback(Websocket_Con *ws, int seq_id, const char *key);
   void resolve_pick(Websocket_Con *ws, int seq_id, const char *key);

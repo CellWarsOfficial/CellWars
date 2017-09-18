@@ -103,6 +103,7 @@ void DB_conn::bcast_message(string message)
 
 void DB_conn::bcast_message(string message, int flag)
 {
+  log -> record(ME, "broadcasting [" + message + "]");
   std::map<int, Database *>::iterator i;
   manager_lock.lock();
   for (i = database_list.begin(); i != database_list.end(); i++)
