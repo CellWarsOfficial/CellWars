@@ -123,7 +123,11 @@ int main()
 {
   remove(F_NAME);
   remove(STD_TO_F_NAME);
-  freopen(STD_TO_F_NAME, "w", stdout);
+  if(freopen(STD_TO_F_NAME, "w", stdout) == NULL)
+  {
+    fprintf(stderr, "failed to initialise test, please retry\n");
+    return -1;
+  }
   test_init();
   test_file();
   test_record();
