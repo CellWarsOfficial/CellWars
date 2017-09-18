@@ -48,16 +48,18 @@ class Player_Manager
   void kill(CELL_TYPE t);
   Player *get_player(CELL_TYPE t);
   void bcast_message(string message);
-  private:
   void handle_client_message(Websocket_Con *ws,string msg);
+  private:
   void resolve_callback(Websocket_Con *ws, int seq_id, const char *key);
   void resolve_pick(Websocket_Con *ws, int seq_id, const char *key);
   void resolve_details(Websocket_Con *ws, int seq_id, const char *key);
   void resolve_update(Websocket_Con *ws, int seq_id, const char *key);
   void resolve_score(Websocket_Con *ws, int seq_id, const char *key);
+  void player_bind(Player *p, Websocket_Con *ws);
   void detach(Websocket_Con *ws);
   void attach(Websocket_Con *ws, CELL_TYPE t);
   Player *find_owner(Websocket_Con *ws);
+  Player *find_player(CELL_TYPE t);
   function<void(Websocket_Con *, string)> cb;
   int active_conns;
   mutex manager_lock;
