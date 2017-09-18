@@ -13,15 +13,18 @@ using namespace std;
 class Database
 {
   public:
-  Database(Websocket_Con *ws);
+  Database(Websocket_Con *ws, string con_string);
   ~Database();
   void send(string message);
+  string get_con_string();
   void set_flag(int value);
   void clear_flag(int value);
   bool is_safe();
+  int load;
   private:
   Websocket_Con *ws;
   int flags;
+  string con_string;
   mutex database_lock;
 };
 
@@ -32,6 +35,7 @@ class DB_conn
   ~DB_conn();
   void subscribe(Websocket_Con *ws);
   function<void(Websocket_Con *, string)> get_callback();
+  string get_db_for_client();
   void erase();
   void swap();
   void put(CELL_TYPE t, int x, int y);
@@ -42,11 +46,12 @@ class DB_conn
   private:
   void handle_database_message(Websocket_Con *ws, string msg);
   function<void(Websocket_Con *, string)> cb;
-  map <int, Database *> database_list;
+  map <Websocket_Con *, Database *> database_list;
   map <string, string> variables;
   Logger *log;
   int erase_status;
   int active_conns;
+  int avg_load;
   mutex manager_lock;
 };
 #endif

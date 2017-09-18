@@ -187,7 +187,6 @@ void Websocket_Con::act()
     if(buffer_read != buffer_write)
     { // 1
       ws_lock.unlock();
-      log -> record(con, "Writing data");
       if(emit(WS_OPCODE_TXT, write_buffer[buffer_write]))
       {
         return;
@@ -203,10 +202,8 @@ void Websocket_Con::act()
       continue;
     }
     ws_lock.unlock();
-    log -> record(con, "See if there's something to read");
     if(check_readable(socket, WS_INPUT_WAIT_TIMEOUT))
     { // 2
-      log -> record(con, "There is");
       if(this -> parse())
       {
         return;
@@ -224,7 +221,6 @@ void Websocket_Con::act()
       sent_ping = true;
       ws_lock.unlock();
       ping_msg = get_random_string();
-      log -> record(con, "Sending ping with content [" + ping_msg + "]");
       if(emit(WS_OPCODE_PING, ping_msg))
       {
         return;
@@ -234,7 +230,6 @@ void Websocket_Con::act()
     if(!sent_ping)
     { // 4
       ws_lock.unlock();
-      log -> record(con, "Self scheduling ping");
       ping();
       continue;
     }
@@ -321,7 +316,6 @@ int Websocket_Con::analyse()
   }
   if(last_opcode == WS_OPCODE_PING)
   { // respond to ping
-    log -> record(con, "Responding to ping with message [" + last_msg + "]");
     aux = emit(WS_OPCODE_PONG, last_msg);
     this -> refresh();
     return aux;
@@ -330,7 +324,6 @@ int Websocket_Con::analyse()
   { // got pong back
     if(sent_ping && (last_msg.compare(ping_msg) == 0))
     {
-      log -> record(con, "Received pong for a ping I sent");
       sent_ping = false;
       ping_msg = "";
     }
@@ -343,7 +336,6 @@ int Websocket_Con::analyse()
   }
   if(last_fin)
   {
-    log -> record(con, "Returning message to higher entity");
     if(last_msg.length() != 0)
     {
       this -> callback(this, last_msg); // can't handle it anymore

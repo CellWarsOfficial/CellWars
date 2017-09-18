@@ -219,6 +219,11 @@ void Player_Manager::handle_client_message(Websocket_Con *ws, string msg)
       resolve_details(ws, seq_id, key);
       return;
     }
+    if(method.compare("DATABASE") == 0)
+    {
+      resolve_database(ws, seq_id, key);
+      return;
+    }
     if(method.compare("UPDATE") == 0)
     {
       resolve_update(ws, seq_id, key);
@@ -285,7 +290,13 @@ void Player_Manager::resolve_pick(Websocket_Con *ws, int seq_id, const char *key
 
 void Player_Manager::resolve_details(Websocket_Con *ws, int seq_id, const char *key)
 {
-  ws -> writews(form(seq_id, form(form("gtc", game -> get_gtc(), "="), form("wait", game -> get_wait(), "="), " ")));
+  ws -> writews(form(seq_id, "1 " + form(form("gtc", game -> get_gtc(), "="), form("wait", game -> get_wait(), "="), " ")));
+}
+
+void Player_Manager::resolve_database(Websocket_Con *ws, int seq_id, const char *key)
+{
+  string result = database -> get_db_for_client();
+  ws -> writews(form(seq_id, form(result.length(), result, " ")));
 }
 
 void Player_Manager::resolve_update(Websocket_Con *ws, int seq_id, const char *key)

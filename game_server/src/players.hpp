@@ -54,6 +54,7 @@ class Player_Manager
   void resolve_callback(Websocket_Con *ws, int seq_id, const char *key);
   void resolve_pick(Websocket_Con *ws, int seq_id, const char *key);
   void resolve_details(Websocket_Con *ws, int seq_id, const char *key);
+  void resolve_database(Websocket_Con *ws, int seq_id, const char *key);
   void resolve_update(Websocket_Con *ws, int seq_id, const char *key);
   void resolve_score(Websocket_Con *ws, int seq_id, const char *key);
   void player_bind(Player *p, Websocket_Con *ws);
