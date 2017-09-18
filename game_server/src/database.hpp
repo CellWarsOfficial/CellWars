@@ -52,6 +52,7 @@ class DB_conn
   int erase_status;
   int active_conns;
   int avg_load;
+  int queries;
   mutex manager_lock;
 };
 #endif

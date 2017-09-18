@@ -2,11 +2,11 @@
 #define SERVER_UI_H
 
 #include <log.hpp>
-
-extern Game *game;
+#include <game.hpp>
+#include <server.hpp>
 
 void signal_interpreter(int s);
 
-void init_server_ui(Logger *log);
+void init_server_ui(Logger *log, Game *game, Server *server);
 
 #endif

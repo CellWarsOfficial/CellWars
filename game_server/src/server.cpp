@@ -96,7 +96,7 @@ void Server::act(int socket)
 
 void Server::demand_stat()
 {
-  log -> record(ME, "not implemented");
+  log -> record(ME, "currently serving " + to_string(monitor.size()) + " active connections");
 }
 
 int create_server_socket(int port)

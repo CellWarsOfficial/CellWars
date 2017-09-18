@@ -48,6 +48,7 @@ int main(int argc, char **argv)
   DB_conn *db_info = NULL;
   Player_Manager *player_manager = NULL;
   Server *server = NULL;
+  Game *game = NULL;
   thread *game_thread = NULL;
   thread *server_thread = NULL;
 
@@ -171,7 +172,7 @@ int main(int argc, char **argv)
   game = new Game(db_info, player_manager, log);
   game_thread = new thread(&Game::start, game, flags, gtc, wait_time, 25);
   server_thread = new thread(&Server::start, server);
-  init_server_ui(log);
+  init_server_ui(log, game, server);
 
   /* main terminating kills process.
    */

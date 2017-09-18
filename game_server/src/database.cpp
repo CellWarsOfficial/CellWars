@@ -55,6 +55,7 @@ DB_conn::DB_conn(Logger *log)
   erase_status = 1;
   active_conns = 0;
   avg_load = 0;
+  queries = 0;
 }
 
 DB_conn::~DB_conn()
@@ -133,6 +134,7 @@ void DB_conn::bcast_message(string message, int flag)
   log -> record(ME, "broadcasting [" + message + "]");
   std::map<Websocket_Con *, Database *>::iterator i;
   manager_lock.lock();
+  queries++;
   for (i = database_list.begin(); i != database_list.end(); i++)
   {
     i -> second -> send(message);
@@ -157,5 +159,7 @@ void DB_conn::handle_database_message(Websocket_Con *ws, string msg)
 
 void DB_conn::demand_stat()
 {
-  log -> record(ME, "not implemented :(");
+  log -> record(ME, "Currently managing " + to_string(database_list.size()) + " databases over " + to_string(active_conns) + " connections." );
+  log -> record(ME, "Have handled " + to_string(queries) + " queries since starting." );
+  log -> record(ME, "The average database load is: " + to_string(avg_load) + ", or that they say" );
 }

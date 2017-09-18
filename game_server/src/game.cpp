@@ -178,6 +178,8 @@ void Game::demand_stat()
   log -> record(ME, "Game is progressing quite nicely!");
   log -> record(ME, "We are currently at generation " + to_string(curr_gen));
   log -> record(ME, "Using " + to_string(super_node.size()) + " blocks");
+  player_manager -> demand_stat();
+  db_info -> demand_stat();
 }
 
 void Game::check_run()
