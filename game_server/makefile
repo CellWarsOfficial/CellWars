@@ -6,26 +6,22 @@ BINDIR = bin
 RM     = rm -rf
 TARGET = $(BINDIR)/gameserver
 HEADER = $(wildcard $(SRCDIR)/*.hpp)
+SOURCE = $(wildcard $(SRCDIR)/*.cpp)
+OBJECT = $(patsubst %.cpp,%.o, $(patsubst $(SRCDIR)/%,$(BINDIR)/%, $(SOURCE)))
 IP     = localhost
-RUNFLG = -db $(IP) -w 10 -log log.l -q
+RUNFLG = -w 10 -log log.l -q
 IGNORE = >>run.l 2>&1
-KILLCOM = /bin/kill -9
 EFLAGS = -lssl -lcrypto
-OS := $(shell uname)
-ifeq ($(OS), Darwin)
-	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11 -g
-else
-	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11 -g -O0 -pthread
-endif
+CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11 -g -O0 -pthread
 TFLAGS = 
-OBJECT = $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o $(BINDIR)/game.o $(BINDIR)/server_ui.o $(BINDIR)/log.o $(BINDIR)/crank.o $(BINDIR)/server.o $(BINDIR)/math.o $(BINDIR)/strings.o $(BINDIR)/websocket.o $(BINDIR)/hijack.o $(BINDIR)/players.o $(BINDIR)/builder.o
 TESTS  = $(BINDIR)/log_test $(BINDIR)/crank_test $(BINDIR)/block_test $(BINDIR)/misc_test
+LOCKFILE = .gsprocess.lock
 
 .phony: all
-all: installdirs $(TARGET) $(TESTS)
+all: build
 
-.phony: installdirs
-installdirs: $(BINDIR)
+.phony: build
+build: $(BINDIR) $(TARGET) $(TESTS)
 
 $(BINDIR):
 	$(NEWDIR) $@
@@ -33,49 +29,7 @@ $(BINDIR):
 $(TARGET): $(OBJECT)
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@ $(EFLAGS)
 
-$(BINDIR)/init.o: $(SRCDIR)/init.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
-
-$(BINDIR)/block.o: $(SRCDIR)/block.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
-
-$(BINDIR)/malloc_safety.o: $(SRCDIR)/malloc_safety.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
-
-$(BINDIR)/database.o: $(SRCDIR)/database.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
-
-$(BINDIR)/game.o: $(SRCDIR)/game.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
-
-$(BINDIR)/server_ui.o: $(SRCDIR)/server_ui.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
-
-$(BINDIR)/log.o: $(SRCDIR)/log.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
-
-$(BINDIR)/crank.o: $(SRCDIR)/crank.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
-
-$(BINDIR)/server.o: $(SRCDIR)/server.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
-
-$(BINDIR)/math.o: $(SRCDIR)/math.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
-
-$(BINDIR)/strings.o: $(SRCDIR)/strings.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
-
-$(BINDIR)/websocket.o: $(SRCDIR)/websocket.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
-
-$(BINDIR)/hijack.o: $(SRCDIR)/hijack.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
-
-$(BINDIR)/players.o: $(SRCDIR)/players.cpp $(HEADER)
-	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
-
-$(BINDIR)/builder.o: $(SRCDIR)/builder.cpp $(HEADER)
+$(BINDIR)/%.o: $(SRCDIR)/%.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
 
 $(BINDIR)/log_test: $(TSTDIR)/log_test.cpp $(BINDIR)/log.o $(BINDIR)/strings.o $(BINDIR)/math.o $(TSTDIR)/log_test.hpp $(HEADER)
@@ -91,21 +45,23 @@ $(BINDIR)/misc_test: $(TSTDIR)/misc_test.cpp $(BINDIR)/math.o $(BINDIR)/strings.
 	$(CC) $(CFLAGS) $(TFLAGS) $< $(BINDIR)/math.o $(BINDIR)/strings.o $(BINDIR)/malloc_safety.o -o $@ $(EFLAGS)
 
 .phony: check
-check: all
+check: build
 	./$(BINDIR)/log_test
 	./$(BINDIR)/crank_test
 	./$(BINDIR)/block_test
 	./$(BINDIR)/misc_test
   
 .phony: install
-install: all uninstall
-	nohup ./$(TARGET) $(RUNFLG) $(IGNORE) &
+install: uninstall build
+	nohup ./$(TARGET) $(RUNFLG) $(IGNORE) & echo $$! > $(LOCKFILE)
 
 .phony: uninstall
 uninstall:
-	-ps -A | grep gameserver | awk '{print "echo " $$1 ";pgrep -P " $$1}' | sh | sed -e 's#^#/bin/kill -9 #' | sh
+	-cat $(LOCKFILE) | sed -e 's#^#kill #' | sh
 	-while pgrep gameserver > /dev/null; do sleep 1; done
+	-$(RM) $(LOCKFILE)
 
 .phony: clean
-clean:
-	$(RM) $(BINDIR)
+clean: uninstall
+	$(RM) $(BINDIR) $(LOCKFILE)
+

@@ -12,11 +12,11 @@ package-lock.json:
 	npm install
 
 .phony: check
-check: all
+check: build
 	echo "no checking yet"
 
 .phony: install
-install: build uninstall
+install: uninstall build
 	npm run bgdb $(LOG)
 
 .phony: uninstall
@@ -26,3 +26,4 @@ uninstall:
 .phony: clean
 clean: uninstall
 	$(RM) node_modules package-lock.json $(LOCKFILE)
+

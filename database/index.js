@@ -3,10 +3,10 @@ const cors = require("cors");
 const logger = require("morgan")("dev");
 const Websocket = require("ws");
 
-const svPort   = process.env.PORT || 3000;
-const myAddr   = process.env.MYADDR || "http://localhost";
-const hostPath = process.env.SERVPATH || "ws://localhost:7777/database";
-const pass     = process.env.SERVPASS || "_";
+const svPort   = process.env.CW_PORT || 3000;
+const myAddr   = process.env.CW_MYADDR || "http://localhost";
+const hostPath = process.env.CW_SERVPATH || "ws://localhost:7777/database";
+const pass     = process.env.CW_SERVPASS || "_";
 const path     = "/cells";
 const myPath   = myAddr + ":" + svPort + path;
 

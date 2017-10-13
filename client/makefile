@@ -8,10 +8,10 @@ NFHTML = not_found.html
 FILE404 = $(CDIR)/$(NFHTML)
 
 .phony: all
-all: makedir reactf $(FILE404)
+all: build
 
-.phony: makedir
-makedir: $(CDIR)
+.phony: build
+build: $(CDIR) reactf $(FILE404)
 
 $(CDIR):
 	$(NEWDIR) $@
@@ -24,11 +24,11 @@ $(FILE404):
 	$(CP) not_found.html $(CDIR)/
 
 .phony: check
-check: all
+check: build
 	echo "not checking yet"
 
 .phony: install
-install: all
+install: uninstall build
 	echo "not installing yet"
 
 .phony: uninstall
