@@ -146,6 +146,21 @@ string get_random_string()
   return encode(to_string(rand()));
 }
 
+string wrap(string content)
+{
+  return wrap(content, "\"", "\"");
+}
+
+string wrap(string content, string seps)
+{
+  return wrap(content, seps, seps);
+}
+
+string wrap(string content, string sep_left, string sep_right)
+{
+  return sep_left + content + sep_right;
+}
+
 string form(string seq, string message, string sep)
 {
   return seq + sep + message;
@@ -189,4 +204,27 @@ string form(int seq, int message)
 string get_time_as_str()
 {
   return to_string(time(0));
+}
+
+void check_not_null(const void *key)
+{
+  if(key == NULL)
+  {
+    throw invalid_argument("null");
+  }
+}
+
+int get_seq_id(const char *source)
+{
+  return stoi(string_get_next_token(source, STR_WHITE));
+}
+
+string get_method(const char *source)
+{
+  return string_get_next_token(source, STR_WHITE);
+}
+
+string get_arg(const char *source, string target)
+{
+  return string_get_next_token(string_seek(source, target + "="), STR_WHITE);
 }

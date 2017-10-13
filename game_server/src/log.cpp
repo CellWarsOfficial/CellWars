@@ -15,6 +15,7 @@ Logger::Logger(int max_buf, int reaction_time)
   buffer_read = 0;
   buffer_write = 0;
   flags = 1;
+  file = NULL;
   buffer = new string[max_buf];
   parser_thread = new thread(&Logger::parse_buffer, this);
 }

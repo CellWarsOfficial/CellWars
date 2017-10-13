@@ -1,8 +1,6 @@
-#ifndef ALL_LIBRARIES_H
-#define ALL_LIBRARIES_H
-
 #include <block.hpp>
 #include <constants.hpp>
+#include <builder.hpp>
 #include <malloc_safety.hpp>
 #include <database.hpp>
 #include <game.hpp>
@@ -16,5 +14,3 @@
 #include <websocket.hpp>
 #include <players.hpp>
 #include <hijack.hpp>
-
-#endif

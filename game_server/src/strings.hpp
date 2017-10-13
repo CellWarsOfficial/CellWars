@@ -30,6 +30,12 @@ int is_num(string s);
 
 string get_random_string();
 
+string wrap(string content);
+
+string wrap(string content, string seps);
+
+string wrap(string content, string sep_left, string sep_right);
+
 string form(string seq, string message, string sep);
 
 string form(int seq, string message, string sep);
@@ -47,5 +53,13 @@ string form(string seq, int message);
 string form(int seq, int message);
 
 string get_time_as_str();
+
+void check_not_null(const void *key);
+
+int get_seq_id(const char *source);
+
+string get_method(const char *source);
+
+string get_arg(const char *source, string target);
 
 #endif

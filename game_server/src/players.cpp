@@ -373,26 +373,3 @@ Player *Player_Manager::find_player(CELL_TYPE t)
   }
   return NULL;
 }
-
-void check_not_null(const void *key)
-{
-  if(key == NULL)
-  {
-    throw invalid_argument("null");
-  }
-}
-
-int get_seq_id(const char *source)
-{
-  return stoi(string_get_next_token(source, STR_WHITE));
-}
-
-string get_method(const char *source)
-{
-  return string_get_next_token(source, STR_WHITE);
-}
-
-string get_arg(const char *source, string target)
-{
-  return string_get_next_token(string_seek(source, target + "="), STR_WHITE);
-}

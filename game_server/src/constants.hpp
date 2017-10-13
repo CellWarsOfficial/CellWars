@@ -65,6 +65,7 @@
 #define DB_MAX_BUF 2000
 #define DB_DELAY 50
 #define DB_MAX_BUILD_SIZE 200
+#define DB_PASS_VAR "passwd"
 
 /* Math related constants
  */

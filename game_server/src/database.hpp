@@ -2,6 +2,7 @@
 #define DATABASE_H
 
 #include <websocket.hpp>
+#include <builder.hpp>
 #include <log.hpp>
 #include <cstdio>
 #include <string>
@@ -39,13 +40,17 @@ class DB_conn
   void erase();
   void swap();
   void put(CELL_TYPE t, int x, int y);
+  void flush();
   void set_variable(string variable_name, string value);
   void bcast_message(string message);
-  void bcast_message(string message, int flag);
   void demand_stat();
   private:
+  void bcast_message(string message, int flag);
+  string generate_msg(string action);
+  string generate_msg(string action, string data);
   void handle_database_message(Websocket_Con *ws, string msg);
   function<void(Websocket_Con *, string)> cb;
+  Query_builder *query_builder;
   map <Websocket_Con *, Database *> database_list;
   map <string, string> variables;
   Logger *log;

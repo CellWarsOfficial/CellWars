@@ -51,6 +51,7 @@ int main(int argc, char **argv)
   Game *game = NULL;
   thread *game_thread = NULL;
   thread *server_thread = NULL;
+  string db_pass = "";
 
   FLAG_TYPE flags = 0;
   int gtc = DEFAULT_GTC;
@@ -140,6 +141,13 @@ int main(int argc, char **argv)
       }
       continue;
     }
+    if(equ(argv[i], "-pass"))
+    {
+      i++;
+      check_limit(i, argc);
+      db_pass = argv[i];
+      continue;
+    }
     if(equ(argv[i], "-wait", "-w"))
     {
       i++;
@@ -167,6 +175,7 @@ int main(int argc, char **argv)
     fprintf(stderr, "Unrecognised argument \"%s\"\nIgnoring.\n", argv[i]);
   }
   db_info = new DB_conn(log);
+  db_info -> set_variable(DB_PASS_VAR, db_pass);
   player_manager = new Player_Manager(db_info, log);
   server = new Server(server_p, db_info, player_manager, log);
   game = new Game(db_info, player_manager, log);

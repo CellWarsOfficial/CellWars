@@ -361,6 +361,7 @@ void Game::up_db()
       }
     }
   }
+  db_info -> flush();
   db_info -> swap();
   db_info -> erase();
   log -> record(ME, "Database updated");

@@ -3,7 +3,6 @@ NEWDIR = mkdir
 SRCDIR = src
 TSTDIR = test
 BINDIR = bin
-SKDIR  = ../socket.io-client-cpp/build/lib/Release
 RM     = rm -rf
 TARGET = $(BINDIR)/gameserver
 HEADER = $(wildcard $(SRCDIR)/*.hpp)
@@ -19,9 +18,8 @@ else
 	CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11 -g -O0 -pthread
 endif
 TFLAGS = 
-OBJECT = $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o $(BINDIR)/game.o $(BINDIR)/server_ui.o $(BINDIR)/log.o $(BINDIR)/crank.o $(BINDIR)/server.o $(BINDIR)/math.o $(BINDIR)/strings.o $(BINDIR)/websocket.o $(BINDIR)/hijack.o $(BINDIR)/players.o
+OBJECT = $(BINDIR)/init.o $(BINDIR)/block.o $(BINDIR)/malloc_safety.o $(BINDIR)/database.o $(BINDIR)/game.o $(BINDIR)/server_ui.o $(BINDIR)/log.o $(BINDIR)/crank.o $(BINDIR)/server.o $(BINDIR)/math.o $(BINDIR)/strings.o $(BINDIR)/websocket.o $(BINDIR)/hijack.o $(BINDIR)/players.o $(BINDIR)/builder.o
 TESTS  = $(BINDIR)/log_test $(BINDIR)/crank_test $(BINDIR)/block_test $(BINDIR)/misc_test
-LIBS = $(wildcard $(SKDIR)/*.a) # /usr/lib/x86_64-linux-gnu/libcrypto.a
 
 .phony: all
 all: installdirs $(TARGET) $(TESTS)
@@ -75,6 +73,9 @@ $(BINDIR)/hijack.o: $(SRCDIR)/hijack.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
 
 $(BINDIR)/players.o: $(SRCDIR)/players.cpp $(HEADER)
+	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
+
+$(BINDIR)/builder.o: $(SRCDIR)/builder.cpp $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@ $(EFLAGS)
 
 $(BINDIR)/log_test: $(TSTDIR)/log_test.cpp $(BINDIR)/log.o $(BINDIR)/strings.o $(BINDIR)/math.o $(TSTDIR)/log_test.hpp $(HEADER)

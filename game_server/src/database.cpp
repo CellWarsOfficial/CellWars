@@ -1,16 +1,14 @@
 #include <database.hpp>
-#include <block.hpp>
-#include <constants.hpp>
-#include <malloc_safety.hpp>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
 #include <unistd.h>
 #include <chrono>
 #include <ctime>
-#include <all.hpp>
+#include <strings.hpp>
 
 #define ME "Database"
+
 Database::Database(Websocket_Con *ws, string con_string)
 {
   this -> ws = ws; // deleted by senior
@@ -51,6 +49,7 @@ bool Database::is_safe()
 DB_conn::DB_conn(Logger *log)
 {
   this -> log = log;
+  query_builder = new Query_builder();
   cb = bind(&DB_conn::handle_database_message, this, placeholders::_1, placeholders::_2);
   erase_status = 1;
   active_conns = 0;
@@ -67,7 +66,9 @@ DB_conn::~DB_conn()
     delete i -> second;
   }
   database_list.clear();
+  variables.clear();
   manager_lock.unlock();
+  delete query_builder;
 }
 
 void DB_conn::subscribe(Websocket_Con *ws)
@@ -103,18 +104,26 @@ string DB_conn::get_db_for_client()
 
 void DB_conn::erase()
 {
-  bcast_message("ERASE", erase_status);
+  bcast_message(generate_msg("ERASE"), erase_status);
   erase_status = erase_status % 2 + 1; // alternates between 2 and 1
 }
 
 void DB_conn::swap()
 {
-  bcast_message("SWAP");
+  bcast_message(generate_msg("SWAP"));
 }
 
 void DB_conn::put(CELL_TYPE t, int x, int y)
 {
-  bcast_message("SET (" + to_string(x) + ", " + to_string(y) + ") = " + to_string(t));
+  if(query_builder -> add(x, y, t))
+  { // dispatch the batch.
+    flush();
+  }
+}
+
+void DB_conn::flush()
+{
+  bcast_message(generate_msg("SET", query_builder -> get()));
 }
 
 void DB_conn::set_variable(string variable_name, string value)
@@ -145,18 +154,45 @@ void DB_conn::bcast_message(string message, int flag)
 
 void DB_conn::handle_database_message(Websocket_Con *ws, string msg)
 {
+  std::map<Websocket_Con *, Database *>::iterator i;
   if(msg.length() == 0)
   {
     manager_lock.lock();
-    database_list.erase(ws);
+    i = database_list.find(ws);
+    if(i != database_list.end())
+    {
+      delete i -> second;
+      database_list.erase(i);
+    }
     active_conns--;
     manager_lock.unlock();
     delete ws;
     return;
   }
+  manager_lock.lock();
+  i = database_list.find(ws);
+  if ((i == database_list.end()) && (msg.compare(variables[DB_PASS_VAR]) == 0))
+  {
+    database_list[ws] = new Database(ws, "asd");
+    manager_lock.unlock();
+    return;
+  }
+  manager_lock.unlock();
   log -> record(ME, msg);
 }
 
+string DB_conn::generate_msg(string action)
+{
+  return generate_msg(action, "{}");
+}
+
+string DB_conn::generate_msg(string action, string data)
+{
+  return wrap(
+        form(wrap("action"), wrap(action))
+      + "," + form(wrap("data"), data)
+      , "{", "}");
+}
 void DB_conn::demand_stat()
 {
   log -> record(ME, "Currently managing " + to_string(database_list.size()) + " databases over " + to_string(active_conns) + " connections." );
