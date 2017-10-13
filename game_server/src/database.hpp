@@ -46,9 +46,10 @@ class DB_conn
   void demand_stat();
   private:
   void bcast_message(string message, int flag);
+  bool valid_pass(string trial);
+  void handle_database_message(Websocket_Con *ws, string msg);
   string generate_msg(string action);
   string generate_msg(string action, string data);
-  void handle_database_message(Websocket_Con *ws, string msg);
   function<void(Websocket_Con *, string)> cb;
   Query_builder *query_builder;
   map <Websocket_Con *, Database *> database_list;

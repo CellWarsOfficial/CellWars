@@ -1,57 +1,73 @@
 const express = require("express");
 const cors = require("cors");
-const sequelize = require("sequelize");
-const morgan = require("morgan");
-const cfgLoader = require("config.json");
+const logger = require("morgan")("dev");
+const Websocket = require("ws");
 
-const cfg = cfgLoader("./config.json")
-const svPort = process.env.PORT || cfg.svDefPort;
-const dbName = cfg.dbName;
-const dbUser = cfg.dbUser;
-const dbPass = cfg.dbPass;
-const dbDialect = cfg.dbType;
+const svPort   = process.env.PORT || 3000;
+const myAddr   = process.env.MYADDR || "http://localhost";
+const hostPath = process.env.SERVPATH || "ws://localhost:7777/database";
+const pass     = process.env.SERVPASS || "_";
+const path     = "/cells";
+const myPath   = myAddr + ":" + svPort + path;
 
 const server = express();
-const db = new sequelize(
-  dbName,
-  dbUser,
-  dbPass,{
-  dialect: dbDialect
-});
 
-const Cell = db.define("cell", {
-  x:{
-    type: sequelize.NUMERIC
-  },
-  y:{
-    type: sequelize.NUMERIC
-  },
-  type:{
-    type: sequelize.NUMERIC
+class Database{
+  constructor(){
+    this.storage = [];
   }
-});
+
+  erase(){
+    this.storage = [];
+  }
+
+  enrich(data){
+    this.storage = this.storage.concat(data);
+  }
+
+  select(range){
+    return this.storage.filter((elem) => {
+      return (elem.x >= range.px1) &&
+             (elem.x <= range.px2) &&
+             (elem.y >= range.py1) &&
+             (elem.y <= range.py2);
+    });
+  }
+}
+
+let serverSelector = 0;
+let userSelector = 1;
+
+let databases = [];
+
+function swapRunner(unused){
+  let aux = serverSelector;
+  serverSelector = userSelector;
+  userSelector = aux;
+}
+
+function setRunner(data){
+  databases[serverSelector].enrich(data);
+}
+
+function eraseRunner(unused){
+  databases[serverSelector].erase();
+}
+
+const runner = {
+  SET: setRunner,
+  SWAP: swapRunner,
+  ERASE: eraseRunner,
+}
 
 function sanitize(query){
   let obj = {};
-  if(isNaN(query.px1)){
-    throw "px1 is not a number";
-  } else {
-    obj.px1 = query.px1;
-  }
-  if(isNaN(query.px2)){
-    throw "px2 is not a number";
-  } else {
-    obj.px2 = query.px2;
-  }
-  if(isNaN(query.py1)){
-    throw "py1 is not a number";
-  } else {
-    obj.py1 = query.py1;
-  }
-  if(isNaN(query.py2)){
-    throw "py2 is not a number";
-  } else {
-    obj.py2 = query.py2;
+  obj.px1 = parseInt(query.px1);
+  obj.px2 = parseInt(query.px2);
+  obj.py1 = parseInt(query.py1);
+  obj.py2 = parseInt(query.py2);
+  if(isNaN(obj.px1 + obj.px2 + obj.py1 + obj.py2)){
+    throw {status: 400, data: "Invalid parameters"};
   }
   if(obj.px1 > obj.px2){
     var aux = obj.px1;
@@ -66,46 +82,63 @@ function sanitize(query){
   return obj;
 }
 
-function init(){
-  db.authenticate()
-  .then(() => {
-    console.log("Database connected");
-  })
-  .catch((err) => {
-    console.log(err);
+function reset_ws(failed)
+{
+  console.log("Contacting game server");
+  ws = new Websocket(hostPath);
+  ws.on("error", (err) => {
+    if(failed){
+      throw err;
+    } else {
+      console.error(err);
+      reset_ws(true);
+    };
   });
+  ws.on("close", reset_ws);
+  ws.on("open", () => {
+    ws.send("pass=" + pass + " path=" + myPath);
+  });
+  ws.on("message", (data) => {
+    query = JSON.parse(data);
+    console.log("[%d]> %s"
+               , Math.floor(new Date().getTime() / 1000)
+               , query.action);
+    runner[query.action](query.data);
+    if(query.action == "SET"){
+      setRunner(query.data);
+    }
+    if(query.action == "SWAP"){
+      swapRunner();
+    }
+    if(query.action == "ERASE"){
+      eraseRunner();
+    }
+  });
+}
 
-  Cell.sync({force: true}).then (() =>{
-    console.log("created table");
-  });
+function init(){
+  databases = [new Database(), new Database()];
+
+  reset_ws();
 
   server
     .use(cors())
-    .use(morgan("dev"))
+    .use(logger)
     .get("/cells", (req, res, next) => {
-      try{
+      try{ // unorthodox code
         let details = sanitize(req.query);
-        Cell.findAll({ 
-          where: {
-            x: {
-              $gte: details.px1,
-              $lte: details.px2
-            },
-            y: {
-              $gte: details.py1,
-              $lte: details.py2
-            }
-          } 
-        })
-        .then((cellData) => {
-          res.status(200).send(cellData);
-        });
-      } catch (err) {
-        res.status(400).send(err);
+        let cells = databases[userSelector].select(details);
+        throw {status: 200, data: cells};
+      } catch (response) {
+        if(!response.status){
+          res.status(500);
+        } else {
+          res.status(response.status).send(response);
+        }
       }
     })
     .listen(svPort, function () {
-      console.log("Example app listening on port " + svPort.toString() + "!");
+      console.log("App listening on port " + svPort.toString());
     });
 }
 

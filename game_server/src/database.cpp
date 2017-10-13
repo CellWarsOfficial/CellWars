@@ -152,9 +152,21 @@ void DB_conn::bcast_message(string message, int flag)
   manager_lock.unlock();
 }
 
+bool DB_conn::valid_pass(string trial)
+{
+  if(manager_lock.try_lock())
+  {
+    manager_lock.unlock();
+    return false; // not like this
+  }
+  string pass = variables[DB_PASS_VAR];
+  return (pass.length() == 0) || (trial.compare(pass) == 0);
+}
+
 void DB_conn::handle_database_message(Websocket_Con *ws, string msg)
 {
   std::map<Websocket_Con *, Database *>::iterator i;
+  bool skip = false;
   if(msg.length() == 0)
   {
     manager_lock.lock();
@@ -169,15 +181,31 @@ void DB_conn::handle_database_message(Websocket_Con *ws, string msg)
     delete ws;
     return;
   }
-  manager_lock.lock();
-  i = database_list.find(ws);
-  if ((i == database_list.end()) && (msg.compare(variables[DB_PASS_VAR]) == 0))
+  string pass;
+  string path;
+  try
   {
-    database_list[ws] = new Database(ws, "asd");
-    manager_lock.unlock();
-    return;
+    const char *key = msg.c_str();
+    pass = get_arg(key, "pass");
+    path = get_arg(key, "path");
   }
-  manager_lock.unlock();
+  catch (...)
+  {
+    skip = true;
+  }
+  if(!skip)
+  {
+    manager_lock.lock();
+    i = database_list.find(ws);
+    if ((i == database_list.end()) && valid_pass(pass))
+    {
+      log -> record(ME, "New database with path [" + path + "]");
+      database_list[ws] = new Database(ws, path);
+      manager_lock.unlock();
+      return;
+    }
+    manager_lock.unlock();
+  }
   log -> record(ME, msg);
 }
 
@@ -189,8 +217,8 @@ string DB_conn::generate_msg(string action)
 string DB_conn::generate_msg(string action, string data)
 {
   return wrap(
-        form(wrap("action"), wrap(action))
-      + "," + form(wrap("data"), data)
+        form(wrap("action"), wrap(action), ":")
+      + "," + form(wrap("data"), data, ":")
       , "{", "}");
 }
 void DB_conn::demand_stat()

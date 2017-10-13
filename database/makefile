@@ -1,29 +1,28 @@
-ADAPTER1 = adapter.sh
-ADAPTER2 = sv_adapter.sh
-IGNORE   = >/dev/null 2>&1
-KILLCOM  = /bin/kill -9
+LOG      = >db_log.l 2>&1
 RM       = rm -rf
+LOCKFILE = .dbprocess.lock
 
 .phony: all
-all:
-	echo "no compilation required"
+all: build
+
+.phony: build
+build: package-lock.json
+
+package-lock.json:
+	npm install
 
 .phony: check
 check: all
-	echo "not checking yet"
+	echo "no checking yet"
 
 .phony: install
-install: all uninstall
-	#nohup ./$(ADAPTER1) $(IGNORE) &
-	nohup ./$(ADAPTER2) $(IGNORE) &
+install: build uninstall
+	npm run bgdb $(LOG)
 
 .phony: uninstall
-uninstall: remove_main
-
-.phony: remove_main
-remove_main:
-	-ps -A | grep $(ADAPTER1) | awk '{print "echo " $$1 ";pgrep -P " $$1}' | sh | sed -e 's#^#/bin/kill -9 #' | sh        
+uninstall:
+	-cat $(LOCKFILE) | sed -e 's#^#kill #' | sh && $(RM) $(LOCKFILE)
 
 .phony: clean
 clean: uninstall
-	echo "not cleaning yet"
+	$(RM) node_modules package-lock.json $(LOCKFILE)

@@ -22,11 +22,10 @@ int Query_builder::add(int x, int y, CELL_TYPE t)
     warn = size > DB_MAX_BUILD_SIZE;
   }
   size++;
-  acc = acc + wrap(
-        form(wrap("x"), x)
-          + "," + form(wrap("y"), y)
-          + "," + form(wrap("t"), t)
-        , "{", "}");
+  acc = acc + wrap(form(wrap("x"), x, ":")
+           + "," + form(wrap("y"), y, ":")
+           + "," + form(wrap("t"), t, ":")
+         , "{", "}");
   builder_lock.unlock();
   return warn;
 }
