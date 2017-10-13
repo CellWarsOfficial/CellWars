@@ -9,10 +9,10 @@ HEADER = $(wildcard $(SRCDIR)/*.hpp)
 SOURCE = $(wildcard $(SRCDIR)/*.cpp)
 OBJECT = $(patsubst %.cpp,%.o, $(patsubst $(SRCDIR)/%,$(BINDIR)/%, $(SOURCE)))
 IP     = localhost
-RUNFLG = -w 10 -log log.l -q
+RUNFLG = $$CW_GS_RUNFLAGS
 IGNORE = >>run.l 2>&1
 EFLAGS = -lssl -lcrypto
-CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11 -g -O0 -pthread
+CFLAGS = -Wall -Werror -I $(SRCDIR)/ -std=c++11 -O2 -pthread
 TFLAGS = 
 TESTS  = $(BINDIR)/log_test $(BINDIR)/crank_test $(BINDIR)/block_test $(BINDIR)/misc_test
 LOCKFILE = .gsprocess.lock
