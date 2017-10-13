@@ -1,11 +1,10 @@
 SRCDIR = src
 DEVDIR = build
 PUBDIR = html
+MAGICF = index.html # required to distinguish build target and build folder
 CP     = cp -r
 RM     = rm -rf
-NFHTML = not_found.html
-FIL404 = $(PUBDIR)/$(NFHTML)
-SOURCE = $(wildcard $(SRCDIR)/*.hpp)
+SOURCE = $(wildcard $(SRCDIR)/*.js) $(wildcard $(SRCDIR)/*.html) $(wildcard $(SRCDIR)/*.css)
 
 .phony: all
 all: build
@@ -15,16 +14,13 @@ dev: package-lock.json
 	npm run start
 
 .phony: build
-build: package-lock.json $(DEVDIR) $(FIL404)
+build: package-lock.json $(DEVDIR)/$(MAGICF)
 
-$(DEVDIR):
+$(DEVDIR)/$(MAGICF): $(SOURCE)
 	npm run build
 
 package-lock.json:
 	npm install
-
-$(FIL404):
-	$(CP) $(SRCDIR)/$(NFHTML) $(DEVDIR)/
 
 .phony: check
 check: build
