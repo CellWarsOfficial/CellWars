@@ -13,10 +13,10 @@ bin/
 *.log
 # exclude nohup accidental files
 nohup.out
-# exclude asio folder
-asio-*/
 # exclude html output folder
-html/
+client/html/
+# exclude build obtained by react
+client/build/
 # exclude node dependencies
 node_modules/
 # exclude node package lock

@@ -1,7 +1,7 @@
 {
-  "name": "my-app",
-  "version": "0.1.0",
-  "private": true,
+  "name": "cellwarsui",
+  "version": "1.0.0",
+  "description": "User friendly interface for interacting with cells",
   "dependencies": {
     "react": "^15.5.4",
     "react-dom": "^15.5.4"
@@ -9,6 +9,8 @@
   "devDependencies": {
     "react-scripts": "1.0.7"
   },
+  "author": "",
+  "license": "Apache-2.0",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

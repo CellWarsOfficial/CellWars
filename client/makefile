@@ -1,27 +1,30 @@
-NEWDIR = mkdir
-RM     = rm -rf
-CDIR   = html
-NPMBLD = npm run build
-CD     = cd
+SRCDIR = src
+DEVDIR = build
+PUBDIR = html
 CP     = cp -r
+RM     = rm -rf
 NFHTML = not_found.html
-FILE404 = $(CDIR)/$(NFHTML)
+FIL404 = $(PUBDIR)/$(NFHTML)
+SOURCE = $(wildcard $(SRCDIR)/*.hpp)
 
 .phony: all
 all: build
 
+.phony: dev
+dev: package-lock.json
+	npm run start
+
 .phony: build
-build: $(CDIR) reactf $(FILE404)
+build: package-lock.json $(DEVDIR) $(FIL404)
 
-$(CDIR):
-	$(NEWDIR) $@
+$(DEVDIR):
+	npm run build
 
-.phony: reactf
-reactf:
-	-$(CD) ../react/my-app/ && $(NPMBLD) && $(CP) build/* ../../client/$(CDIR)/
+package-lock.json:
+	npm install
 
-$(FILE404):
-	$(CP) not_found.html $(CDIR)/
+$(FIL404):
+	$(CP) $(SRCDIR)/$(NFHTML) $(DEVDIR)/
 
 .phony: check
 check: build
@@ -29,13 +32,13 @@ check: build
 
 .phony: install
 install: uninstall build
-	echo "not installing yet"
+	$(CP) $(DEVDIR) $(PUBDIR)
 
 .phony: uninstall
 uninstall:
-	echo "not uninstalling yet."
+	$(RM) $(PUBDIR)
 
 .phony: clean
 clean: uninstall
-	$(RM) $(CDIR)
+	$(RM) node_modules package-lock.json $(DEVDIR)
 
