@@ -1,7 +1,15 @@
 import React, { Component } from 'react';
 import './App.css';
-import connector from './service/connector';
+import Connector from './service/connector';
+import ColorPickPage from './pages/colorpickpage'
 
+const stageExpectations = [
+  [ ColorPickPage.identifier
+  ]
+]
+
+const logo = "images/logo.gif"
+/*
 const VOL = 'https://www.doc.ic.ac.uk/project/2016/271/g1627123/';
 const VOL_IMAGES = 'images/';
 const idle_cell = VOL_IMAGES.concat('idle_cell.gif');
@@ -64,24 +72,19 @@ const LOST = "LOST";
 var uniqueID = 0;
 
 const INTERACTIVE_EXAMPLE_GRID_SIZE = 5;
-
+*/
 class App extends Component {
   constructor() {
     super();
-    this.state = {
-      currentPage: INTRO_PAGE,
-    }
+    this.connection = new Connector(
+      "ws://" + 
+      window.location.hostname + 
+      ":7777/");
+    this.stage = 0;
   }
 
-  setPageTo(page) {
-    if (this.state.currentPage === INTERACTIVE_PAGE) {
-      page = GAME_PAGE;
-    }
-    if (this.state.currentPage < RULE_PAGE_1) {
-      lastPage = this.state.currentPage;
-    }
-    this.setState({currentPage: page});
-    this.forceUpdate();
+  shouldIRender(object) {
+    return stageExpectations[this.stage].indexOf(object.identifier) + 1;
   }
 
   render() {
@@ -91,25 +94,17 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h3>Multiplayer online turn-based strategy game</h3>
         </div>
-        <div style={{position: 'absolute', right:'10px'}}>
-          <HelpButton onClick={() => this.setPageTo(RULE_PAGE_1)} currentPage = {this.state.currentPage}/>
-        </div>
         <br></br>
         <br></br>
         <div className="App-grid">
-          <RulePage1 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_2)}/>
-          <RulePage2 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_3)}/>
-          <RulePage3 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(RULE_PAGE_4)}/>
-          <RulePage4 currentPage = {this.state.currentPage} onClick={() => this.setPageTo(INTERACTIVE_PAGE)}/>
-          <InteractiveExample currentPage = {this.state.currentPage} onClick={() => this.setPageTo(lastPage)}/>
-          <UserPicker currentPage = {this.state.currentPage} onClick={() => this.setPageTo(GAME_PAGE)}/>
-          <Grid currentPage = {this.state.currentPage}/>
+          <ColorPickPage root = {this}/>
         </div>
+        <h5>Based on the cellular automaton, <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life">Conway's Game of Life - https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life</a></h5>
       </div>
     );
   }
 }
-
+/*
 class HelpButton extends Component {
   render() {
     if (this.props.currentPage == INTRO_PAGE && this.props.currentPage !== INTERACTIVE_PAGE) {  // hide help button on help pages
@@ -1445,5 +1440,5 @@ class RulePage4 extends Component {
     );
   }
 }
-
+*/
 export default App;

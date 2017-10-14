@@ -60,6 +60,15 @@ export default class Connector{
     this.initWS();
   }
 
+  reset(){
+    this.contextList = [];
+    this.listeners = [];
+    this.ws = undefined;
+    this.errCount = 0;
+    this.nextSeq = 0;
+    this.initWS();
+  }
+
   getSeq(){
     this.nextSeq = (this.nextSeq % 100) + 1;
     return this.nextSeq;
