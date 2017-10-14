@@ -1,10 +1,10 @@
 SRCDIR = src
 DEVDIR = build
 PUBDIR = html
-MAGICF = index.html # required to distinguish build target and build folder
+MAGICF = .finished # required to distinguish build target and build folder
 CP     = cp -r
 RM     = rm -rf
-SOURCE = $(wildcard $(SRCDIR)/*.js) $(wildcard $(SRCDIR)/*.html) $(wildcard $(SRCDIR)/*.css)
+SOURCE = $(shell find $(SRCDIR))
 
 .phony: all
 all: build

@@ -1,22 +1,52 @@
 const logger = console;
 
-parseCWProto(wsMessage){
-  let aux;
-  aux = wsMessage.split(":", 1).toString();
-  let seq = parseInt(aux);
-  let raw = wsMessage.cut(aux.length + 1).trim();
+/* Cell wars protocol in a nutshell:
+ * Q: "%s: %m %f*"
+ * R: "%s: %a %f*"
+ * f: "%d=%v*"
+ * Q = query
+ * R = response
+ * s = sequence number, client issued have 1..100, server issued have 101..200
+ * m = method, string in capital letters
+ * f = field containing no whitespace
+ * d = data identifier
+ * v = value identifier
+ */
+
+function varParse(data){
+  let ans = {};
+  data.splot(" ").forEach((field) => {
+    let info = field.split("=")
+    ans[info.trim()] = field.trim();
+  });
+}
+
+function parseCWProto(wsMessage){
+  let seqStr = wsMessage.split(":", 1).toString();
+  let raw = wsMessage.cut(seqStr.length + 1).trim();
+  let seq = parseInt(seqStr, 10);
+  let incoming = undefined;
+  let method = undefined;
+  let status = undefined;
+  let data = {};
   if((seq > 0) && (seq <= 100)){
-    return { sequence: seq, incoming: false, answer: false, data: raw};
+    incoming = false;
+    let statusStr = raw.split(" ", 1).toString()
+    status = parseInt(statusStr, 10);
+    data = varParse(raw.cut(statusStr.length).trim());
   } else { // server issued method
-    let method = raw.split(" ", 1).toString().toUpperCase();
-    if((method === "CRANKFIN") || 
-       (method === "TIMEOUT") || 
-       (method === "LOST")){
-      return {sequence: seq, incoming: true, answer: false, data: method};
-    }
-    console.warn("unrecognised method:", method);
-    return {sequence: seq, incoming: true, answer: false, data: method};
+    incoming = true;
+    method = raw.split(" ", 1).toString().toUpperCase();
+    data = varParse(raw.cut(method.length).trim());
   }
+  return {
+    sequence: seq,
+    method: method,
+    status: status,
+    incoming: incoming,
+    answer: false,
+    data: data
+  };
 }
 
 export default class Connector{
@@ -31,12 +61,12 @@ export default class Connector{
   }
 
   getSeq(){
-    nextSeq = (nextSeq % 100) + 1;
-    return nextSeq;
+    this.nextSeq = (this.nextSeq % 100) + 1;
+    return this.nextSeq;
   }
 
   initWS(){
-    this.ws = new WebSocket(address);
+    this.ws = new WebSocket(this.address);
     this.ws.onmessage = this.handleMessage.bind(this);
     this.ws.onclose = this.handleClose.bind(this);
     this.ws.onerror = this.handleError.bind(this);
@@ -48,10 +78,12 @@ export default class Connector{
   }
 
   findContext(id){
-    if(contextList[id] === undefined){
+    let context = this.contextList[id]
+    if(context === undefined){
       console.warn("unassigned sequence:", id);
     }
-    return contextList[id];
+    this.contextList[id] = undefined;
+    return context;
   }
 
   notifyListeners(method, data){
@@ -66,14 +98,14 @@ export default class Connector{
       this.notifyListeners(details.method, details.data);
     } else {
       let context = this.findContext(details.sequence);
-      context.callback(details.data, context);
+      context["_cwCall"](details.data, context);
     }
   }
 
   handleClose(){
     this.errCount += 1;
     if(this.errCount < 3){
-      initWS();
+      this.initWS();
     } else {
       this.handleError(new Error("Maintainance"));
     }
@@ -87,37 +119,41 @@ export default class Connector{
     this.listeners.push({method: event, callback:callback});
   }
 
-  /* Promise based returns */
-  getDb(){
-    let that = this;
-    return new Promise((resolve, reject) => {
-      let seq = this.getSeq();
-      contextList[seq] = {callback: (data) => {
-        let aux = data.split(" ");
-        if(aux[0]){
-          resolve(aux[1]);
-        } else {
-          reject();
-        }
-      }};
-      that.send(seq.toString + ": DATABASE");
-    });
+  getDb(callback, context = {}){
+    context["_cwCall"] = callback;
+    let seq = this.getSeq();
+    this.contextList[seq] = context;
+    this.send(seq.toString + ": DATABASE");
   }
 
-  /* Promise based returns */
-  getScore(){
-    let that = this;
-    return new Promise((resolve, reject) => {
-      let seq = this.getSeq();
-      contextList[seq] = {callback: (data) => {
-        let aux = data.split(" ");
-        if(aux[0]){
-          resolve(aux[1]);
-        } else {
-          reject();
-        }
-      }};
-      that.send(seq.toString + ": DATABASE");
-    });
+  getScore(playerType, callback, context = {}){
+    context["_cwCall"] = callback;
+    let seq = this.getSeq();
+    this.contextList[seq] = context;
+    this.send(seq.toString + ": SCORE t=" + playerType.toString());
+  }
+
+  selectType(playerType, callback, context = {}){
+    context["_cwCall"] = callback;
+    let seq = this.getSeq();
+    this.contextList[seq] = context;
+    this.send(seq.toString + ": PICK t=" + playerType.toString());
+  }
+
+  update(px, py, t, callback, context = {}){
+    context["_cwCall"] = callback;
+    let seq = this.getSeq();
+    this.contextList[seq] = context;
+    this.send(seq.toString + ": UPDATE px=" + px.toString() + 
+                                     " py=" + py.toString() + 
+                                     " t=" + t.toString()
+    );
+  }
+
+  fetchDetails(callback, context = {}){
+    context["_cwCall"] = callback;
+    let seq = this.getSeq();
+    this.contextList[seq] = context;
+    this.send(seq.toString + ": DETAILS");
   }
 }
