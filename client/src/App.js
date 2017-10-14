@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import './App.css';
+import connector from './service/connector';
 
 const VOL = 'https://www.doc.ic.ac.uk/project/2016/271/g1627123/';
-const VOL_IMAGES = VOL.concat('images/');
+const VOL_IMAGES = 'images/';
 const idle_cell = VOL_IMAGES.concat('idle_cell.gif');
 const big_cell = VOL_IMAGES.concat('big_cell.png')
 const logo = VOL_IMAGES.concat('logo.gif');
