@@ -3,7 +3,7 @@ const cors = require("cors");
 const logger = require("morgan")("dev");
 const Websocket = require("ws");
 
-const svPort   = process.env.CW_PORT || 3000;
+const svPort   = process.env.CW_PORT || 3010;
 const myAddr   = process.env.CW_MYADDR || "http://localhost";
 const hostPath = process.env.CW_SERVPATH || "ws://localhost:7777/database";
 const pass     = process.env.CW_SERVPASS || "_";
@@ -104,15 +104,6 @@ function reset_ws(failed)
                , Math.floor(new Date().getTime() / 1000)
                , query.action);
     runner[query.action](query.data);
-    if(query.action == "SET"){
-      setRunner(query.data);
-    }
-    if(query.action == "SWAP"){
-      swapRunner();
-    }
-    if(query.action == "ERASE"){
-      eraseRunner();
-    }
   });
 }
 

@@ -1,52 +1,38 @@
 import React, { Component } from 'react';
-import playerTypes from '../data/playertypes';
 import Grid from '../data/grid';
-/*class UserPicker extends Component {
-  render() {
-    if (this.props.currentPage !== INTRO_PAGE)
-    {
-     return null;
-    }
-
-    var cols = [];
-    for (let i = 0; i < Math.floor(players / cellPerRow); i++) {
-      cols.push(<GenCol key={"r=".concat(i*cellPerRow)} start={i*cellPerRow} onClick={(a) => this.handleClick(a)} />);
-    }
-
-    return (<div><h2>Pick your colour</h2><br></br><table className="table">
-      <tbody>
-      {cols}
-      </tbody>
-    </table>
-    <br></br>
-    <br></br>
-    <h5>Based on the cellular automaton, <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life">Conway's Game of Life - https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life</a></h5>
-    </div>);
-
-  }
-
-  handleClick(uid) {
-    yourUserID = uid;
-    requestColor(yourUserID);
-    this.props.onClick();
-  }
-
-}*/
 
 export default class ColorPickPage extends Component {
 
   static identifier = "ColorPickPage";
 
-  constructor() {
-    super();
-    console.log("con called");
+  constructor(props) {
+    super(props);
+    this.root = props.root;
+    this.state = {render: 0};
     this.identifier = ColorPickPage.identifier;
+    this.available = [];
+    this.region = {x1:1, x2:15, y1:1, y2:17}
+    let col = 0;
+    for(let i = this.region.x1; i <= this.region.x2; i++){
+      for(let j = this.region.y1; j <= this.region.y2; j++){
+        col++
+        this.available.push({x:i, y:j, t:col});
+      }
+    }
   }
 
   render() {
-    if(this.props.root.shouldIRender(this)){
+    if(this.state.render){
+      let callback = (cell) => {
+        this.root.setColor(cell.t);
+      };
       return(
-        <Grid dataset = {{data:[[7,7,7],[7,7,7]]}}/>
+        <Grid
+          dataset={this.available}
+          region={this.region}
+          onClick={callback}
+          display="0"
+        />
       );
     }
     return null;

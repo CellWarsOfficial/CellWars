@@ -2,8 +2,8 @@ export default class ColorInfo{
 
   static rainbow(n){
     var b = 255 - (n % 4) * 64;
-    var g = 255 - ((n / 4) % 4) * 64;
-    var r = 255 - ((n / 16) % 4)* 64;
+    var g = 255 - ((n / 4) % 8 + 0.5) * 32;
+    var r = 255 - ((n / 16) % 8 + 0.5) * 32;
     return new ColorInfo(r, g, b);
   }
 
@@ -12,6 +12,10 @@ export default class ColorInfo{
     this.g = g;
     this.b = b;
   };
+
+  contrast(){
+    return new ColorInfo(255 - this.r, 255 - this.g, 255 - this.b);
+  }
 
   toString(){
     return 'rgb(' + this.r + ',' + this.g + ',' + this.b + ')';

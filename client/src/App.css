@@ -24,16 +24,34 @@ h6 {
   color: white;
 }
 
+.App-footer {
+  background-color: #222;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  color: white;
+}
+
 .cell:hover {
   border-color: black;
 }
 
 .cell {
+  font-family: monospace;
+  font-size: 12px;
   border-radius: 8px;
   border: 1px solid #ddd;
-  margin-left: 3px;
+  margin: 3px;
+  padding: 0px;
   -webkit-transition-duration: 0.4s;
-  margin-right: 3px;
+  vertical-align: middle;
+}
+
+.cellContainer {
+  width: 24px;
+  height: 24px;
 }
 
 @keyframes App-logo-spin {
@@ -74,7 +92,6 @@ h3 {
   height: 40px;
   cursor: pointer;
   -webkit-transition-duration: 0.4s;
-  margin-bottom: 10%;
 }
 
 .tableImage:hover {
@@ -96,28 +113,18 @@ h3 {
   margin-left: 6em;
 }
 
-.gridExample td:hover {
-  border-color: black;
-}
-
-.gridExample td {
-  width: 50px;
-  height: 50px;
-  -webkit-transition-duration: 0.4s;
-  border: 1px solid #ddd;
-}
-
 .arrow {
   display: inline-block;
 }
 
-.fullExample {
-  margin: 0 auto;
-  padding: 40px;
-  border: 1px dashed grey;
-  text-align: center;
-  width: 60%;
-  position: relative;
+table {
+  border-collapse: collapse;
+}
+
+table tr td {
+  border: 1px solid #aaa;
+  margin: 0;
+  padding: 0;
 }
 
 h2 {
@@ -139,6 +146,7 @@ h2 {
 .moveButton:hover {background-color: white; color: black;}
 
 body {
+  border: 0;
   margin: 0;
   padding: 0;
   font-family: sans-serif;

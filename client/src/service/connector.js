@@ -15,15 +15,20 @@ const logger = console;
 
 function varParse(data){
   let ans = {};
-  data.splot(" ").forEach((field) => {
+  data.split(" ").forEach((field) => {
+    if(field === ""){
+      return;
+    }
     let info = field.split("=")
-    ans[info.trim()] = field.trim();
+    ans[info[0].trim()] = info[1].trim();
   });
+  return ans;
 }
 
 function parseCWProto(wsMessage){
+  console.log(wsMessage);
   let seqStr = wsMessage.split(":", 1).toString();
-  let raw = wsMessage.cut(seqStr.length + 1).trim();
+  let raw = wsMessage.slice(seqStr.length + 1).trim();
   let seq = parseInt(seqStr, 10);
   let incoming = undefined;
   let method = undefined;
@@ -33,11 +38,11 @@ function parseCWProto(wsMessage){
     incoming = false;
     let statusStr = raw.split(" ", 1).toString()
     status = parseInt(statusStr, 10);
-    data = varParse(raw.cut(statusStr.length).trim());
+    data = varParse(raw.slice(statusStr.length).trim());
   } else { // server issued method
     incoming = true;
     method = raw.split(" ", 1).toString().toUpperCase();
-    data = varParse(raw.cut(method.length).trim());
+    data = varParse(raw.slice(method.length).trim());
   }
   return {
     sequence: seq,
@@ -58,6 +63,13 @@ export default class Connector{
     this.errCount = 0;
     this.nextSeq = 0;
     this.initWS();
+  }
+
+  send(stuff){
+    if(this.ws.readyState !== this.ws.OPEN){
+      throw new Error("Websocket not opened");
+    }
+    this.ws.send(stuff);
   }
 
   reset(){
@@ -128,32 +140,32 @@ export default class Connector{
     this.listeners.push({method: event, callback:callback});
   }
 
-  getDb(callback, context = {}){
+  getDB(callback, context = {}){
     context["_cwCall"] = callback;
     let seq = this.getSeq();
     this.contextList[seq] = context;
-    this.send(seq.toString + ": DATABASE");
+    this.send(seq.toString() + ": DATABASE");
   }
 
   getScore(playerType, callback, context = {}){
     context["_cwCall"] = callback;
     let seq = this.getSeq();
     this.contextList[seq] = context;
-    this.send(seq.toString + ": SCORE t=" + playerType.toString());
+    this.send(seq.toString() + ": SCORE t=" + playerType.toString());
   }
 
   selectType(playerType, callback, context = {}){
     context["_cwCall"] = callback;
     let seq = this.getSeq();
     this.contextList[seq] = context;
-    this.send(seq.toString + ": PICK t=" + playerType.toString());
+    this.send(seq.toString() + ": PICK t=" + playerType.toString());
   }
 
   update(px, py, t, callback, context = {}){
     context["_cwCall"] = callback;
     let seq = this.getSeq();
     this.contextList[seq] = context;
-    this.send(seq.toString + ": UPDATE px=" + px.toString() + 
+    this.send(seq.toString() + ": UPDATE px=" + px.toString() + 
                                      " py=" + py.toString() + 
                                      " t=" + t.toString()
     );
@@ -163,6 +175,6 @@ export default class Connector{
     context["_cwCall"] = callback;
     let seq = this.getSeq();
     this.contextList[seq] = context;
-    this.send(seq.toString + ": DETAILS");
+    this.send(seq.toString() + ": DETAILS");
   }
 }

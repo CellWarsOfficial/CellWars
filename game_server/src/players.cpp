@@ -262,14 +262,14 @@ void Player_Manager::resolve_pick(Websocket_Con *ws, int seq_id, const char *key
   if(find_owner(ws))
   { // you already picked
     manager_lock.unlock();
-    ws -> writews(form(seq_id, "accept=0"));
+    ws -> writews(form(seq_id, "1 accept=0"));
     return;
   }
   manager_lock.unlock();
   CELL_TYPE t = (CELL_TYPE) stoi(get_arg(key, "t"));
   if(t == 0)
   { // no undead 'round here!
-    ws -> writews(form(seq_id, "accept=0"));
+    ws -> writews(form(seq_id, "1 accept=0"));
     return;
   }
   manager_lock.lock();
@@ -279,24 +279,24 @@ void Player_Manager::resolve_pick(Websocket_Con *ws, int seq_id, const char *key
     player_list[t] = p;
     player_bind(p, ws);
     manager_lock.unlock();
-    ws -> writews(form(seq_id, "accept=1"));
+    ws -> writews(form(seq_id, "1 accept=1"));
   }
   else
   { // taken
     manager_lock.unlock();
-    ws -> writews(form(seq_id, "accept=0"));
+    ws -> writews(form(seq_id, "1 accept=0"));
   }
 }
 
 void Player_Manager::resolve_details(Websocket_Con *ws, int seq_id, const char *key)
 {
-  ws -> writews(form(seq_id, "accept=1 " + form(form("gtc", game -> get_gtc(), "="), form("wait", game -> get_wait(), "="), " ")));
+  ws -> writews(form(seq_id, "1 accept=1 " + form(form("gtc", game -> get_gtc(), "="), form("wait", game -> get_wait(), "="), " ")));
 }
 
 void Player_Manager::resolve_database(Websocket_Con *ws, int seq_id, const char *key)
 {
   string result = database -> get_db_for_client();
-  ws -> writews(form(seq_id, form(form("accept", result.length(), "="), form("database", result, "="), " ")));
+  ws -> writews(form(seq_id, "1 " + form(form("accept", result.length(), "="), form("database", result, "="), " ")));
 }
 
 void Player_Manager::resolve_update(Websocket_Con *ws, int seq_id, const char *key)
@@ -308,7 +308,8 @@ void Player_Manager::resolve_update(Websocket_Con *ws, int seq_id, const char *k
   int px = stoi(get_arg(key, "px"));
   int py = stoi(get_arg(key, "py"));
   CELL_TYPE t = (CELL_TYPE) stoi(get_arg(key, "t"));
-  ws -> writews(form(seq_id, "accept=" + game -> user_does(px, py, t, owner)));
+  int allowed = game -> user_does(px, py, t, owner);
+  ws -> writews(form(seq_id, "1 accept=" + to_string(allowed)));
 }
 
 void Player_Manager::resolve_score(Websocket_Con *ws, int seq_id, const char *key)
@@ -318,7 +319,7 @@ void Player_Manager::resolve_score(Websocket_Con *ws, int seq_id, const char *ke
   Player *p = find_player(t);
   manager_lock.unlock();
   int score = (p == NULL) ? 0 : p -> get_score();
-  ws -> writews(form(seq_id, "score=" + score));
+  ws -> writews(form(seq_id, "1 accept=1 score=" + score));
 }
 
 /* Hidden interaction functions - no lock/reversed protection.*/

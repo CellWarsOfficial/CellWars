@@ -1,13 +1,37 @@
 import React, { Component } from 'react';
 import './App.css';
 import Connector from './service/connector';
+import Database from './service/database';
 import ColorPickPage from './pages/colorpickpage'
+import PlayPage from './pages/playpage'
 
-const stageExpectations = [
-  [ ColorPickPage.identifier
-  ]
+const stages = [
+  {
+    desc: "initial stage",
+    init: () => {},
+    expectation: [
+    ]
+  },
+  {
+    desc: "pick stage",
+    init: () => {},
+    expectation: [
+      ColorPickPage.identifier
+    ]
+  },
+  {
+    desc: "play stage",
+    init: (app) => {
+      app.pages.find((page) => {
+        return page.identifier === PlayPage.identifier;
+      }).reloader();
+    },
+    expectation: [
+      PlayPage.identifier
+    ]
+  }
 ]
-
+const PAGECOUNT = 2;
 const logo = "images/logo.gif"
 /*
 const VOL = 'https://www.doc.ic.ac.uk/project/2016/271/g1627123/';
@@ -73,18 +97,75 @@ var uniqueID = 0;
 
 const INTERACTIVE_EXAMPLE_GRID_SIZE = 5;
 */
+
+function inform(str){
+  console.warn(str);
+}
+
 class App extends Component {
   constructor() {
     super();
-    this.connection = new Connector(
+    this.connector = new Connector(
       "ws://" + 
       window.location.hostname + 
       ":7777/");
     this.stage = 0;
+    this.pages = [];
+    this.color = 0;
+    this.database = undefined;
+  }
+
+  setColor(color){
+    if(!color){
+      inform("color not available");
+      return;
+    } else {
+      this.connector.selectType(color, (response) => {
+        if(response.accept !== "0"){
+          this.color = color;
+          this.getDB(() => {
+            this.setStage("play stage");
+          });
+        } else {
+          inform("color not available");
+        }
+      });
+    }
+  }
+
+  getDB(then = undefined){
+    this.connector.getDB((response) => {
+        if(response.accept){
+          this.database = new Database(response.database);
+          if(then){
+            then();
+          }
+        } else {
+          inform("color not available");
+        }
+      });
+  }
+
+  setStage(stage){
+    this.stage = stages.findIndex((elem) => {
+      return elem.desc === stage;
+    });
+    stages[this.stage].init(this);
+    this.pages.forEach((page) => {
+      page.setState({render: this.shouldIRender(page)});
+    })
+    inform("stage changed");
   }
 
   shouldIRender(object) {
-    return stageExpectations[this.stage].indexOf(object.identifier) + 1;
+    return stages[this.stage].expectation.indexOf(object.identifier) + 1;
+  }
+
+  register(page){
+    this.pages.push(page);
+    if(this.pages.length === PAGECOUNT){
+      this.setStage("pick stage");
+    }
   }
 
   render() {
@@ -94,12 +175,24 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h3>Multiplayer online turn-based strategy game</h3>
         </div>
-        <br></br>
-        <br></br>
         <div className="App-grid">
-          <ColorPickPage root = {this}/>
+          <ColorPickPage
+            root={this}
+            ref={this.register.bind(this)}
+          />
+          <PlayPage
+            root={this}
+            ref={this.register.bind(this)}
+          />
         </div>
-        <h5>Based on the cellular automaton, <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life">Conway's Game of Life - https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life</a></h5>
+        <div className="App-footer">
+          <h5>
+            Based on the cellular automaton,
+            <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life">
+              Conway's Game of Life
+            </a>
+          </h5>
+        </div>
       </div>
     );
   }
