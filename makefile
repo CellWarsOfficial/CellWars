@@ -1,3 +1,5 @@
+include envfile
+export $(shell sed 's/=.*//' envfile)
 STDTAR := build check clean install uninstall
 SUBDIR := client database game_server
 
