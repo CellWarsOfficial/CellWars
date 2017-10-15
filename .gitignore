@@ -21,3 +21,5 @@ client/build/
 node_modules/
 # exclude node package lock
 package-lock.json
+# environment file
+envfile
