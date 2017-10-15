@@ -1,8 +1,8 @@
 #!/bin/bash
 # This file contains most deploy-specific constants.
-# Note - this file is excluded by gitignore.
+# Note - this file is excluded by gitignore. Not recommented to commit.
 
-# Gameserver related constants
+# Gameserver relatdqwdwqdqwdqed constants
 CW_GS_COMFLAGS=-O2
 CW_GS_RUNFLAGS=-pass base -wait 10
 
@@ -10,4 +10,4 @@ CW_GS_RUNFLAGS=-pass base -wait 10
 CW_PORT=
 CW_MYADDR=
 CW_SERVPATH=
-CW_SERVPASS=baseasdasdasdsadsada
+CW_SERVPASS=base
